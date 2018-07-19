@@ -199,6 +199,14 @@ Blockly.Msg.TEXT_APPEND_VARIABLE = Blockly.Msg.VARIABLES_DEFAULT_NAME;
 Blockly.Msg.TEXT_CREATE_JOIN_ITEM_TITLE_ITEM = Blockly.Msg.VARIABLES_DEFAULT_NAME;
 Blockly.Msg.PROCEDURES_DEFRETURN_COMMENT = Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT;
 
+Blockly.DROPDOWN_MULTIPLIER = [['1', '1'],
+        ['10', '10'],
+        ['100', '100'],
+        ['1000', '1000'],
+        ['10,000', '10000'],
+        ['100,000', '100000'],
+        ['1,000,000', '1000000']];
+
 
 //--------------ActivityBoard Help URLs -----------------------
 Blockly.MSG_CONTROL_HELPURL = "http://learn.parallax.com/ab-blocks/control";
@@ -210,6 +218,7 @@ Blockly.MSG_VARIABLES_HELPURL = "http://learn.parallax.com/ab-blocks/variables";
 Blockly.MSG_FUNCTIONS_HELPURL = "http://learn.parallax.com/ab-blocks/functions";
 Blockly.MSG_PINS_HELPURL = "http://learn.parallax.com/ab-blocks/pins";
 Blockly.MSG_SERIAL_LCD_HELPURL = "http://learn.parallax.com/ab-blocks/serial-lcd";
+Blockly.MSG_GRAPHING_HELPURL = "http://learn.parallax.com/ab-blocks/graph";
 Blockly.MSG_OLED_HELPURL = "http://learn.parallax.com/ab-blocks/oled";
 Blockly.MSG_BADGE_DISPLAY_HELPURL = "http://learn.parallax.com/ab-blocks/badgedisplay";
 Blockly.MSG_BADGE_IR_COMM_HELPURL = "http://learn.parallax.com/ab-blocks/badgeir";
@@ -244,7 +253,11 @@ Blockly.MSG_ROBOT_HELPURL = "http://learn.parallax.com/ab-blocks/robot";
 Blockly.MSG_IMU_HELPURL = "http://learn.parallax.com/ab-blocks/lsm9ds1";
 Blockly.MSG_WS2812B_HELPURL = "http://learn.parallax.com/ab-blocks/ws2812b";
 Blockly.MSG_SYSTEM_HELPURL = "http://learn.parallax.com/ab-blocks/system";
-
+Blockly.MSG_BADGE_LEDS_HELPURL = "http://learn.parallax.com/ab-blocks/badge-leds";
+Blockly.MSG_BADGE_IR_HELPURL = "http://learn.parallax.com/ab-blocks/badgeir";
+Blockly.MSG_BADGE_DISPLAY_HELPURL = "http://learn.parallax.com/ab-blocks/badgedisplay";
+Blockly.MSG_BADGE_BUTTONS_HELPURL = "http://learn.parallax.com/ab-blocks/badge-buttons";
+Blockly.MSG_BADGE_ACCEL_HELPURL = "http://learn.parallax.com/ab-blocks/badge-accel";
 
 //----------Activity Board (Propeller C) block tooltips ----------------------------
 Blockly.MSG_COMMENT_TOOLTIP = "add comment: Leave a note for people that will not affect the program.";
@@ -295,6 +308,7 @@ Blockly.MSG_WAITCNT_TOOLTIP = "pause until: waits until the system clounter reac
 Blockly.MSG_REGISTER_SET_TOOLTIP = "cog set register: sets the value of the specified cog register.";
 Blockly.MSG_REGISTER_GET_TOOLTIP = "cog get register: retrievs the value of the specified cog register.";
 Blockly.MSG_CUSTOM_CODE_TOOLTIP = "user code: must be properly written Propeller C code.  Places code input into specificed location.";
+Blockly.MSG_CUSTOM_CODE_MULTIPLE_TOOLTIP = "User defined code: Set label, color, code, block type, and inputs.\nAdd correctly formatted Propeller C code to the includes,\nglobals, setups, main, and functions sections.\n Use \"@1, @2, @3, @4, or @5\" to insert values from inputs 1, 2, 3, 4, or 5 into your custom C code.";
 Blockly.MSG_VARIABLES_SET_TOOLTIP = "set variable: name and attach initial value block.";
 Blockly.MSG_VARIABLES_GET_TOOLTIP = "use variable: choose set variables from dropdown.";
 Blockly.MSG_PROCEDURES_DEFNORETURN_TOOLTIP = "define function: group blocks to re-use ending with return; name group.";
@@ -306,6 +320,8 @@ Blockly.MSG_CHECK_PIN_INPUT_TOOLTIP = "check PIN (programmable): Set I/O pin of 
 Blockly.MSG_SET_PINS_TOOLTIP = "set multiple pins: define group then set each pin. Do not use on P29-P31.";
 Blockly.MSG_GET_PINS_TOOLTIP = "binary get pins: gets the value of a group of pins as a binary value. Highest pin is MSB.";
 Blockly.MSG_SET_PINS_BINARY_TOOLTIP = "binary set pins: define group then set each pins using a binary value. Highest pin is MSB. Do not use on P29-P31.";
+Blockly.MSG_GRAPH_SETTINGS_TOOLTIP = "Graph initialize: set how long data is held and the range of the graph.";
+Blockly.MSG_GRAPH_OUTPUT_TOOLTIP = "Graph output: send attached values to the graph.  Use in a repeat loop with a pause block, don't send data more than once every 25 ms.";
 Blockly.MSG_DEBUG_LCD_INIT_TOOLTIP = "LCD initialize: set I/O pin to LCD; match baud to LCD switches.";
 Blockly.MSG_DEBUG_LCD_PRINT_TOOLTIP = "LCD print text: display on serial LCD.";
 Blockly.MSG_DEBUG_LCD_PRINT_MULTIPLE_TOOLTIP = "LCD print multiple: send attached values or text to the LCD.";
@@ -376,6 +392,7 @@ Blockly.MSG_XBEE_RECEIVE_TOOLTIP = "XBee receive: receives information from an X
 Blockly.MSG_XBEE_PRINT_MULTIPLE_TOOLTIP = "XBee send multiple: send attached values or text to the Xbee module.";
 Blockly.MSG_XBEE_SCAN_MULTIPLE_TOOLTIP = "XBee receive multiple: receive numbers or characters from the XBee module and store them in the specified variables.";
 Blockly.MSG_WS2812B_INIT_TOOLTIP = "RGB-LED init: match to Propeller I/O pin connections and number of LEDs.";
+Blockly.MSG_BADGE_RGB_INIT_TOOLTIP = "RGB-LED number: set the number of RGB (WS2812b) LEDs.";
 Blockly.MSG_WS2812B_SET_TOOLTIP = "RGB-LED set: specify color for a specific LED.";
 Blockly.MSG_WS2812B_MULTIPLE_TOOLTIP = "RGB-LED set multiple: specify color for a range of consecutive LEDs.";
 Blockly.MSG_WS2812B_UPDATE_TOOLTIP = "RGB-LED update: update colors of all connected RGB-LEDs.";
@@ -471,6 +488,44 @@ Blockly.MSG_CONSTRAIN_VALUE_TOOLTIP = "constrain value: prevent a value from bei
 Blockly.MSG_MAP_VALUE_TOOLTIP = "map value: scale a value from one range to a different range.";
 Blockly.MSG_MATH_ADVANCED_TOOLTIP = "advanced math: perform a trigonometric, exponential, or logrithmic function.\nAngles are in degrees.";
 Blockly.MSG_MATH_INV_TRIG_TOOLTIP = "inverse trig: perform an inverse trigonometric function.\nAngles are in degrees.";
+Blockly.MSG_STRING_SCAN_MULTIPLE_TOOLTIP = "scan string: look for and extract values or characters from a string.";
+Blockly.MSG_STRING_SPLIT_TOOLTIP = "split string: use to split up a string separated by the defined character. Use more than once to extract multiple string parts.";
+Blockly.MSG_STRING_NULL_TOOLTIP = "string empty: use to test if a string is null or empty.";
+Blockly.MSG_STRING_TRIM_TOOLTIP = "trim string: remove extra spaces at the beginning and end of a string of text.";
+Blockly.MSG_STRING_VAR_LENGTH_TOOLTIP = "string variable set length: set the size (in characters + 1) of the variables that store text.";
+Blockly.MSG_STRING_SPRINT_MULTIPLE_TOOLTIP = "create string: make a new string from atached values or text.";
+Blockly.MSG_HEB_BADGE_AXIS_ACCELERATION_TOOLTIP = "Accelerometer get: returns acceleration and tilt on one of 3 axes (AX, AY, or AZ) in centigravity (cg) units, which is 100ths of 1 gravity (1 g).";
+Blockly.MSG_HEB_BADGE_EEPROM_IS_STORED_TOOLTIP = "Memory contact: check if a string of text has already been stored in EEPROM memory.";
+Blockly.MSG_HEB_BADGE_EEPROM_RETRIEVE_TOOLTIP = "Memory get contact: retrieve text with a certain index number from EEPROM memory.";
+Blockly.MSG_HEB_BADGE_EEPROM_STORE_TOOLTIP = "Memory store contact: store text up to 128 characters to EEPROM memory.";
+Blockly.MSG_HEB_BADGE_WAS_SHAKEN_TOOLTIP = "Accelerometer shaken: check if accelerometer was shaken within the last half second.";
+Blockly.MSG_HEB_CLEAR_SCREEN_TOOLTIP = "Badge Display clear screen: clears screen by setting all pixels to black.";
+Blockly.MSG_HEB_COLOR_VAL_TOOLTIP = "Badge color value: use with the Badge set RGB-LED block to specifiy the RGB-LED color.";
+Blockly.MSG_HEB_COUNT_CONTACTS_TOOLTIP = "Memory count contacts: returns how many contacts are currently stored in EEPROM memory.";
+Blockly.MSG_HEB_SET_FONT_TOOLTIP = "Badge Display set font: sets the displayed text to be either large or small.";
+Blockly.MSG_HEB_CURSOR_POSITION_TOOLTIP = "Badge Display set cursor: 0,0 is top-left corner of display.";
+Blockly.MSG_HEB_ERASE_ALL_CONTACTS_TOOLTIP = "Memory erase contacts: erases entire user portion of EEPROM memory by placing 255 in each location.";
+Blockly.MSG_HEB_IR_CLEAR_BUFFER_TOOLTIP = "IR clear buffer: clear the infrared send/receive buffers.";
+Blockly.MSG_HEB_IR_READ_SIGNAL_TOOLTIP = "IR receive message: receive text from another badge.";
+Blockly.MSG_HEB_IR_SEND_SIGNAL_TOOLTIP = "IR send text: send text to another badge.";
+Blockly.MSG_HEB_OLED_BOX_TOOLTIP = "Badge Display draw rectangle: set x,y position of each corner.";
+Blockly.MSG_HEB_OLED_CIRCLE_TOOLTIP = "Badge Display draw circle: x,y of center point, radius, color, fill. ";
+Blockly.MSG_HEB_OLED_LINE_TOOLTIP = "Badge Display draw line: set start and end points; 0,0 is top-left.";
+Blockly.MSG_HEB_OLED_POINT_TOOLTIP = "Badge Display draw point: at x, y from top-left corner.";
+Blockly.MSG_HEB_OLED_TRIANGLE_TOOLTIP = "Badge Display draw triangle: set x,y position of each corner.";
+Blockly.MSG_HEB_PRINT_MULTIPLE_TOOLTIP = "Badge Display print multiple: send attached values or text to the display.";
+Blockly.MSG_HEB_PRINT_NUMERIC_VAR_TOOLTIP = "Badge Display print number: display value as decimal, hex, or binary.";
+Blockly.MSG_HEB_PRINT_STRING_VAR_TOOLTIP = "Badge Display print text: send string to display.";
+Blockly.MSG_HEB_PWM_LED_TOOLTIP = "Badge set LED brightness: set the brightness of the specified LED.";
+Blockly.MSG_HEB_ROTATE_TOOLTIP = "Badge Display rotate: rotate the screen image 180 degrees.";
+Blockly.MSG_HEB_SET_LED_RGB_TOOLTIP = "Badge set RGB-LED: set the specified RGB LED to a specific color.";
+Blockly.MSG_HEB_TEXT_TO_SPEECH_SAY_TOOLTIP = "TTS say: speaks the specified string of text based on what phonemes are used.";
+Blockly.MSG_HEB_TEXT_TO_SPEECH_SPELL_TOOLTIP = "TTS spell: speaks each letter in the specificed string of text individually.";
+Blockly.MSG_HEB_TOGGLE_LED_OPEN_TOOLTIP = "Badge set LED: turn the specified LED on or off.";
+Blockly.MSG_HEB_TOGGLE_LED_TOOLTIP = "Badge set LED: turn the specified LED on or off.";
+Blockly.MSG_HEB_TOUCHPAD_SENSITIVITY_TOOLTIP = "Touch sensitivty: sets the sensitivity of the touchpads (A & B) on the badge.";
+Blockly.MSG_HEB_TOUCHPAD_STATUS_TOOLTIP = "Button: returns the state of the specified nav button or touchpad (1) pressed, (0) not pressed. ";
+Blockly.MSG_HEB_TOUCHPAD_STATUS_WX_TOOLTIP = "Touchpad: returns the state of the specified touch button (1) pressed, (0) not pressed. ";
 
 
 //-------Scribbler 3 help URLs ---------------------------------------------
@@ -709,6 +764,7 @@ page_text_label['editor_button_cancel'] = "Cancel";
 page_text_label['editor_button_close'] = "Close";
 page_text_label['editor_button_replace'] = "Replace";
 page_text_label['editor_clear-workspace'] = "Clear workspace";
+page_text_label['editor_offline_title'] = "Offline Expermiental Version";
 page_text_label['editor_client_available'] = "<strong>Select the correct port,</strong> then click <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"15\" style=\"vertical-align: middle;\"><path d=\"M4.4,0 L6.8,0 6.8,7.2 10,7.2 5.6,11.6 1.2,7.2 4.4,7.2 Z\" style=\"stroke:#000;stroke-width:1;fill:#000;\"/></svg> or <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"15\" style=\"vertical-align: middle;\"><path d=\"M4.4,0 L6.8,0 6.8,4.8 10,4.8 5.6,9.2 1.2,4.8 4.4,4.8 Z M0.4,9.6 L10.8,9.6 10.8,11.6 0.4,11.6 Z\" style=\"stroke:#000;stroke-width:1;fill:#000;\"/></svg>.";
 page_text_label['editor_client_available_short'] = "<strong>Select the correct port,</strong> then click <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"14\" height=\"15\" style=\"vertical-align: middle;\"><path d=\"M4.4,0 L6.8,0 6.8,4.8 10,4.8 5.6,9.2 1.2,4.8 4.4,4.8 Z M0.4,9.6 L10.8,9.6 10.8,11.6 0.4,11.6 Z\" style=\"stroke:#000;stroke-width:1;fill:#000;\"/></svg>.";
 page_text_label['editor_client_checking'] = "Looking for BlocklyProp-Client...";
@@ -890,7 +946,7 @@ page_text_label['project_board'] = "Board Type";
 page_text_label['project_board_activity-board'] = "Propeller Activity Board WX";
 page_text_label['project_board_flip'] = "Propeller FLiP or Project Board";
 page_text_label['project_board_heb'] = "Hackable Electronic Badge";
-page_text_label['project_board_heb-wx'] = "Hackable Electronic Badge WX";
+page_text_label['project_board_heb-wx'] = "Badge WX";
 page_text_label['project_board_other'] = "Other Propeller Board";
 page_text_label['project_board_propcfile'] = "Propeller C (code-only)";
 page_text_label['project_board_s3'] = "Scribbler Robot";
@@ -1017,3 +1073,23 @@ $(document).ready(function () {
         }
     }
 });
+
+
+// If online, return the full help URL, if offline, open a modal
+
+/**
+ * Load the block's help page in a new window.
+ * @private
+ */
+Blockly.BlockSvg.prototype.showHelp_ = function () {
+    var url = goog.isFunction(this.helpUrl) ? this.helpUrl() : this.helpUrl;
+    if (!isOffline && url) {
+        window.open(url);
+    } else if (url) {
+        // TODO: open modal/iframe with help content
+	var u = url.replace(/https:\/\/learn.parallax.com\//g, '');
+	u = 'cdn/help/' + u.replace(/\//g, '-') + '.html';
+	$('#help-content').html('<iframe src="' + u + '" style="height:600px; border:none;" />');
+	$('#help-dialog').modal('show');
+    }
+};
