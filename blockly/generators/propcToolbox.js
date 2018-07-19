@@ -816,7 +816,7 @@ xmlToolbox += '            <block type="xbee_transmit"></block>';
 xmlToolbox += '            <block type="xbee_print_multiple" experimental="true"></block>';
 xmlToolbox += '            <block type="xbee_receive"></block>';
 xmlToolbox += '            <block type="xbee_scan_multiple" experimental="true"></block>';
-xmlToolbox += '            <block type="xbee_configure" experimental="true"></block>';
+//xmlToolbox += '            <block type="xbee_configure" experimental="true"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '    </category>';
 xmlToolbox += '    <category key="category_sensor-input" include="heb,heb-wx," colour="140">';
