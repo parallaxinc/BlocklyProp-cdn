@@ -844,7 +844,7 @@ Blockly.Blocks.heb_touchpad_sensitivity = {
 };
 
 Blockly.propc.heb_touchpad_sensitivity = function () {
-    return 'touch_sensitivity_set(' + this.getFieldValue("LEVEL") + ')';
+    return 'touch_sensitivity_set(' + this.getFieldValue("LEVEL") + ');';
 };
 
 Blockly.Blocks.heb_text_to_speech_say = {
