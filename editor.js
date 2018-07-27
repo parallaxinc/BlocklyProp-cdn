@@ -295,8 +295,8 @@ var saveProject = function () {
 
 var saveAsDialog = function () {
 
-    // use the plain 'save-as' endpoint for now.
-    if (1 === 1) {   // if (inDemo !== 'demo') {
+    // Production still uses the uses the plain 'save-as' endpoint for now.
+    if (inDemo !== 'demo') {     // if (1 === 1) {
 
         // Old function - still in use because save-as+board type is not approved for use.
         utils.prompt("Save project as", projectData['name'], function (value) {
