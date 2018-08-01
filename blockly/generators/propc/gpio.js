@@ -1522,7 +1522,7 @@ Blockly.propc.wav_set_pins = function () {
     if (wavePinBlockCount <= 1) {
     */
         if (!this.disabled) {
-            Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + pin_left + ', ' + pin_right + ')';
+            Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + pin_left + ', ' + pin_right + ');';
         }
         return '';
     /*

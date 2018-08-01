@@ -1277,7 +1277,7 @@ Blockly.Blocks.scribbler_random_boolean = {
 };
 
 Blockly.propc.scribbler_random_boolean = function () {
-    Blockly.propc.setups_["random_seed"] = "srand(INA + CNT);\n";
+    Blockly.propc.setups_["random_seed"] = "srand(INA + CNT);";
     return ['(rand() % 2)', Blockly.propc.ORDER_ATOMIC];
 };
 
@@ -1496,7 +1496,7 @@ Blockly.propc.sirc_s3_get = function () {
     var pin = this.getFieldValue('PIN');
 
     Blockly.propc.definitions_["sirc"] = '#include "sirc.h"';
-    Blockly.propc.setups_["sirc"] = "sirc_setTimeout(70);\n";
+    Blockly.propc.setups_["sirc"] = "sirc_setTimeout(70);";
 
     var code = 'sirc_button(' + pin + ')';
     return [code, Blockly.propc.ORDER_ATOMIC];
