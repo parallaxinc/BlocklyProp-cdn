@@ -1432,7 +1432,7 @@ Blockly.propc.wav_play = function () {
             Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');\n';
         }
         if (projectData["board"] === "heb-wx") {
-            Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + profile.default.earphone_jack + ')';
+            Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + profile.default.earphone_jack + ');';
         }
     }
     var code = 'wav_play("' + filename + '.wav");\n';

@@ -95,8 +95,15 @@ function getURLParameter(name) {
     return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(window.location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
 }
 
-// Server (demo/production) detection
+// Server (demo/production) detection & url parameter override
 var inDemo = $("meta[name=in-demo]").attr("content");
+if (getURLParameter('experimental')) {
+    if (getURLParameter('experimental') !== 'true') {
+        inDemo = 'production';
+    } else {
+        inDemo = 'demo';
+    }
+}
 
 // Operating system detection
 var osName = 'unknown-client';
