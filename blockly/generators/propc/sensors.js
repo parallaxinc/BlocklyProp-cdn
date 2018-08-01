@@ -155,7 +155,7 @@ Blockly.propc.sound_impact_run = function () {
 
     if (!this.disabled) {
         Blockly.propc.definitions_["sound_impact"] = '#include "soundimpact.h"';
-        Blockly.propc.setups_["sound_impact"] = 'int *__soundimpactcog = soundImpact_run(' + pin + ');\n';
+        Blockly.propc.setups_["sound_impact"] = 'int *__soundimpactcog = soundImpact_run(' + pin + ');';
     }
 
     return '';
@@ -810,7 +810,7 @@ Blockly.propc.MMA7455_init = function () {
     if (!this.disabled) {
         Blockly.propc.definitions_["include_mma7455"] = '#include "mma7455.h"';
         Blockly.propc.global_vars_["mma_7455_tempVars"] = 'short int __tmpX, __tmpY, __tmpZ;';
-        Blockly.propc.setups_["mma_7455"] = 'MMA7455_init(' + pinx + ', ' + piny + ', ' + pinz + ');\n';
+        Blockly.propc.setups_["mma_7455"] = 'MMA7455_init(' + pinx + ', ' + piny + ', ' + pinz + ');';
     }
     return '';
 };
@@ -981,7 +981,7 @@ Blockly.propc.lsm9ds1_init = function () {
 
     if (!this.disabled) {
         Blockly.propc.definitions_["include_lsm9ds1"] = '#include "lsm9ds1.h"';
-        Blockly.propc.setups_["lsm9ds1_init"] = 'imu_init(' + pin_scl + ', ' + pin_sio + ', ' + pin_csa + ', ' + pin_csm + ');\n';
+        Blockly.propc.setups_["lsm9ds1_init"] = 'imu_init(' + pin_scl + ', ' + pin_sio + ', ' + pin_csa + ', ' + pin_csm + ');';
         Blockly.propc.global_vars_["lsm9ds1_vars"] = 'float __imuX, __imuY, __imuZ, __compI;\n';
     }
     return '';
@@ -1884,7 +1884,7 @@ Blockly.propc.sirc_get = function () {
 
     if (!this.disabled) {
         Blockly.propc.definitions_["sirc"] = '#include "sirc.h"';
-        Blockly.propc.setups_["sirc"] = "sirc_setTimeout(70);\n";
+        Blockly.propc.setups_["sirc"] = "sirc_setTimeout(70);";
     }
     var code = 'sirc_button(' + pin + ')';
     return [code, Blockly.propc.ORDER_NONE];

@@ -165,7 +165,7 @@ Blockly.propc.variables_declare = function () {
     var varName = Blockly.propc.variableDB_.getName(
             this.getFieldValue('VAR'),
             Blockly.Variables.NAME_TYPE);
-    Blockly.propc.setups_['setup_var' + varName] = varName + ' = ' + argument0 + ';\n';
+    Blockly.propc.setups_['setup_var' + varName] = varName + ' = ' + argument0 + ';';
     Blockly.propc.vartype_[varName] = dropdown_type;
     return '';
 };
