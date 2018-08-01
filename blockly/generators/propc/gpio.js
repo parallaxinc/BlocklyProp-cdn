@@ -1384,10 +1384,8 @@ Blockly.propc.sound_play = function () {
     }
     
     if (projectData['board'] && !this.disabled) {
-        if (projectData['board'] === "heb") {
-            Blockly.propc.setups_["sound_start"] = 'audio0 = sound_run(9, 10);';
-        } else if (projectData['board'] === "heb-wx") {
-            Blockly.propc.setups_["sound_start"] = 'audio0 = sound_run(0, 1);';
+        if (projectData['board'] === "heb" || projectData['board'] === "heb-wx") {
+            Blockly.propc.setups_["sound_start"] = 'audio0 = sound_run(' + profile.default.earphone_jack + ');';
         }
         Blockly.propc.definitions_["include_soundplayer"] = '#include "sound.h"';
         Blockly.propc.definitions_["sound_define_0"] = 'sound* audio0;';       
@@ -1433,6 +1431,9 @@ Blockly.propc.wav_play = function () {
         if (!initFound) {
             Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');\n';
         }
+        if (projectData["board"] === "heb-wx") {
+            Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + profile.default.earphone_jack + ')';
+        }
     }
     var code = 'wav_play("' + filename + '.wav");\n';
     return code;
@@ -1465,7 +1466,7 @@ Blockly.Blocks.wav_volume = {
         this.setTooltip(Blockly.MSG_WAV_VOLUME_TOOLTIP);
         this.setColour(colorPalette.getColor('io'));
         this.appendValueInput('VOLUME')
-                .appendField("WAV volume (0 - 10)")
+                .appendField("WAV volume")
                 .appendField('R,0,10,0', 'RANGEVALS1');
         this.getField('RANGEVALS1').setVisible(false);
         this.setInputsInline(true);
@@ -1480,8 +1481,55 @@ Blockly.propc.wav_volume = function () {
     if (!this.disabled) {
         Blockly.propc.definitions_["include wavplayer"] = '#include "wavplayer.h"';
     }
-    var code = 'wav_volume(constrainInt(' + volume + ', 0, 10));\n';
+    var code = 'wav_volume(' + volume + ');\n';
     return code;
+};
+
+Blockly.Blocks.wav_set_pins = {
+    helpUrl: Blockly.MSG_AUDIO_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_WAV_SET_PINS_TOOLTIP);
+        this.setColour(colorPalette.getColor('io'));
+        this.appendDummyInput('LEFTPIN')
+                .appendField("WAV set output left PIN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['None','-1']])), "PINL")
+                .appendField("right PIN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['None','-1']])), "PINR");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+    }
+    // TODO: add warning for second use of this block when wav_close is not present...is wav_close even a block?
+};
+
+Blockly.propc.wav_set_pins = function () {
+    var pin_left = this.getFieldValue('PINL');
+    var pin_right = this.getFieldValue('PINR');
+
+    if (pin_right === pin_left) {
+        pin_right = '-1';
+    }
+    /*
+    // TODO: is wav_close is added, uncomment the commented out code in this block
+
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+    var wavePinBlockCount = 0;
+    for (var ab = 0; ab < allBlocks.length; ab++) {
+        if (allBlocks[ab].type === 'wav_set_pins') {
+            wavePinBlockCount++;
+        }
+    }
+    if (wavePinBlockCount <= 1) {
+    */
+        if (!this.disabled) {
+            Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + pin_left + ', ' + pin_right + ')';
+        }
+        return '';
+    /*
+    } else {
+        return 'wav_set_pins(' + pin_left + ', ' + pin_right + ')';
+    }
+    */
 };
 
 Blockly.Blocks.wav_stop = {
