@@ -830,7 +830,7 @@ Blockly.propc.fb360_init = function () {
 
     if (!this.disabled) {
         Blockly.propc.definitions_["include servo360"] = '#include "servo360.h"';
-        Blockly.propc.setups_["servo360_" + pin] = 'servo360_connect(' + pin + ',' + fb + ');\n';
+        Blockly.propc.setups_["servo360_" + pin] = 'servo360_connect(' + pin + ',' + fb + ');';
     }
     return '';
 };
@@ -1429,7 +1429,7 @@ Blockly.propc.wav_play = function () {
             }
         }
         if (!initFound) {
-            Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');\n';
+            Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');';
         }
         if (projectData["board"] === "heb-wx") {
             Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + profile.default.earphone_jack + ');';
@@ -1579,7 +1579,7 @@ Blockly.propc.sd_init = function () {
     var pin_cs = this.getFieldValue('CS');
 
     if (!this.disabled) {
-        Blockly.propc.setups_["sd_card"] = 'sd_mount(' + pin_do + ', ' + pin_clk + ', ' + pin_di + ', ' + pin_cs + ');\n';
+        Blockly.propc.setups_["sd_card"] = 'sd_mount(' + pin_do + ', ' + pin_clk + ', ' + pin_di + ', ' + pin_cs + ');';
     }
 
     return '';
@@ -1646,7 +1646,7 @@ Blockly.propc.sd_open = function () {
     }
 
     if (!this.disabled && !initFound && profile.default.sd_card) {
-        Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');\n';
+        Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');';
     }
 
     var code = head + 'fp = fopen("' + fp + '","' + mode + '");';
@@ -1681,7 +1681,7 @@ Blockly.Blocks.sd_read = {
                 .appendField("store in")
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_SET_ITEM), 'VAR');
         this.setInputsInline(true);
-        this.setPreviousStatement(true, null);
+        this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
     },
     getVars: function () {
@@ -1806,7 +1806,7 @@ Blockly.propc.sd_read = function () {
     }
 
     if (!this.disabled && !initFound && profile.default.sd_card) {
-        Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');\n';
+        Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');';
     }
 
     return code;
@@ -1874,7 +1874,7 @@ Blockly.propc.sd_file_pointer = function () {
     }
 
     if (!this.disabled && !initFound && profile.default.sd_card) {
-        Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');\n';
+        Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');';
     }
 
     if (allBlocks.indexOf('SD file open') === -1) {
@@ -1977,7 +1977,7 @@ Blockly.propc.ab_drive_init = function () {
         if (bot === 'servodiffdrive.h') {
             var left = Number(this.getFieldValue('LEFT'));
             var right = Number(this.getFieldValue('RIGHT'));
-            Blockly.propc.setups_["servodiffdrive"] = 'drive_pins(' + left + ',' + right + ');\n';
+            Blockly.propc.setups_["servodiffdrive"] = 'drive_pins(' + left + ',' + right + ');';
         }
     }
     return '';

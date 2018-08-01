@@ -110,7 +110,7 @@ function processKey(code) {
             }
         }    
     } else if (active_connection === 'simulated') {
-        updateTermBox(t_str);
+        displayInTerm(t_str);
     } else if (active_connection === 'websocket') {
         var msg_to_send = {
             type: 'serial-terminal',

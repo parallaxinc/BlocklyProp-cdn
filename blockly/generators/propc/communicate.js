@@ -259,7 +259,7 @@ Blockly.Blocks.console_print_multiple = {
     decompose: function (workspace) {
         var containerBlock = Blockly.Block.obtain(workspace, 'console_print_container');
         var subBlock = 'console_print_';
-        if (this.type === 'console_print_multiple' || this.type === 'oled_print_multiple' || this.type === 'debug_lcd_print_multiple') {
+        if (this.type === 'console_print_multiple' || this.type === 'oled_print_multiple' || this.type === 'debug_lcd_print_multiple' || this.type === 'parallel_lcd_print_multiple') {
             containerBlock.initSvg();
             containerBlock.setFieldValue((this.specDigits_ ? 'TRUE' : 'FALSE'), 'PLACES');
         } else if (this.type === 'string_sprint_multiple') {
@@ -567,9 +567,14 @@ Blockly.propc.console_print_multiple = function () {
             code += 'dprint(fdser' + p + ', "';
             break;
         case 'debug_lcd_print_multiple':
-            initBlock = 'LCD initialize';
+            initBlock = 'Serial LCD initialize';
             errorString = '// ERROR: LCD is not initialized!\n';
-            code += 'dprint(debug_lcd, "';
+            code += 'dprint(serial_lcd, "';
+            break;
+        case 'parallel_lcd_print_multiple':
+            initBlock = 'Parallel LCD initialize';
+            errorString = '// ERROR: LCD is not initialized!\n';
+            code += 'dprint(parallel_lcd, "';
             break;
         case 'oled_print_multiple':
             initBlock = 'OLED initialize';
@@ -1742,7 +1747,7 @@ Blockly.Blocks.debug_lcd_init = {
         this.setTooltip(Blockly.MSG_DEBUG_LCD_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
-                .appendField("LCD initialize PIN")
+                .appendField("Serial LCD initialize PIN")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
         this.appendDummyInput()
                 .appendField("baud")
@@ -1759,16 +1764,16 @@ Blockly.propc.debug_lcd_init = function () {
         var dropdown_pin = this.getFieldValue('PIN');
         var baud = this.getFieldValue('BAUD');
 
-        Blockly.propc.global_vars_['setup_debug_lcd'] = 'serial *debug_lcd;';
-        Blockly.propc.setups_['setup_debug_lcd'] = 'debug_lcd  = serial_open(' + dropdown_pin + ', ' + dropdown_pin + ', 0, ' + baud + ');\n';
+        Blockly.propc.global_vars_['setup_debug_lcd'] = 'serial *serial_lcd;';
+        Blockly.propc.setups_['setup_debug_lcd'] = 'serial_lcd  = serial_open(' + dropdown_pin + ', ' + dropdown_pin + ', 0, ' + baud + ');';
     }
 
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('LCD initialize') === -1)
+    if (allBlocks.indexOf('Serial LCD initialize') === -1)
     {
         return '// ERROR: LCD is not initialized!\n';
     } else {
-        var code = 'writeChar(debug_lcd, 22);\npause(5);\n';
+        var code = 'writeChar(serial_lcd, 22);\npause(5);\n';
         return code;
     }
 };
@@ -1803,7 +1808,7 @@ Blockly.Blocks.debug_lcd_music_note = {
 
 Blockly.propc.debug_lcd_music_note = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('LCD initialize') === -1)
+    if (allBlocks.indexOf('Serial LCD initialize') === -1)
     {
         return '// ERROR: LCD is not initialized!\n';
     } else {
@@ -1813,22 +1818,27 @@ Blockly.propc.debug_lcd_music_note = function () {
         var dropdown_length = this.getFieldValue('LENGTH');
 
         var code = '';
-        code += 'writeChar(debug_lcd, ' + dropdown_octave + ');\n';
-        code += 'writeChar(debug_lcd, ' + dropdown_length + ');\n';
-        code += 'writeChar(debug_lcd, ' + dropdown_note + ');\n';
+        code += 'writeChar(serial_lcd, ' + dropdown_octave + ');\n';
+        code += 'writeChar(serial_lcd, ' + dropdown_length + ');\n';
+        code += 'writeChar(serial_lcd, ' + dropdown_note + ');\n';
 
         return code;
     }
 };
 
 Blockly.Blocks.debug_lcd_print = {
-    helpUrl: Blockly.MSG_SERIAL_LCD_HELPURL,
     init: function () {
+        this.setHelpUrl(Blockly.MSG_SERIAL_LCD_HELPURL);
         this.setTooltip(Blockly.MSG_DEBUG_LCD_PRINT_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
+        var mt = "Serial";
+        if (this.type.indexOf('parallel') > -1) {
+            mt = "Parallel";
+            this.setHelpUrl(Blockly.MSG_PARALLEL_LCD_HELPURL);
+        }
         this.appendValueInput('MESSAGE')
                 .setCheck('String')
-                .appendField("LCD print text ");
+                .appendField(mt + " LCD print text ");
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -1836,7 +1846,8 @@ Blockly.Blocks.debug_lcd_print = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('LCD initialize') === -1)
+        if ((allBlocks.indexOf('Serial LCD initialize') === -1 && this.type === 'debug_lcd_print') || 
+                (allBlocks.indexOf('Parallel LCD initialize') === -1 && this.type === 'parallel_lcd_print'))
         {
             this.setWarningText('WARNING: You must use an LCD\ninitialize block at the beginning of your program!');
         } else {
@@ -1847,23 +1858,32 @@ Blockly.Blocks.debug_lcd_print = {
 
 Blockly.propc.debug_lcd_print = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('LCD initialize') === -1)
-    {
+    var st = 'serial';
+    if (this.type === 'parallel_lcd_print') {
+        st = 'parallel';
+    }
+    if ((allBlocks.indexOf('Serial LCD initialize') === -1 && st === 'serial') || 
+    (allBlocks.indexOf('Parallel LCD initialize') === -1 && st === 'parallel')) {
         return '// ERROR: LCD is not initialized!\n';
     } else {
         var msg = Blockly.propc.valueToCode(this, 'MESSAGE', Blockly.propc.ORDER_NONE);
-        return 'dprint(debug_lcd, ' + msg.replace(/%/g, "%%") + ');\n';
+        return 'dprint(' + st + '_lcd, ' + msg.replace(/%/g, "%%") + ');\n';
     }
 };
 
 Blockly.Blocks.debug_lcd_number = {
-    helpUrl: Blockly.MSG_SERIAL_LCD_HELPURL,
     init: function () {
+        this.setHelpUrl(Blockly.MSG_SERIAL_LCD_HELPURL);
         this.setTooltip(Blockly.MSG_DEBUG_LCD_NUMBER_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
+        var mt = "Serial";
+        if (this.type.indexOf('parallel') > -1) {
+            mt = "Parallel";
+            this.setHelpUrl(Blockly.MSG_PARALLEL_LCD_HELPURL);
+        }
         this.appendValueInput('VALUE')
                 .setCheck("Number")
-                .appendField("LCD print number");
+                .appendField(mt + " LCD print number");
         this.appendDummyInput()
                 .appendField("as")
                 .appendField(new Blockly.FieldDropdown([['Decimal', 'DEC'], ['Hexadecimal', 'HEX'], ['Binary', 'BIN']]), "FORMAT");
@@ -1874,7 +1894,8 @@ Blockly.Blocks.debug_lcd_number = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('LCD initialize') === -1)
+        if ((allBlocks.indexOf('Serial LCD initialize') === -1 && this.type === 'debug_lcd_number') || 
+                (allBlocks.indexOf('Parallel LCD initialize') === -1 && this.type === 'parallel_lcd_number'))
         {
             this.setWarningText('WARNING: You must use an LCD\ninitialize block at the beginning of your program!');
         } else {
@@ -1886,14 +1907,18 @@ Blockly.Blocks.debug_lcd_number = {
 Blockly.propc.debug_lcd_number = function () {
     var code = '';
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('LCD initialize') === -1)
-    {
+    var st = 'serial';
+    if (this.type === 'parallel_lcd_print') {
+        st = 'parallel';
+    }
+    if ((allBlocks.indexOf('Serial LCD initialize') === -1 && st === 'serial') || 
+    (allBlocks.indexOf('Parallel LCD initialize') === -1 && st === 'parallel')) {
         code += '// ERROR: LCD is not initialized!\n';
     } else {
         var value = Blockly.propc.valueToCode(this, 'VALUE', Blockly.propc.ORDER_ATOMIC);
         var format = this.getFieldValue('FORMAT');
 
-        code += 'dprint(debug_lcd, ';
+        code += 'dprint(' + st + '_lcd, ';
         if (format === 'BIN') {
             code += '"%b"';
         } else if (format === 'HEX') {
@@ -1913,7 +1938,7 @@ Blockly.Blocks.debug_lcd_action = {
         this.setTooltip(Blockly.MSG_DEBUG_LCD_ACTION_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
-                .appendField("LCD command")
+                .appendField("Serial LCD command")
                 .appendField(new Blockly.FieldDropdown([
                     ["clear screen", "12"],
                     ["move cursor right", "9"],
@@ -1934,7 +1959,7 @@ Blockly.Blocks.debug_lcd_action = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('LCD initialize') === -1)
+        if (allBlocks.indexOf('Serial LCD initialize') === -1)
         {
             this.setWarningText('WARNING: You must use an LCD\ninitialize block at the beginning of your program!');
         } else {
@@ -1945,13 +1970,14 @@ Blockly.Blocks.debug_lcd_action = {
 
 Blockly.propc.debug_lcd_action = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('LCD initialize') === -1)
+    if ((allBlocks.indexOf('Serial LCD initialize') === -1 && this.type === 'debug_lcd_action') || 
+            (allBlocks.indexOf('Parallel LCD initialize') === -1 && this.type === 'parallel_lcd_action'))
     {
         return '// ERROR: LCD is not initialized!\n';
     } else {
         var action = this.getFieldValue('ACTION');
         var code = '';
-        code += 'writeChar(debug_lcd, ' + action + ');\n';
+        code += 'writeChar(serial_lcd, ' + action + ');\n';
         //if(action === '12') {
         code += 'pause(5);\n';
         //}
@@ -1961,12 +1987,17 @@ Blockly.propc.debug_lcd_action = function () {
 };
 
 Blockly.Blocks.debug_lcd_set_cursor = {
-    helpUrl: Blockly.MSG_SERIAL_LCD_HELPURL,
     init: function () {
+        this.setHelpUrl(Blockly.MSG_SERIAL_LCD_HELPURL);
         this.setTooltip(Blockly.MSG_DEBUG_LCD_SET_CURSOR_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
+        var mt = "Serial";
+        if (this.type.indexOf('parallel') > -1) {
+            mt = "Parallel";
+            this.setHelpUrl(Blockly.MSG_PARALLEL_LCD_HELPURL);
+        }
         this.appendValueInput('ROW')
-                .appendField("LCD set cursor row")
+                .appendField(mt + " LCD set cursor row")
                 .setCheck('Number');
         this.appendValueInput('COLUMN')
                 .appendField("column")
@@ -1979,7 +2010,8 @@ Blockly.Blocks.debug_lcd_set_cursor = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('LCD initialize') === -1)
+        if ((allBlocks.indexOf('Serial LCD initialize') === -1 && this.type === 'debug_lcd_set_cursor') || 
+                (allBlocks.indexOf('Parallel LCD initialize') === -1 && this.type === 'parallel_lcd_set_cursor'))
         {
             this.setWarningText('WARNING: You must use an LCD\ninitialize block at the beginning of your program!');
         } else {
@@ -1990,25 +2022,34 @@ Blockly.Blocks.debug_lcd_set_cursor = {
 
 Blockly.propc.debug_lcd_set_cursor = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('LCD initialize') === -1)
+    if ((allBlocks.indexOf('Serial LCD initialize') === -1 && this.type === 'debug_lcd_set_cursor') || 
+            (allBlocks.indexOf('Parallel LCD initialize') === -1 && this.type === 'parallel_lcd_set_cursor'))
     {
-        return '// LCD: Serial is not initialized!\n';
+        return '// LCD is not initialized!\n';
     } else {
-        if (!this.disabled) {
-            var row = Blockly.propc.valueToCode(this, 'ROW', Blockly.propc.ORDER_NONE);
-            var column = Blockly.propc.valueToCode(this, 'COLUMN', Blockly.propc.ORDER_NONE);
+        var row = Blockly.propc.valueToCode(this, 'ROW', Blockly.propc.ORDER_NONE);
+        var column = Blockly.propc.valueToCode(this, 'COLUMN', Blockly.propc.ORDER_NONE);
+
+        if (this.type === 'debug_lcd_set_cursor') {
+            return 'writeChar(serial_lcd, (128 + (constrainInt(' + row + ', 0, 3) * 20) + constrainInt(' + column + ', 0, 19)));\n';
+        } else {
+            return 'lcdParallel_setCursor(parallel_lcd, ' + column + ', char ' + row + ');';
         }
-        return 'writeChar(debug_lcd, (128 + (constrainInt(' + row + ', 0, 3) * 20) + constrainInt(' + column + ', 0, 19)));\n';
     }
 };
 
 Blockly.Blocks.debug_lcd_print_multiple = {
-    helpUrl: Blockly.MSG_TERMINAL_HELPURL,
     init: function () {
+        this.setHelpUrl(Blockly.MSG_SERIAL_LCD_HELPURL);
         this.setTooltip(Blockly.MSG_DEBUG_LCD_PRINT_MULTIPLE_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
+        var mt = "Serial";
+        if (this.type.indexOf('parallel') > -1) {
+            mt = "Parallel";
+            this.setHelpUrl(Blockly.MSG_PARALLEL_LCD_HELPURL);
+        }
         this.appendDummyInput()
-                .appendField('LCD print');
+                .appendField(mt + ' LCD print');
         this.appendValueInput('PRINT0')
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .setCheck('String')
@@ -2036,7 +2077,8 @@ Blockly.Blocks.debug_lcd_print_multiple = {
             warnTxt = 'LCD print multiple must have at least one term.';
         }
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('LCD initialize') === -1)
+        if ((allBlocks.indexOf('Serial LCD initialize') === -1 && this.type === 'debug_lcd_print_multiple') || 
+                (allBlocks.indexOf('Parallel LCD initialize') === -1 && this.type === 'parallel_lcd_print_multiple'))
         {
             warnTxt = 'WARNING: You must use an LCD\ninitialize block at the beginning of your program!';
         }
@@ -2045,6 +2087,120 @@ Blockly.Blocks.debug_lcd_print_multiple = {
 };
 
 Blockly.propc.debug_lcd_print_multiple = Blockly.propc.console_print_multiple;
+
+
+//--------------- Parallel LCD Blocks --------------------------------------------
+Blockly.Blocks.parallel_lcd_init = {
+    helpUrl: Blockly.MSG_PARALLEL_LCD_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_DEBUG_LCD_INIT_TOOLTIP);
+        this.setColour(colorPalette.getColor('protocols'));
+        this.appendDummyInput()
+                .appendField("Parallel LCD initialize columns")
+                .appendField(new Blockly.FieldTextInput('16', Blockly.FieldTextInput.numberValidator), "COLS")
+                .appendField("rows")
+                .appendField(new Blockly.FieldTextInput('2', Blockly.FieldTextInput.numberValidator), "ROWS")
+                .appendField("RS")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital), "RS_PIN")
+                .appendField("EN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital), "EN_PIN")
+                .appendField("D0")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital), "DATA0")
+                .appendField("D1")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital), "DATA1")
+                .appendField("D2")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital), "DATA2")
+                .appendField("D3")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital), "DATA3");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+    }
+};
+
+Blockly.propc.parallel_lcd_init = function () {
+    if (!this.disabled) {
+        var cols = this.getFieldValue('COLS');
+        var rows = this.getFieldValue('ROWS');
+        var rs_pin = this.getFieldValue('RS_PIN');
+        var en_pin = this.getFieldValue('EN_PIN');
+        var d0_pin = this.getFieldValue('DATA0');
+        var d1_pin = this.getFieldValue('DATA1');
+        var d2_pin = this.getFieldValue('DATA2');
+        var d3_pin = this.getFieldValue('DATA3');
+
+        Blockly.propc.definitions_["include lcdParallel"] = '#include "lcdParallel.h"';
+        Blockly.propc.global_vars_['setup_parallel_lcd'] = 'lcdParallel *parallel_lcd;';
+        Blockly.propc.setups_['setup_parallel_lcd'] = 'parallel_lcd = lcdParallel_init(' + cols + ', ' + rows + ', 8, ' + rs_pin + ', ' + en_pin + ', ' + d0_pin + ', ' + d1_pin + ', ' + d2_pin + ', ' + d3_pin + ');';
+    }
+
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+    if (allBlocks.indexOf('Parallel LCD initialize') === -1)
+    {
+        return '// ERROR: LCD is not initialized!\n';
+    } else {
+        return '';
+    }
+};
+
+Blockly.Blocks.parallel_lcd_print = Blockly.Blocks.debug_lcd_print;
+Blockly.propc.parallel_lcd_print = Blockly.propc.debug_lcd_print;
+
+Blockly.Blocks.parallel_lcd_number = Blockly.Blocks.debug_lcd_number;
+Blockly.propc.parallel_lcd_number = Blockly.propc.debug_lcd_number;
+
+Blockly.Blocks.parallel_lcd_action = {
+    helpUrl: Blockly.MSG_PARALLEL_LCD_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_DEBUG_LCD_ACTION_TOOLTIP);
+        this.setColour(colorPalette.getColor('protocols'));
+        this.appendDummyInput()
+                .appendField("Parallel LCD command")
+                .appendField(new Blockly.FieldDropdown([
+                    ["Display off", "noDisplay"],
+                    ["Display on", "display"],
+                    ["Cursor solid", "noBlink"],
+                    ["Cursor blinking", "blink"],
+                    ["Cursor off", "noCursor"],
+                    ["Cursor on", "cursor"],
+                    ["Scroll left", "scrollDisplayLeft"],
+                    ["Scroll right", "scrollDisplayRight"],
+                    ["Write left to right", "leftToRight"],
+                    ["Write right to left", "rightToLeft"],
+                    ["Right justify text", "autoscroll"],
+                    ["Left justify text", "noAutoscroll"]
+                ]), "ACTION");
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+        this.setWarningText(null);
+    },
+    onchange: function () {
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+        if (allBlocks.indexOf('Parallel LCD initialize') === -1)
+        {
+            this.setWarningText('WARNING: You must use an LCD\ninitialize block at the beginning of your program!');
+        } else {
+            this.setWarningText(null);
+        }
+    }
+};
+
+Blockly.propc.debug_lcd_action = function () {
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+    if (allBlocks.indexOf('Parallel LCD initialize') === -1)
+    {
+        return '// ERROR: LCD is not initialized!\n';
+    } else {
+        var action = this.getFieldValue('ACTION');
+        return 'lcdParallel_' + action + '(parallel_lcd);\n';
+    }
+};
+
+Blockly.Blocks.parallel_lcd_set_cursor = Blockly.Blocks.debug_lcd_set_cursor;
+Blockly.propc.parallel_lcd_set_cursor = Blockly.propc.debug_lcd_set_cursor;
+
+Blockly.Blocks.parallel_lcd_print_multiple = Blockly.Blocks.debug_lcd_print_multiple;
+Blockly.propc.parallel_lcd_print_multiple = Blockly.propc.console_print_multiple;
 
 
 //--------------- XBee Blocks --------------------------------------------------
@@ -2074,7 +2230,7 @@ Blockly.propc.xbee_setup = function () {
     if (!this.disabled) {
         Blockly.propc.definitions_["include fdserial"] = '#include "fdserial.h"';
         Blockly.propc.global_vars_["xbee"] = "fdserial *xbee;";
-        Blockly.propc.setups_["xbee"] = 'xbee = fdserial_open(' + di_pin + ', ' + do_pin + ', 0, ' + baud + ');\n';
+        Blockly.propc.setups_["xbee"] = 'xbee = fdserial_open(' + di_pin + ', ' + do_pin + ', 0, ' + baud + ');';
     }
     return '';
 };
@@ -3225,7 +3381,7 @@ Blockly.propc.ws2812b_init = function () {
         }
         Blockly.propc.definitions_["ws2812b_sets" + pin] += '\n#define RGB_COUNT' + pin + '   ' + num;
         Blockly.propc.global_vars_["ws2812b_array" + pin] = 'ws2812 *ws2812b' + pin + ';\nint RGBleds' + pin + '[' + num + '];\n';
-        Blockly.propc.setups_["ws2812b_init" + pin] = 'ws2812b' + pin + ' = ws2812b_open();\n';
+        Blockly.propc.setups_["ws2812b_init" + pin] = 'ws2812b' + pin + ' = ws2812b_open();';
     }
     return '';
 };
@@ -3476,7 +3632,7 @@ Blockly.propc.ws2812b_update = function () {
             Blockly.propc.definitions_["ws2812b_def"] = '#include "ws2812.h"';
             Blockly.propc.definitions_["ws2812b_sets"] = '#define RGB_COUNT   4';
             Blockly.propc.global_vars_["ws2812b_array"] = 'ws2812 *ws2812b;\nint RGBleds[4];\n';
-            Blockly.propc.setups_["ws2812b_init"] = 'ws2812b = ws2812b_open();\n';
+            Blockly.propc.setups_["ws2812b_init"] = 'ws2812b = ws2812b_open();';
         }
     }
     var p = '';
@@ -4054,10 +4210,8 @@ Blockly.propc.wx_init_adv = function () {
             mode = this.getFieldValue('MODE');
         }
 
-        var code = 'wifi_start(' + pin_do + ', ' + pin_di + ', 115200, ' + mode + ');\n';
-
         Blockly.propc.definitions_["wx_def"] = '#include "wifi.h"';
-        Blockly.propc.setups_["wx_init"] = code;
+        Blockly.propc.setups_["wx_init"] = 'wifi_start(' + pin_do + ', ' + pin_di + ', 115200, ' + mode + ');';
     }
     return '';
 };
@@ -5482,7 +5636,7 @@ Blockly.Blocks.i2c_send = {
                 .setCheck('Number')
                 .appendField(" at address");
         this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
+        this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.pinWarn = null;
         //this.checkI2cPins(null);
@@ -5648,7 +5802,7 @@ Blockly.Blocks.i2c_receive = {
                 .appendField("store in")
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_SET_ITEM), 'VAR');
         this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
+        this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.pinWarn = null;
         //this.checkI2cPins(null);
@@ -5737,7 +5891,7 @@ Blockly.Blocks.i2c_mode = {
                 ]), "MODE");
         this.warnFlag = 0;
         this.pinWarn = null;
-        this.setPreviousStatement(true, null);
+        this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
     },
     onchange: function (event) {
