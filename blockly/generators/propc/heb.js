@@ -865,7 +865,7 @@ Blockly.propc.heb_text_to_speech_say = function () {
 
     Blockly.propc.definitions_["TTS"] = '#include "text2speech.h"';
     Blockly.propc.global_vars_["TTS"] = 'talk *tts_talk;';
-    Blockly.propc.setups_["TTS"] = 'tts_talk = talk_run(9, 10);\ntalk_set_speaker(tts_talk, 1, 100);';
+    Blockly.propc.setups_["TTS"] = 'tts_talk = talk_run(' + profile.default.earphone_jack + ');\ntalk_set_speaker(tts_talk, 1, 100);';
 
     var code = 'talk_say(tts_talk, ' + str + ');\n';
     return code;
@@ -889,7 +889,7 @@ Blockly.propc.heb_text_to_speech_spell = function () {
 
     Blockly.propc.definitions_["TTS"] = '#include "text2speech.h"';
     Blockly.propc.global_vars_["TTS"] = 'talk *tts_talk;';
-    Blockly.propc.setups_["TTS"] = 'tts_talk = talk_run(9, 10);\ntalk_set_speaker(tts_talk, 1, 100);';
+    Blockly.propc.setups_["TTS"] = 'tts_talk = talk_run(' + profile.default.earphone_jack + ');\ntalk_set_speaker(tts_talk, 1, 100);';
 
     var code = 'talk_spell(tts_talk, ' + str + ');\n';
     return code;

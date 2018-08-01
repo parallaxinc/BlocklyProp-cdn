@@ -456,6 +456,7 @@ Blockly.MSG_WAV_PLAY_TOOLTIP = "WAV play: Plays the specified .WAV file stored o
 Blockly.MSG_WAV_STATUS_TOOLTIP = "WAV status: returns 1/true if a .WAV file is playing, returns 0/false if not.";
 Blockly.MSG_WAV_VOLUME_TOOLTIP = "WAV volume: sets the volume of the WAV player - 0 (quietest) to 10 (loudest).";
 Blockly.MSG_WAV_STOP_TOOLTIP = "WAV stop: Stops the WAV player object, frees up resources on the Propeller.";
+Blockly.MSG_WAV_SET_PINS_TOOLTIP = "WAV set pins: Use only at the beginning of your program to send the WAV file player output to different pins.";
 Blockly.MSG_BASE_FREQOUT_TOOLTIP = "frequency out: sends pulses to the I/O pin at the specified frequency.";
 Blockly.MSG_SOUND_INIT_TOOLTIP = "sound initialize: starts the polyphonic (multi-tone) sound process.";
 Blockly.MSG_SOUND_PLAY_TOOLTIP = "sound play: set or stop the freqeuncy, set the volume, and/or set the waveform of one of the four available channels.";
