@@ -33,18 +33,33 @@ document.localProject = {
     'yours': true,
 }
 
-var c_cmp = ["/", "Users", "mmatz", "Documents", "SimpleIDE", "Learn", "Simple Libraries"];
+var c_cmp = ["/", "Users", os.userInfo().username, "Documents", "SimpleIDE", "Learn", "Simple Libraries"];
+var c_pth = ["/", "Applications", "SimpleIDE.app", "Contents", "propeller-gcc", "bin", "propeller-elf-gcc"];
+
+if (navigator.browserSpecs.system === "Windows") {
+    c_pth = ["/", "Program Files (x86)", "SimpleIDE", "propeller-gcc", "bin", "propeller-elf-gcc"];
+}
+
+if ($("meta[name=c-libraries-path]").attr("content")) {
+    c_cmp = $("meta[name=c-libraries-path]").attr("content").split('|');
+}
+if ($("meta[name=c-compiler-path]").attr("content")) {
+    c_pth = $("meta[name=c-compiler-path]").attr("content").split('|');
+}
+
 for (var i = 0; i < c_cmp.length; i++) {
     configs['c-libraries'] = path.join(configs['c-libraries'], c_cmp[i]);
 }
-var c_pth = ["/", "Applications", "SimpleIDE.app", "Contents", "propeller-gcc", "bin", "propeller-elf-gcc"];
 for (var i = 0; i < c_pth.length; i++) {
     configs['c-compiler'] = path.join(configs['c-compiler'], c_pth[i]);
 }
 
+console.log(c_cmp);
+console.log(c_pth);
+
 /*
 var configs = {
-    'c-libraries': path.join("/", "Users", "mmatz", "Documents", "SimpleIDE", "Learn", "Simple Libraries"),
+    'c-libraries': path.join("/", "Users", os.userInfo().username, "Documents", "SimpleIDE", "Learn", "Simple Libraries"),
     'c-compiler': path.join("/", "Applications", "SimpleIDE.app", "Contents", "propeller-gcc", "bin", "propeller-elf-gcc")
 };
 */

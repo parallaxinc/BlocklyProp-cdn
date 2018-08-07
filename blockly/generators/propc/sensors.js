@@ -92,7 +92,7 @@ Blockly.Blocks.sensor_ping = {
         this.setColour(colorPalette.getColor('input'));
         this.appendDummyInput()
                 .appendField("Ping))) distance in")
-                .appendField(new Blockly.FieldDropdown([["inches", "_inches"], ["cm", "_cm"]]), "UNIT")
+                .appendField(new Blockly.FieldDropdown([["inches", "_inches"], ["cm", "_cm"], ["\u00B5s", ""]]), "UNIT")
                 .appendField("PIN")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
 
