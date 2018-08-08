@@ -695,7 +695,7 @@ Blockly.Blocks.servo_move = {
         this.setTooltip(Blockly.MSG_SERVO_MOVE_TOOLTIP);
         this.addPinMenu("Servo PIN", 'ANGLE');
         this.appendValueInput("ANGLE")
-                .appendField("set angle (0-180\u00B0)")
+                .appendField("set angle")
                 .setCheck("Number")
                 .appendField('R,0,180,0', 'RANGEVALS1');
         this.getField('RANGEVALS1').setVisible(false);
@@ -767,11 +767,12 @@ Blockly.Blocks.servo_set_ramp = {
     init: function () {
         this.setTooltip(Blockly.MSG_SERVO_SET_RAMP_TOOLTIP);
         this.setColour(colorPalette.getColor('output'));
-        this.addPinMenu("CR servo set ramp PIN", 'RAMPSTEP');
+        this.addPinMenu("CR servo PIN", 'RAMPSTEP');
         this.appendValueInput('RAMPSTEP')
-                .appendField("rampstep (0 - 100)")
-                .setCheck('Number');
-
+                .appendField("set ramp step")
+                .setCheck('Number')
+                .appendField('R,0,100,0', 'RANGEVALS0')
+        this.getField('RANGEVALS0').setVisible(false);
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -2110,7 +2111,7 @@ Blockly.propc.ab_drive_ramping = function () {
             allBlocks.indexOf('Robot ActivityBot 360\u00b0 initialize') > -1) {
         return 'drive_setAcceleration(' + ops + ', ' + ramping.toString(10) + ');\n';
     } else if (allBlocks.indexOf('Robot Servo Differential Drive initialize') > -1) {
-        return 'drive_setRampStep(' + (ramping / 50).toString(10) + ',' + (ramping / 50).toString(10) + ');\n';
+        return 'drive_setramp(' + (ramping / 50).toString(10) + ',' + (ramping / 50).toString(10) + ');\n';
     } else {
         return '// Robot drive system is not initialized!\n';
     }
