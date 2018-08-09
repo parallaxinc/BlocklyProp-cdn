@@ -374,13 +374,13 @@ var saveProjectAs = function (requestor) {
             code = getXml();
         }
 
-        // Save the new project using the board-as endpoint
+        // Save the new project
         projectData['board'] = p_type;
         projectData['code'] = code;
         projectData['name'] = p_name;
 
-        $.post(baseUrl + 'rest/project/board-as', projectData, function (data) {
-            var previousOwner = projectData['yours'];
+        $.post(baseUrl + 'rest/project/code-as', projectData, function (data) {
+            // var previousOwner = projectData['yours'];
             projectData = data;
             projectData['code'] = code; // Save code in projectdata to be able to verify if code has changed upon leave
 
@@ -390,22 +390,22 @@ var saveProjectAs = function (requestor) {
         timestampSaveTime(20, true);
     } else {
         var tt = new Date();
-	var pd = {
-        'board': p_type,
-        'code': "<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>",
-        'created': tt,
-        'description': "",
-        'description-html': "",
-        'id': 0,
-        'modified': tt,
-        'name': p_name,
-        'private': true,
-        'shared': false,
-        'type': "PROPC",
-        'user': "offline",
-        'yours': true,
-	}
-	setupWorkspace(pd);
+        var pd = {
+            'board': p_type,
+            'code': "<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>",
+            'created': tt,
+            'description': "",
+            'description-html': "",
+            'id': 0,
+            'modified': tt,
+            'name': p_name,
+            'private': true,
+            'shared': false,
+            'type': "PROPC",
+            'user': "offline",
+            'yours': true,
+        }
+        setupWorkspace(pd);
         // TODO: reload the toolbox
     }  
 };
