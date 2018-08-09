@@ -1686,10 +1686,14 @@ Blockly.Blocks.sd_read = {
         this.setNextStatement(true, null);
     },
     getVars: function () {
-        return [this.getFieldValue('VAR')];
+        if(this.getField('VAR')) {
+            return [this.getFieldValue('VAR')];
+        } else {
+            return [];
+        }
     },
     renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
+        if (this.getField('VAR') && Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
             this.setFieldValue(newName, 'VAR');
         }
     },
