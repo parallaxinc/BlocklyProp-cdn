@@ -148,7 +148,8 @@ function tabClick(id) {
         document.getElementById('prop-btn-find-replace').style.display = 'inline-block';
         document.getElementById('prop-btn-undo').style.display = 'inline-block';
         document.getElementById('prop-btn-redo').style.display = 'inline-block';
-        document.getElementById('download-project').style.display = 'none';
+        $('.propc-only').removeClass('hidden');
+        //document.getElementById('download-project').style.display = 'none';
     }
 
     document.getElementById('content_' + selectedTab).style.display = 'block';
@@ -166,25 +167,34 @@ function tabClick(id) {
 // Populate the currently selected pane with content generated from the blocks.
 function renderContent(pane) {
     // Initialize the pane.
-    if (pane === 'blocks') {
+    if (pane === 'blocks' && projectData['board'] !== 'propcfile') {
         Blockly.mainWorkspace.render();
     } else if (pane === 'xml') {
         var xmlDom = null;
+        var xmlText = '';
         if (projectData['board'] === 'propcfile') {
-            xmlDom = Blockly.Xml.textToDom(propcAsBlocksXml());
+            xmlText = propcAsBlocksXml();
         } else {
             xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+            xmlText = Blockly.Xml.domToPrettyText(xmlDom);
         }
-        var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
         codeXml.setValue(xmlText);
         codeXml.gotoLine(0);
     } else if (pane === 'propc' && projectData['board'] !== 'propcfile') {
         prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
     } else if (pane === 'propc') {
         if (codePropC.getValue() === '') {
-            codePropC.setValue(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
+            codePropC.setValue(atob((projectData['code'].match(/<field name="CODE">(.*)<\/field>/) || ['', ''])[1] || ''));
+            codePropC.gotoLine(0);
         }
-        codePropC.gotoLine(0);
+        if (codePropC.getValue() === '') {
+            var blankProjectCode = '// ------ Libraries and Definitions ------\n';
+            blankProjectCode += '#include "simpletools.h"\n\n\n';
+            blankProjectCode += '// ------ Global Variables and Objects ------\n\n\n';
+            blankProjectCode += '// ------ Main Program ------\n';
+            blankProjectCode += 'int main() {\n\n\nwhile (1) {\n\n\n}}';
+            prettyCode(blankProjectCode);
+        }   
     }
 }
 
@@ -265,7 +275,9 @@ function init(blockly) {
         if (projectData['code'].length < 43) {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
         }
-        loadToolbox(projectData['code']);
+        if (projectData['board'] !== 'propcfile') {
+            loadToolbox(projectData['code']);
+        }
     }
 
     // if the project is a propc code-only project, enable code editing.
@@ -336,7 +348,7 @@ function cloudCompile(text, action, successHandler) {
         if (isOffline) {
             localCompile(action, {'single.c': propcCode}, 'single.c', function(data) {
                 if (data.error) {
-                    // console.log(data);
+                    console.log(data);
                     // Get message as a string, or blank if undefined
                     alert("BlocklyProp was unable to compile your project:\n" + data['message'] 
                         + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");

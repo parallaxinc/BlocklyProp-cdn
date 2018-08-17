@@ -1674,12 +1674,7 @@ Blockly.Blocks.sd_read = {
                     this.sourceBlock_.setSdMode(mode);
                 }), "MODE");
         this.appendDummyInput("VALUE")
-                .appendField("bytes of")
-                .appendField(new Blockly.FieldDropdown([
-                    ["text", "TEXT"],
-                    ["an integer", "INT"]
-                ]), "TYPE")
-                .appendField("store in")
+                .appendField("bytes  store in")
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_SET_ITEM), 'VAR');
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
@@ -1717,17 +1712,13 @@ Blockly.Blocks.sd_read = {
         if (mode === "fwrite") {
             this.appendValueInput("SIZE");
             this.appendValueInput("VALUE")
-                    .setCheck(null)
+                    .setCheck("String")
                     .appendField("bytes of");
         } else if (mode === "fread") {
-            this.appendValueInput("SIZE");
+            this.appendValueInput("SIZE")
+                    .setCheck("Number");
             this.appendDummyInput("VALUE")
-                    .appendField("bytes of")
-                    .appendField(new Blockly.FieldDropdown([
-                        ["text", "TEXT"],
-                        ["an integer", "INT"]
-                    ]), "TYPE")
-                    .appendField("store in")
+                    .appendField("bytes  store in")
                     .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_SET_ITEM), 'VAR');
         } else {
             this.appendDummyInput("SIZE");
@@ -1761,40 +1752,24 @@ Blockly.Blocks.sd_read = {
 Blockly.propc.sd_read = function () {
     var size = Blockly.propc.valueToCode(this, 'SIZE', Blockly.propc.ORDER_NONE) || '1';
     var mode = this.getFieldValue('MODE');
-    var type = '';
     var value = '';
-    var valType = 'int';
+    var code = '';
 
     if (mode === 'fread') {
         value = Blockly.propc.variableDB_.getName(this.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE);
-        type = this.getFieldValue('TYPE');
-        if (type === 'TEXT') {
-            Blockly.propc.vartype_[value] = 'char *';
-        }
+        value = '&' + value;
+        Blockly.propc.vartype_[value] = 'char *';
     } else if (mode === 'fwrite') {
-        value = Blockly.propc.valueToCode(this, 'VALUE', Blockly.propc.ORDER_NONE) || '0';
-        type = 'INT';
-        var connBlock = this.getInput('VALUE').connection.targetBlock();
-        if (connBlock) {
-            var connOutput = connBlock.outputConnection.check_;
-            if (connOutput && connOutput.toString().indexOf('String') > -1) {
-                type = 'TEXT';
-            }
-        }
+        value = Blockly.propc.valueToCode(this, 'VALUE', Blockly.propc.ORDER_NONE) || '';
     }
-    var code = '';
+
     if (mode === 'fclose') {
         code = mode + '(fp);';
     } else {
-        var s = '';
-        if (type === 'INT' && mode === 'fwrite') {
-            s = 'int __temp = ' + value + ';\n';
-            value = '&__temp';
-        } else if (type === 'INT' && mode === 'fread') {
-            value = '&' + value;
-        }
-        code = s + mode + '(' + value + ', 1, ' + size + ', fp);';
+        code = mode + '(' + value + ', 1, ' + size + ', fp);';
+        //code = mode + '(&' + value + ', 1, ' + size + ', fp);';
     }
+
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
     if (allBlocks.indexOf('SD file open') === -1) {
         code = '// WARNING: You must use a SD file open block before reading, writing, or closing an SD file!';

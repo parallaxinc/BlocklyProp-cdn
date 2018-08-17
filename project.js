@@ -45,7 +45,7 @@ $(document).ready(function () {
             $("#project-form-description-html").val(simplemde.options.previewRender(simplemde.value()));
         },
         'success': function () {
-            $(".project-changed:not(.hidden").remove();
+            $(".project-changed:not(.hidden)").remove();
             var projectChanged = $(".project-changed").clone().insertAfter(".project-changed");
             projectChanged.removeClass("hidden");
             projectChanged.delay(5000).fadeOut(400, function () {

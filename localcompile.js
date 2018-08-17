@@ -267,9 +267,6 @@ function determine_order(header_file, header_files, c_files) {
     }
 }
 
-//219
-//186
-
 var find_dependencies = function(library) {
   
     for (var files in lib_files) {

@@ -259,7 +259,11 @@ Blockly.Blocks.console_print_multiple = {
     decompose: function (workspace) {
         var containerBlock = Blockly.Block.obtain(workspace, 'console_print_container');
         var subBlock = 'console_print_';
-        if (this.type === 'console_print_multiple' || this.type === 'oled_print_multiple' || this.type === 'debug_lcd_print_multiple' || this.type === 'parallel_lcd_print_multiple') {
+        if (this.type === 'console_print_multiple' || 
+                this.type === 'oled_print_multiple' || 
+                this.type === 'debug_lcd_print_multiple' || 
+                this.type === 'parallel_lcd_print_multiple' ||
+                this.type === 'heb_print_multiple') {
             containerBlock.initSvg();
             containerBlock.setFieldValue((this.specDigits_ ? 'TRUE' : 'FALSE'), 'PLACES');
         } else if (this.type === 'string_sprint_multiple') {

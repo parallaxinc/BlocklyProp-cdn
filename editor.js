@@ -65,7 +65,7 @@ $(document).ready(function () {
 
         // hide save interaction elements
         $('.online-only').addClass('hidden');
-	$('.offline-only').removeClass('hidden');
+	    $('.offline-only').removeClass('hidden');
 
         $("#save_as_dialog_title_text").html('Choose a project name and board type');
         $("#save_as_dialog_button").html('Continue');
@@ -126,7 +126,9 @@ var setupWorkspace = function (data) {
     projectLoaded = true;
     if (ready) {
         setProfile(data['board']);
-        initToolbox(data['board'], []);
+        if (data['board'] !== 'propcfile') {
+            initToolbox(data['board'], []);
+        }
     }
     if (projectData['board'] === 's3') {
         $('#prop-btn-ram').addClass('hidden');
@@ -228,9 +230,6 @@ var saveProject = function () {
         var code = '';
         if (projectData['board'] === 'propcfile') {
             code = propcAsBlocksXml();
-
-            Blockly.mainWorkspace.clear();
-            loadToolbox(code);
         } else {
             code = getXml();
         }
@@ -365,11 +364,8 @@ var saveProjectAs = function (requestor) {
     var code = '';
 
     if (requestor !== 'offline') {
-        if (projectData && projectData['board'] === 'propcfile') {
+        if (projectData && p_type === 'propcfile') {
             code = propcAsBlocksXml();
-
-            Blockly.mainWorkspace.clear();
-            loadToolbox(code);
         } else {
             code = getXml();
         }
@@ -433,7 +429,11 @@ var blocklyReady = function () {
 
     if (projectLoaded) {
         setProfile(projectData['board']);
-        initToolbox(projectData['board']);
+        if (projectData['board'] !== 'propcfile') {
+            initToolbox(projectData['board']);
+        } else {
+            init(Blockly);
+        }
     } else {
         ready = true;
     }
@@ -484,7 +484,14 @@ function hashCode(str) {
 }
 
 function downloadCode() {
-    var projXMLcode = getXml(); //projectData['code'];
+    var projXMLcode = '';
+    
+    if (projectData && projectData['board'] === 'propcfile') {
+        projXMLcode = propcAsBlocksXml();
+    } else {
+        projXMLcode = getXml();
+    }
+
     projXMLcode = projXMLcode.substring(42, projXMLcode.length);
     projXMLcode = projXMLcode.substring(0, (projXMLcode.length - 6));
 
@@ -588,16 +595,18 @@ function uploadHandler(files) {
         {
             var uploadedChecksum = xmlString.substring((xmlString.length - 24), (xmlString.length - 12));
             uploadedXML = xmlString.substring(xmlString.indexOf("<block"), (xmlString.length - 29));
+
             var computedChecksum = hashCode(uploadedXML).toString();
             computedChecksum = '000000000000'.substring(computedChecksum.length, 12) + computedChecksum;
 
-            if (computedChecksum === uploadedChecksum)
-                xmlValid = true;
+            var boardIndex = xmlString.indexOf('transform="translate(-225,-23)">Device: ');
+            uploadBoardType = xmlString.substring((boardIndex + 40), xmlString.indexOf('</text>', (boardIndex + 41)));
 
+            if (computedChecksum === uploadedChecksum) {
+                xmlValid = true;
+            }
             if (xmlValid) {
-                var boardIndex = xmlString.indexOf('transform="translate(-225,-23)">Device: ');
-                uploadBoardType = xmlString.substring((boardIndex + 40), xmlString.indexOf('</text>', (boardIndex + 41)));
-                if (uploadBoardType !== projectData['board']) {
+                if (projectData && uploadBoardType !== projectData['board']) {
                     document.getElementById("selectfile-verify-boardtype").style.display = "block";
                 } else {
                     document.getElementById("selectfile-verify-boardtype").style.display = "none";

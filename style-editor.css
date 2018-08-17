@@ -390,8 +390,27 @@ nav .nav > li > a:first-child {
     border-color: #adadad;
     box-shadow: 2px 2px 5px #888;
 }
+
+.example-propc-code {
+    color: #000;
+    background-color: #fff;
+    border: 1px #999 solid;
+    padding: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.alert-neutral {
+    color: #535353;
+    background-color: #eee;
+    border-color: #e0e0e0;
+}
 /*target Internet Explorer 9 and Internet Explorer 10:*/
 
+.indent-left {
+    padding-left: 15px;
+}
 @media screen and (min-width: 0\0) {
     select {
         background: none;

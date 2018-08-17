@@ -803,6 +803,7 @@ page_text_label['editor_save-as'] = "Save project as";
 page_text_label['editor_save-check'] = "Save project reminder";
 page_text_label['editor_save-check_warning'] = "It has been <span id=\"save-check-warning-time\"></span> minutes since you last saved your project. Save now?";
 page_text_label['editor_saveas_boardtype_warning'] = "<strong>Warning!</strong> You are about to save the blocks from your current project into a project that is for a different board/device.  If the blocks that are in your project are not available for the board/device you selected, the new project may <strong>not work!</strong>";
+page_text_label['editor_term_graph_setup'] = "Terminal &amp; Graph setup";
 page_text_label['editor_title_graphing'] = "Graphing";
 page_text_label['editor_title_result'] = "Result";
 page_text_label['editor_title_terminal'] = "Terminal";
