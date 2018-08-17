@@ -639,7 +639,7 @@ Blockly.Blocks.heb_badge_eeprom_store = {
 Blockly.propc.heb_badge_eeprom_store = function () {
     var contact = Blockly.propc.valueToCode(this, "CONTACT", Blockly.propc.ORDER_NONE);
 
-    return 'store(new char[]{"' + contact + '"});\n';
+    return 'store(' + contact + ');\n';
 };
 
 Blockly.Blocks.heb_badge_eeprom_is_stored = {
@@ -662,7 +662,7 @@ Blockly.Blocks.heb_badge_eeprom_is_stored = {
 Blockly.propc.heb_badge_eeprom_is_stored = function () {
     var contact = Blockly.propc.valueToCode(this, "CONTACT", Blockly.propc.ORDER_NONE);
 
-    return ['stored(new char[]{"' + contact + '"})', Blockly.propc.ORDER_ATOMIC];
+    return ['stored(' + contact + ')', Blockly.propc.ORDER_ATOMIC];
 };
 
 Blockly.Blocks.heb_badge_eeprom_retrieve = {
@@ -695,6 +695,9 @@ Blockly.Blocks.heb_badge_eeprom_retrieve = {
 Blockly.propc.heb_badge_eeprom_retrieve = function () {
     var index = Blockly.propc.valueToCode(this, "INDEX", Blockly.propc.ORDER_NONE);
     var buffer = Blockly.propc.variableDB_.getName(this.getFieldValue('BUFFER'), Blockly.Variables.NAME_TYPE);
+
+    Blockly.propc.vartype_[buffer] = 'char';
+    Blockly.propc.varlength_[buffer] = 128;
 
     return 'retrieve(' + buffer + ', constrainInt(' + index + ', 0, contacts_count() - 1));\n';
 };
