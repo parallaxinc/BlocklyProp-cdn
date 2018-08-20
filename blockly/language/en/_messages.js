@@ -686,6 +686,7 @@ toolbox_label['category_hackable-electronic-badge'] = "Hackable Electronic Badge
 toolbox_label['category_hackable-electronic-badge_led_control'] = "LEDs";
 toolbox_label['category_hackable-electronic-badge_oled'] = "Badge Display";
 toolbox_label['category_hackable-electronic-badge_ir-communication'] = "Badge IR Comms";
+toolbox_label['category_communicate_badge_lock'] = "Badge WiFi Lock";
 toolbox_label['category_hackable-electronic-badge_eeprom'] = "Memory";
 toolbox_label['category_hackable-electronic-badge_accelerometer'] = "Accelerometer";
 toolbox_label['category_hackable-electronic-badge_touchpad-control'] = "Badge Buttons";

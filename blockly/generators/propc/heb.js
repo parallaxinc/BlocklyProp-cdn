@@ -32,7 +32,7 @@ Blockly.Blocks.heb_wx_lock = {
     init: function () {
         this.setHelpUrl(Blockly.MSG_CONTROL_HELPURL);
         this.setTooltip(Blockly.MSG_HEB_WX_LOCK_TOOLTIP);
-        this.setColour(colorPalette.getColor('programming'));
+        this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField('Badge WX programming')
                 .appendField(new Blockly.FieldDropdown([
