@@ -256,6 +256,7 @@ Blockly.MSG_WS2812B_HELPURL = "http://learn.parallax.com/ab-blocks/ws2812b";
 Blockly.MSG_SYSTEM_HELPURL = "http://learn.parallax.com/ab-blocks/system";
 Blockly.MSG_BADGE_LEDS_HELPURL = "http://learn.parallax.com/ab-blocks/badge-leds";
 Blockly.MSG_BADGE_IR_HELPURL = "http://learn.parallax.com/ab-blocks/badgeir";
+Blockly.MSG_BADGE_WX_LOCK = "http://learn.parallax.com/ab-blocks/badge-lock";
 Blockly.MSG_BADGE_DISPLAY_HELPURL = "http://learn.parallax.com/ab-blocks/badgedisplay";
 Blockly.MSG_BADGE_BUTTONS_HELPURL = "http://learn.parallax.com/ab-blocks/badge-buttons";
 Blockly.MSG_BADGE_ACCEL_HELPURL = "http://learn.parallax.com/ab-blocks/badge-accel";
