@@ -117,7 +117,15 @@ Blockly.propc.console_print_variables = function () {
         }
     }
     if (format === 'CHAR') {
-        code += ', (' + value + ' & 0xFF));\n';
+        if (!(value.length === 3 && value[0] === "'" && value[2] === "'")) {
+            if (value !== value.replace(/[^0-9]+/g, "")) {
+                value = '(' + value + ' & 0xFF)'
+            } else if (!(0 < parseInt(value) && parseInt(value) < 256)) {
+                value = '(' + value + ' & 0xFF)'
+            }
+        }
+    
+        code += ', ' + value + ');\n';
     } else {
         code += ', ' + value + ');\n';
     }
@@ -1099,7 +1107,15 @@ Blockly.propc.serial_send_text = function () {
         var data = Blockly.propc.valueToCode(this, 'VALUE', Blockly.propc.ORDER_ATOMIC) || '0';
 
         if (type === "BYTE") {
-            return 'fdserial_txChar(fdser' + p + ', (' + data + ' & 0xFF) );\n';
+            if (!(data.length === 3 && data[0] === "'" && data[2] === "'")) {
+                if (data !== data.replace(/[^0-9]+/g, "")) {
+                    data = '(' + data + ' & 0xFF)'
+                } else if (!(0 < parseInt(data) && parseInt(data) < 256)) {
+                    data = '(' + data + ' & 0xFF)'
+                }
+            }
+
+            return 'fdserial_txChar(fdser' + p + ', ' + data + ');\n';
         } else if (type === "INT") {
             return 'dprint(fdser' + p + ', "%d\\r", ' + data + ');\n';
         } else if (type === "HEX") {
@@ -2296,7 +2312,15 @@ Blockly.propc.xbee_transmit = function () {
         var data = Blockly.propc.valueToCode(this, 'VALUE', Blockly.propc.ORDER_ATOMIC) || '0';
 
         if (type === "BYTE") {
-            return 'fdserial_txChar(xbee, (' + data + ' & 0xFF) );\n';
+            if (!(data.length === 3 && data[0] === "'" && data[2] === "'")) {
+                if (data !== data.replace(/[^0-9]+/g, "")) {
+                    data = '(' + data + ' & 0xFF)'
+                } else if (!(0 < parseInt(data) && parseInt(data) < 256)) {
+                    data = '(' + data + ' & 0xFF)'
+                }
+            }
+
+            return 'fdserial_txChar(xbee, ' + data + ');\n';
         } else if (type === "INT") {
             return 'dprint(xbee, "%d\\r", ' + data + ');\n';
         } else if (type === "HEX") {
@@ -4729,7 +4753,7 @@ Blockly.propc.wx_listen = function () {
 Blockly.Blocks.wx_join = {
     helpUrl: Blockly.MSG_AWX_HELPURL,
     init: function () {
-        this.setTooltip(Blockly.MSG_AWX_GET_IP_TOOLTIP);
+        this.setTooltip(Blockly.MSG_AWX_JOIN_NETWORK_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .setAlign(Blockly.ALIGN_RIGHT)

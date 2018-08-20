@@ -28,6 +28,35 @@ if (!Blockly.Blocks)
     Blockly.Blocks = {};
 
 
+Blockly.Blocks.heb_wx_lock = {
+    init: function () {
+        this.setHelpUrl(Blockly.MSG_CONTROL_HELPURL);
+        this.setTooltip(Blockly.MSG_HEB_WX_LOCK_TOOLTIP);
+        this.setColour(colorPalette.getColor('programming'));
+        this.appendDummyInput()
+                .appendField('Badge WX programming')
+                .appendField(new Blockly.FieldDropdown([
+                        ["unlock", "Allow the Badge WX to be programmed over WiFi,high"], 
+                        ["lock", "Prevent the Badge WX from being programmed over WiFi,input"],
+                        ["reset and lock WX module", "Resets the WX module and then prevents the Badge WX from being programmed over WiFi,reset"]
+                    ]), "STATE")
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+    }
+};
+
+Blockly.propc.heb_wx_lock = function () {
+    var lock_state_value = this.getFieldValue("STATE").split(',');
+
+    var code = '// ' + lock_state_value[0] + '\n';
+    if(lock_state_value[1] === 'reset') {
+        code += 'pulse_out(17, 100);\n';
+        lock_state_value[1] = 'input';
+    }
+    code += lock_state_value[1] + '(17);\n';
+    return code;
+};  
+
 Blockly.Blocks.heb_toggle_led = {
     init: function () {
         this.setHelpUrl(Blockly.MSG_BADGE_LEDS_HELPURL);

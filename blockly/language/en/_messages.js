@@ -386,6 +386,7 @@ Blockly.MSG_AWX_CODE_TOOLTIP = "Advanced WX code: provides the value for one of 
 Blockly.MSG_AWX_MODE_TOOLTIP = "Advanced WX mode: sets or gets the current mode of the WX module.";
 Blockly.MSG_AWX_BUFFER_TOOLTIP = "Advanced WX buffer: use to set a different receive buffer and/or size for the receive buffer";
 Blockly.MSG_AWX_DISCONNECT_TOOLTIP = "Advanced WX disconnect: disconnected from the specified connection.";
+Blockly.MSG_AWX_JOIN_NETWORK_TOOLTIP = "Advanced WX join network: Join a network by specifying its SSID and that network's passphrase.";
 Blockly.MSG_AWX_GET_IP_TOOLTIP = "Advanced WX get IP address: provides the IP address of the specified mode as a string.";
 Blockly.MSG_XBEE_SETUP_TOOLTIP = "XBee initialize: match to Propeller I/O pin connections and XBee Baud rate.";
 Blockly.MSG_XBEE_TRANSMIT_TOOLTIP = "XBee transmit: sends information to an XBee.  Strings and numbers are terminated with an ASCII 13";
@@ -527,7 +528,8 @@ Blockly.MSG_HEB_TOGGLE_LED_OPEN_TOOLTIP = "Badge set LED: turn the specified LED
 Blockly.MSG_HEB_TOGGLE_LED_TOOLTIP = "Badge set LED: turn the specified LED on or off.";
 Blockly.MSG_HEB_TOUCHPAD_SENSITIVITY_TOOLTIP = "Touch sensitivty: sets the sensitivity of the touchpads (A & B) on the badge.";
 Blockly.MSG_HEB_TOUCHPAD_STATUS_TOOLTIP = "Button: returns the state of the specified nav button or touchpad (1) pressed, (0) not pressed. ";
-Blockly.MSG_HEB_TOUCHPAD_STATUS_WX_TOOLTIP = "Touchpad: returns the state of the specified touch button (1) pressed, (0) not pressed. ";
+Blockly.MSG_HEB_TOUCHPAD_STATUS_WX_TOOLTIP = "Touchpad: returns the state of the specified touch button (1) pressed, (0) not pressed.";
+Blockly.MSG_HEB_WX_LOCK_TOOLTIP = "Badge WiFi Lock: set the badge to allow or prevent itself from being programmed over WiFi."
 
 
 //-------Scribbler 3 help URLs ---------------------------------------------
