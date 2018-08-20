@@ -147,6 +147,8 @@ Blockly.FieldCode.prototype.showEditor_ = function() {
     }
   }
   Blockly.WidgetDiv.position(xy.x, xy.y, windowSize, scrollOffset);
+  this.codeField_.focus();
+  this.codeField_.navigateFileEnd();
 };
 
 /**

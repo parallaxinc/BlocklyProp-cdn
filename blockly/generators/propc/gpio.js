@@ -610,7 +610,15 @@ Blockly.propc.eeprom_write = function () {
     var code = '';
     if (data !== '') {
         if (type === 'BYTE') {
-            code += 'ee_putByte((' + data + ' & 255), (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
+            if (!(data.length === 3 && data[0] === "'" && data[2] === "'")) {
+                if (data !== data.replace(/[^0-9]+/g, "")) {
+                    data = '(' + data + ' & 0xFF)'
+                } else if (!(0 < parseInt(data) && parseInt(data) < 256)) {
+                    data = '(' + data + ' & 0xFF)'
+                }
+            }
+
+            code += 'ee_putByte(' + data + ', (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
         } else if (type === 'NUMBER') {
             code += 'ee_putInt(' + data + ', (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
         } else {
@@ -664,7 +672,7 @@ Blockly.propc.eeprom_read = function () {
 
     if (data !== '') {
         if (type === 'BYTE') {
-            code += data + ' = ee_getByte( 32768 + constrainInt(' + address + ', 0, 7675)) & 255;\n';
+            code += data + ' = ee_getByte( 32768 + constrainInt(' + address + ', 0, 7675));\n';
         } else if (type === 'NUMBER') {
             code += data + ' = ee_getInt( 32768 + constrainInt(' + address + ', 0, 7675));\n';
         } else {

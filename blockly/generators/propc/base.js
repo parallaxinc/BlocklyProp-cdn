@@ -691,11 +691,11 @@ Blockly.Blocks.char_type_block = {
         for (var k = 33; k < 127; k++) {
             charMenu.push([k.toString(10) + ' - ' + String.fromCharCode(k), k.toString(10)]);
         }
-        charMenu.concat(["7 - bell", "7"],
-                ["10 - line feed", "10"],
-                ["11 - tab", "11"],
-                ["13 - carriage return", "13"],
-                ["127 - delete", "127"]);
+        charMenu.push(["7 - bell", "7"]);
+        charMenu.push(["10 - line feed", "10"]);
+        charMenu.push(["11 - tab", "11"]);
+        charMenu.push(["13 - carriage return", "13"]);
+        charMenu.push(["127 - delete", "127"]);
         this.appendDummyInput()
                 .appendField("character")
                 .appendField(new Blockly.FieldDropdown(charMenu), "CHAR");
@@ -1676,13 +1676,20 @@ Blockly.Blocks.set_char_at_position_zero = Blockly.Blocks.set_char_at_position;
 Blockly.propc.set_char_at_position = function () {
     var pos = Blockly.propc.valueToCode(this, 'POSITION', Blockly.propc.ORDER_ATOMIC) || '1';
     var chr = Blockly.propc.valueToCode(this, 'CHAR', Blockly.propc.ORDER_ATOMIC) || '32';
+    if (!(chr.length === 3 && chr[0] === "'" && chr[2] === "'")) {
+        if (chr !== chr.replace(/[^0-9]+/g, "")) {
+            chr = '(' + chr + ' & 0xFF)'
+        } else if (!(0 < parseInt(chr) && parseInt(chr) < 256)) {
+            chr = '(' + chr + ' & 0xFF)'
+        }
+    }
     var data = Blockly.propc.variableDB_.getName(this.getFieldValue('VALUE'), Blockly.Variables.NAME_TYPE);
     Blockly.propc.vartype_[data] = 'char *';
 
     if (this.type === 'set_char_at_position') {
-        return data + '[(' + pos + '>strlen(' + data + ')?strlen(' + data + '):' + pos + ')-1] = (' + chr + ' & 0xFF)\n;';
+        return data + '[(' + pos + '>strlen(' + data + ')?strlen(' + data + '):' + pos + ')-1] = ' + chr + '\n;';
     } else {
-        return data + '[' + pos + '] = (' + chr + ' & 0xFF)\n;';
+        return data + '[' + pos + '] = ' + chr + '\n;';
     }
 };
 
