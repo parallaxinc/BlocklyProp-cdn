@@ -528,8 +528,7 @@ Blockly.MSG_HEB_TEXT_TO_SPEECH_SPELL_TOOLTIP = "TTS spell: speaks each letter in
 Blockly.MSG_HEB_TOGGLE_LED_OPEN_TOOLTIP = "Badge set LED: turn the specified LED on or off.";
 Blockly.MSG_HEB_TOGGLE_LED_TOOLTIP = "Badge set LED: turn the specified LED on or off.";
 Blockly.MSG_HEB_TOUCHPAD_SENSITIVITY_TOOLTIP = "Touch sensitivty: sets the sensitivity of the touchpads (A & B) on the badge.";
-Blockly.MSG_HEB_TOUCHPAD_STATUS_TOOLTIP = "Button: returns the state of the specified nav button or touchpad (1) pressed, (0) not pressed. ";
-Blockly.MSG_HEB_TOUCHPAD_STATUS_WX_TOOLTIP = "Touchpad: returns the state of the specified touch button (1) pressed, (0) not pressed.";
+Blockly.MSG_HEB_TOUCHPAD_STATUS_TOOLTIP = "Button: returns the state of the specified rocker or touchpad button (1) pressed, (0) not pressed. ";
 Blockly.MSG_HEB_WX_LOCK_TOOLTIP = "Badge WiFi Lock: set the badge to allow or prevent itself from being programmed over WiFi."
 
 
