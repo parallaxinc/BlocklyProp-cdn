@@ -4924,7 +4924,7 @@ Blockly.Blocks.wx_mode = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        if (allBlocks.toString().indexOf('WX initialize') === -1)
+        if (allBlocks.toString().indexOf('WX initialize') === -1 && boardType !== 'heb-wx')
         {
             this.setWarningText('WARNING: You must use a WX\ninitialize block at the beginning of your program!');
         }
@@ -5115,7 +5115,7 @@ Blockly.Blocks.wx_ip = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        if (allBlocks.toString().indexOf('WX initialize') === -1)
+        if (allBlocks.toString().indexOf('WX initialize') === -1 && boardType !== 'heb-wx')
         {
             this.setWarningText('WARNING: You must use a WX\ninitialize block at the beginning of your program!');
         }

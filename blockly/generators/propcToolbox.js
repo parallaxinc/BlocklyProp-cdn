@@ -8,7 +8,6 @@
 var xmlToolbox = '';
 xmlToolbox += '<xml id="toolbox">';
 xmlToolbox += '    <category key="category_control" colour="205">';
-xmlToolbox += '        <block type="heb_wx_lock" include="heb-wx,"></block>';
 xmlToolbox += '        <block type="comment"></block>';
 xmlToolbox += '        <block type="controls_if"></block>';
 xmlToolbox += '        <block type="controls_repeat">';
@@ -457,6 +456,9 @@ xmlToolbox += '                <value name="RGB">';
 xmlToolbox += '                    <block type="heb_color_val"></block>';
 xmlToolbox += '                </value>';
 xmlToolbox += '            </block>';
+xmlToolbox += '        </category>';
+xmlToolbox += '        <category key="category_communicate_badge_lock" include="heb-wx," experimental="true">';
+xmlToolbox += '            <block type="heb_wx_lock"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '        <category key="category_communicate_oled" exclude="heb,heb-wx,">';
 xmlToolbox += '            <block type="oled_initialize"></block>';

@@ -30,9 +30,9 @@ if (!Blockly.Blocks)
 
 Blockly.Blocks.heb_wx_lock = {
     init: function () {
-        this.setHelpUrl(Blockly.MSG_CONTROL_HELPURL);
+        this.setHelpUrl(Blockly.MSG_BADGE_WX_LOCK);
         this.setTooltip(Blockly.MSG_HEB_WX_LOCK_TOOLTIP);
-        this.setColour(colorPalette.getColor('programming'));
+        this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField('Badge WX programming')
                 .appendField(new Blockly.FieldDropdown([
@@ -801,7 +801,7 @@ Blockly.propc.heb_badge_was_shaken = function () {
 
 Blockly.Blocks.heb_touchpad_status = {
     init: function () {
-        var myTooltip = Blockly.MSG_HEB_TOUCHPAD_STATUS_TOOLTIP;
+        this.setTooltip(Blockly.MSG_HEB_TOUCHPAD_STATUS_TOOLTIP);
         this.setHelpUrl(Blockly.MSG_BADGE_BUTTONS_HELPURL);
         this.setColour(colorPalette.getColor('input'));
         if (projectData && projectData['board'] !== 'heb-wx') {
@@ -818,7 +818,6 @@ Blockly.Blocks.heb_touchpad_status = {
                         ["Any button", "-1"]
                     ]), "TOUCHPAD");
         } else {
-            myTooltip = Blockly.MSG_HEB_TOUCHPAD_STATUS_WX_TOOLTIP;
             this.appendDummyInput()
                     .appendField("Button ")
                     .appendField(new Blockly.FieldDropdown([
@@ -833,7 +832,6 @@ Blockly.Blocks.heb_touchpad_status = {
                         ["Any button", "-1"]
                     ]), "TOUCHPAD");
         }
-        this.setTooltip(myTooltip);
         this.setPreviousStatement(false, null);
         this.setNextStatement(false, null);
         this.setOutput(true, 'Number');
