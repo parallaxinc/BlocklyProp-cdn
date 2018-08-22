@@ -37,8 +37,8 @@ Blockly.Blocks.heb_wx_lock = {
                 .appendField('Badge WX programming')
                 .appendField(new Blockly.FieldDropdown([
                         ["unlock", "Allow the Badge WX to be programmed over WiFi,high"], 
-                        ["lock", "Prevent the Badge WX from being programmed over WiFi,input"],
-                        ["reset and lock WX module", "Resets the WX module and then prevents the Badge WX from being programmed over WiFi,reset"]
+                        ["lock", "Prevent the Badge WX from being programmed over WiFi,input"]
+                        //["reset and lock WX module", "Resets the WX module and then prevents the Badge WX from being programmed over WiFi,reset"]
                     ]), "STATE")
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);

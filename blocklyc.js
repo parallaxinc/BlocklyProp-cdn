@@ -346,7 +346,12 @@ function cloudCompile(text, action, successHandler) {
             terminalNeeded = 'graph';
 
         if (isOffline) {
-            localCompile(action, {'single.c': propcCode}, 'single.c', function(data) {
+            // Compiler optimization options:
+            // -O0 (None)
+            // -O1 (Mixed)
+            // -O2 (Speed)
+            // -Os (Size)
+            localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
                 if (data.error) {
                     console.log(data);
                     // Get message as a string, or blank if undefined

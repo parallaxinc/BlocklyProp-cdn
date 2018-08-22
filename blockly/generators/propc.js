@@ -379,7 +379,9 @@ Blockly.propc.finish = function (code) {
         for (var idk in function_vars) {
             if (definitions[idx].indexOf(function_vars[idk]) > 2 && definitions[idx].indexOf('volatile') === -1) {
                 //TODO: uncomment this when optimization is utilized!
-                //definitions[idx] = 'volatile ' + definitions[idx];
+                if(inDemo) {
+                    definitions[idx] = 'volatile ' + definitions[idx];
+                }
             }
         }
     }
