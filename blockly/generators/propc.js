@@ -270,6 +270,7 @@ Blockly.propc.finish = function (code) {
     // Convert the definitions dictionary into a list.
     var imports = [];
     var methods = [];
+    var ui_system_settings = [];
     var declarations = [];
     var definitions = [];
     var function_vars = [];
@@ -287,8 +288,10 @@ Blockly.propc.finish = function (code) {
     for (var name in Blockly.propc.definitions_) {
         var def = Blockly.propc.definitions_[name];
         if (def.match(/^#include/) || def.match(/^#define/) || def.match(/^#if/) ||
-                def.match(/^#end/) || def.match(/^#else/) || def.match(/^#pragma/)) {
+            def.match(/^#end/) || def.match(/^#else/) || def.match(/^#pragma/)) {
             imports.push(def);
+        } else if (def.match(/\/\/ GRAPH_[A-Z]*_START:/)) {
+            ui_system_settings.push(def);
         } else {
             definitions.push(def);
         }
@@ -304,22 +307,11 @@ Blockly.propc.finish = function (code) {
         }
     }
 
-    for (var method in Blockly.propc.cog_methods_) {
-        for (var variable in Blockly.propc.vartype_) {
-            if (Blockly.propc.methods_[method].indexOf(variable) > -1) {
-                function_vars.push(variable);
-            }
-        }
-    }
 
     for (var method in Blockly.propc.methods_) {
         methods.push(Blockly.propc.methods_[method]);
     }
 
-    var bigStr = ' = "\\0                                                                                                                               ';
-    var endStr = '";';
-
-    var spaceAdd = '';
     for (var def in definitions) {
         for (var variable in Blockly.propc.vartype_) {
             if (definitions[def].indexOf("{{$var_type_" + variable + "}}") > -1) {
@@ -360,8 +352,18 @@ Blockly.propc.finish = function (code) {
                 definitions[def] = 'char ' + Blockly.propc.string_var_lengths[vt][0] + '[' + Blockly.propc.string_var_lengths[vt][1] + '];';
             }
         }
+
+        for (var method in Blockly.propc.cog_methods_) {
+            console.log(Blockly.propc.methods_[method]);
+            console.log(definitions[def].replace(/[achintr]* \**(\w+)[\[\]0-9]*;/g, '$1'));
+            if (Blockly.propc.methods_[method].indexOf(definitions[def].replace(/[achintr]* (\w+)[\[\]0-9]*;/g, '$1')) > -1) {
+                function_vars.push(definitions[def]);
+            }
+        }
+
     }
 
+    
     for (var stack in Blockly.propc.stacks_) {
         definitions.push(Blockly.propc.stacks_[stack]);
     }
@@ -377,7 +379,7 @@ Blockly.propc.finish = function (code) {
     // Add volatile to variable declarations in cogs
     for (var idx = user_var_start; idx < user_var_end; idx++) {
         for (var idk in function_vars) {
-            if (definitions[idx].indexOf(function_vars[idk]) > 2 && definitions[idx].indexOf('volatile') === -1) {
+            if (definitions[idx] === function_vars[idk] && definitions[idx].indexOf('volatile') === -1) {
                 //TODO: uncomment this when optimization is utilized!
                 if(inDemo) {
                     definitions[idx] = 'volatile ' + definitions[idx];
@@ -426,6 +428,7 @@ Blockly.propc.finish = function (code) {
                 profile.default.description !== "Propeller C (code-only)") {
             setup += "/* EMPTY_PROJECT */\n";
         }
+        setup += ui_system_settings.join('\n') + '\n\n';
 
         var spacer_decs = '';
         if (declarations.length > 0)
