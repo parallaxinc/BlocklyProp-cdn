@@ -270,6 +270,7 @@ Blockly.propc.finish = function (code) {
     // Convert the definitions dictionary into a list.
     var imports = [];
     var methods = [];
+    var ui_system_settings = [];
     var declarations = [];
     var definitions = [];
     var function_vars = [];
@@ -287,9 +288,10 @@ Blockly.propc.finish = function (code) {
     for (var name in Blockly.propc.definitions_) {
         var def = Blockly.propc.definitions_[name];
         if (def.match(/^#include/) || def.match(/^#define/) || def.match(/^#if/) ||
-            def.match(/^#end/) || def.match(/^#else/) || def.match(/^#pragma/) || 
-            def.match(/\/\/ GRAPH_[A-Z]*_START:/)) {
+            def.match(/^#end/) || def.match(/^#else/) || def.match(/^#pragma/)) {
             imports.push(def);
+        } else if (def.match(/\/\/ GRAPH_[A-Z]*_START:/)) {
+            ui_system_settings.push(def);
         } else {
             definitions.push(def);
         }
@@ -426,6 +428,7 @@ Blockly.propc.finish = function (code) {
                 profile.default.description !== "Propeller C (code-only)") {
             setup += "/* EMPTY_PROJECT */\n";
         }
+        setup += ui_system_settings.join('\n') + '\n\n';
 
         var spacer_decs = '';
         if (declarations.length > 0)
