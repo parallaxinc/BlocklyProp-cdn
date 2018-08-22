@@ -133,7 +133,7 @@ oswalk(configs['c-libraries'], function(err, f) {
 });
 
 
-function localCompile(action, source_files, app_filename, callback) {
+function localCompile(action, source_files, app_filename, lib_opt, comp_opt, callback) {
 
     // create a temporary directory to store files
     source_directory = fs.mkdtempSync(path.join(os.tmpdir(), 'pgc-'));
@@ -222,7 +222,7 @@ function localCompile(action, source_files, app_filename, callback) {
     // TODO: Promisify to make sure this all executes?
     // Precompile libraries
     for (var l = 0; l < library_order.length; l++) {
-	compile_lib(source_directory, library_order[l] + '.c', library_order[l] + '.o', external_libraries_info, function(output) {
+	compile_lib(source_directory, library_order[l] + '.c', library_order[l] + '.o', external_libraries_info, lib_opt, function(output) {
 		console.log(output);
         });
 
@@ -230,7 +230,7 @@ function localCompile(action, source_files, app_filename, callback) {
 */
 
     if (success) {
-	compile_binary(source_directory, action, app_filename, library_order, external_libraries_info, function(output) {
+	compile_binary(source_directory, action, app_filename, library_order, external_libraries_info, comp_opt, function(output) {
 		return callback(output);
 	});
     }
@@ -289,10 +289,10 @@ var find_dependencies = function(library) {
     }
 };
 
-function compile_lib(working_directory, source_file, target_filename, libraries, callback) {
+function compile_lib(working_directory, source_file, target_filename, libraries, lib_opt, callback) {
     var out_text = working_directory + ' -> Compiling ' + source_file + ' into ' + target_filename + '\n';
 
-    executing_data = create_lib_executing_data(source_file, target_filename, libraries);  // build execution command
+    executing_data = create_lib_executing_data(source_file, target_filename, libraries, lib_opt);  // build execution command
     out_text += executing_data.join(' ');
 
     // TODO: find a better way to handle spaces in the directory names
@@ -317,14 +317,14 @@ function compile_lib(working_directory, source_file, target_filename, libraries,
     });   
 }
 
-function compile_binary(working_directory, action, source_file, binaries, libraries, callback) {
+function compile_binary(working_directory, action, source_file, binaries, libraries, comp_opt, callback) {
     
     var file_out = 'usr' + (Math.random().toString(36).substring(2, 10)) + 'pgc' + compile_actions[action.toUpperCase()]["extension"];
     var binary_file = path.join(working_directory, file_out);
     
     var out_text = '';
 
-    executing_data = create_executing_data(path.join(source_directory, source_file), binary_file, binaries, libraries);  // build execution command
+    executing_data = create_executing_data(path.join(source_directory, source_file), binary_file, binaries, libraries, comp_opt);  // build execution command
     out_text += executing_data.join(' ');
     
     // Create a new tempfile and open it for writing
@@ -439,7 +439,7 @@ function parse_includes(source_file) {
     return icl;
 }
 
-function create_lib_executing_data(lib_c_file_name, binary_file, descriptors) {
+function create_lib_executing_data(lib_c_file_name, binary_file, descriptors, lib_opt) {
     executable = configs['c-compiler'];
 
     executing_data = [executable];
@@ -453,7 +453,7 @@ function create_lib_executing_data(lib_c_file_name, binary_file, descriptors) {
         executing_data.push("-L");
         executing_data.push(descriptors[descriptor] + '/cmm');
     }
-    executing_data.push("-O0");
+    executing_data.push(lib_opt || "-O0");
     executing_data.push("-mcmm");
     executing_data.push("-m32bit-doubles");
     executing_data.push("-std=c99");
@@ -465,7 +465,7 @@ function create_lib_executing_data(lib_c_file_name, binary_file, descriptors) {
     return executing_data;
 }
 
-function create_executing_data(main_c_file_name, binary_file, binaries, descriptors) {
+function create_executing_data(main_c_file_name, binary_file, binaries, descriptors, comp_opt) {
     executable = configs['c-compiler'];
 
     executing_data = [executable];
@@ -481,7 +481,7 @@ function create_executing_data(main_c_file_name, binary_file, binaries, descript
     }
     executing_data.push("-o");
     executing_data.push(binary_file);
-    executing_data.push("-O0");
+    executing_data.push(comp_opt || "-O0");
     executing_data.push("-mcmm");
     executing_data.push("-m32bit-doubles");
     executing_data.push("-std=c99");
