@@ -851,22 +851,15 @@ Blockly.Blocks.heb_touchpad_sensitivity = {
         this.appendDummyInput()
                 .appendField("Touchpad sensitivity ")
                 .appendField(new Blockly.FieldDropdown([
-                    ["0 (low)", "0"],
-                    ["1", "1"],
-                    ["2", "2"],
-                    ["3", "3"],
-                    ["4", "4"],
-                    ["5", "5"],
-                    ["6", "6"],
-                    ["7 (medium)", "7"],
-                    ["8", "8"],
-                    ["9", "9"],
-                    ["10", "10"],
-                    ["11", "11"],
-                    ["12", "12"],
-                    ["13", "13"],
-                    ["14", "14"],
-                    ["15 (high)", "15"]
+                    ["0 (low)", "7"],
+                    ["1", "8"],
+                    ["2", "9"],
+                    ["3", "10"],
+                    ["4", "11"],
+                    ["5 (default)", "12"],
+                    ["6", "13"],
+                    ["7", "14"],
+                    ["8 (high)", "15"]
                 ]), "LEVEL");
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);

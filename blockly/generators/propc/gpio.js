@@ -2399,8 +2399,10 @@ Blockly.Blocks.activitybot_calibrate = {
         this.setColour(colorPalette.getColor('robot'));
         this.appendDummyInput()
                 .appendField(new Blockly.FieldDropdown([
-                    ["ActivityBot 360\u00b0", "abcalibrate360.h"],
-                    ["ActivityBot", "abcalibrate.h"]]), "BOT")
+                        ["ActivityBot 360\u00b0", "abcalibrate360.h"],
+                        ["ActivityBot", "abcalibrate.h"],
+                        ["ActivityBot 360\u00b0 (Parallaxy)", "Parallaxy"]
+                    ]), "BOT")
                 .appendField("calibrate");
     },
     onchange: function () {
@@ -2416,13 +2418,17 @@ Blockly.Blocks.activitybot_calibrate = {
 };
 
 Blockly.propc.activitybot_calibrate = function () {
-    var bot = this.getFieldValue('BOT') || 'abcalibrate.h';
+    var bot = this.getFieldValue('BOT') || 'ab360calibrate.h';
     var servo = '';
-    
+    var code = 'high(26);\nhigh(27);\ncal_activityBot();\nlow(26);\nlow(27);\n';
+    if (bot === 'Parallaxy') {
+        code = 'cal_supply5V(1);\n' + code;
+        bot = 'ab360calibrate.h';
+    }
     Blockly.propc.definitions_["activitybot_calibrate"] = servo + '#include "' + bot + '"';
     Blockly.propc.setups_["activitybot_calibrate"] = 'cal_servoPins(12, 13);\n\tcal_encoderPins(14, 15);';
 
-    return 'high(26);\nhigh(27);\ncal_activityBot();\nlow(26);\nlow(27);\n';
+    return code;
 };
 
 Blockly.Blocks.activitybot_display_calibration = {

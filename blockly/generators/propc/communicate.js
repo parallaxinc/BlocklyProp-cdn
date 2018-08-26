@@ -775,6 +775,27 @@ Blockly.propc.console_newline = function () {
     return 'term_cmd(CR);\n';
 };
 
+Blockly.Blocks.console_close = {
+    helpUrl: Blockly.MSG_TERMINAL_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_CONSOLE_CLOSE_TOOLTIP);
+        this.setColour(colorPalette.getColor('protocols'));
+        this.appendDummyInput()
+                .appendField("Terminal close");
+
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+    }
+};
+
+Blockly.propc.console_close = function () {
+    // Blockly.propc.serial_terminal_ = true;
+    if (!this.disabled) {
+        Blockly.propc.setups_['terminal_close'] = 'simpleterm_close();\n';
+    }
+    return '';
+};
+
 Blockly.Blocks.console_clear = {
     helpUrl: Blockly.MSG_TERMINAL_HELPURL,
     init: function () {
@@ -839,11 +860,11 @@ Blockly.Blocks.serial_open = {
     init: function () {
         this.setTooltip(Blockly.MSG_SERIAL_OPEN_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
-        this.appendDummyInput()
+        this.appendDummyInput("PIN_SETUP")
                 .appendField("Serial initialize RX")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['None', 'None']])), "RXPIN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['31', '31'], ['None', 'None']])), "RXPIN")
                 .appendField("TX")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['None', 'None']])), "TXPIN");
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['30', '30'], ['None', 'None']])), "TXPIN");
         this.appendDummyInput('BAUD_RATE')
                 .appendField("baud")
                 .appendField(new Blockly.FieldDropdown([
@@ -879,8 +900,8 @@ Blockly.Blocks.serial_open = {
     },
     onchange: function (event) {
         this.serialPin = this.getFieldValue('RXPIN') + ',' + this.getFieldValue('TXPIN');
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
         if (event.blockId === this.id || event.oldXml) {  // only fire when it's this block or a block got deleted
-            var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
             for (var x = 0; x < allBlocks.length; x++) {
                 var func = allBlocks[x].serPins;
                 if (func) {
@@ -893,6 +914,11 @@ Blockly.Blocks.serial_open = {
                     }
                 }
             }
+        }
+        if ((this.getFieldValue('RXPIN') === '31' || this.getFieldValue('TXPIN') === '30') && allBlocks.toString().indexOf('Terminal close') === -1) {
+            this.setWarningText('DO NOT use pins 30 or 31 without using the Terminal close block!');
+        } else {
+            this.setWarningText(null);
         }
     },
     setToOther: function (br) {
@@ -1213,6 +1239,57 @@ Blockly.propc.serial_receive_text = function () {
 
             return 'dscan(fdser' + p + ', "%s", ' + data + ');\n';
         }
+    }
+};
+
+Blockly.Blocks.serial_status = {
+    helpUrl: Blockly.MSG_PROTOCOLS_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_SERIAL_STATUS_TOOLTIP);
+        this.setColour(colorPalette.getColor('protocols'));
+        this.appendDummyInput()
+                .appendField("Serial")
+                .appendField(new Blockly.FieldDropdown([
+                    ["characters are recieved", "rxReady"],
+                    ["recieved character count", "rxCount"],
+                    ["peek at first recieved character", "rxPeek"],
+                    ["transmit buffer empty", "txEmpty"]
+                ]), 'TYPE');
+        this.setInputsInline(true);
+        this.setOutput(true, "Number");
+        this.setWarningText(null);
+        this.ser_pins = [];
+        this.serPins();
+    },
+    mutationToDom: Blockly.Blocks['serial_send_text'].mutationToDom,
+    domToMutation: Blockly.Blocks['serial_send_text'].domToMutation,
+    serPins: Blockly.Blocks['serial_send_text'].serPins,
+    updateSerPin: Blockly.Blocks['serial_send_text'].updateSerPin,
+    onchange: function () {
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+        if (allBlocks.indexOf('Serial initialize') === -1)
+        {
+            this.setWarningText('WARNING: You must use a Serial\ninitialize block at the beginning of your program!');
+        } else {
+            this.setWarningText(null);
+        }
+    }
+};
+
+Blockly.propc.serial_status = function () {
+    var p = '';
+    if (this.ser_pins.length > 0) {
+        p = this.ser_pins[0][0].replace(',', '_').replace(/None/g, 'N');
+    }
+    if (this.getInput('SERPIN')) {
+        p = this.getFieldValue('SER_PIN').replace(',', '_').replace(/None/g, 'N');
+    }
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+    if (allBlocks.indexOf('Serial initialize') === -1) {
+        return '// ERROR: Serial is not initialized!\n';
+    } else {
+        var type = this.getFieldValue('TYPE');
+        return  ['fdserial_' + type + '(fdser' + p + ')', Blockly.propc.ORDER_NONE];
     }
 };
 
@@ -2505,7 +2582,7 @@ Blockly.propc.xbee_scan_multiple = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
     if (allBlocks.indexOf('XBee initialize') > -1)
     {
-        var code = 'dscan(fdser, "';
+        var code = 'dscan(xbee, "';
         var varList = '';
         var code_add = '';
         var i = 0;
