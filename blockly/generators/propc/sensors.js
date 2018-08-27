@@ -1911,9 +1911,10 @@ Blockly.Blocks.keypad_initialize = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-        this.keypadPins_ = '0,1,2,3,4,5,6,7,';
-        this.onchange();
-    },
+        //this.keypadPins_ = '0,1,2,3,4,5,6,7,';
+        //this.onchange();
+    } //,
+    /*
     onchange: function () {
         this.keypadPins_ = '';
         for (var i = 0; i < 8; i++)
@@ -1927,10 +1928,12 @@ Blockly.Blocks.keypad_initialize = {
             }
         }
     }
+    */
 };
 
 Blockly.propc.keypad_initialize = function () {
     if (!this.disabled) {
+        /*
         var keyDecl = 'int keypad_button(int __a, int __b, int __c, int __d, int __e, ';
         keyDecl += 'int __f, int __g, int __h)';
         
@@ -1948,6 +1951,18 @@ Blockly.propc.keypad_initialize = function () {
 
         Blockly.propc.methods_["4x4keypad"] = keyDecl + keyFunc;
         Blockly.propc.method_declarations_["4x4keypad"] = keyDecl + ';\n';
+        */
+
+        var kp = [];
+        for (var k = 0; k < 8; k++) {
+            kp[k] = this.getFieldValue('P' + k);
+        }
+        var keypad_vars = 'int __rowPins[] = {' + kp[0] + ', ' + kp[1] + ', ' + kp[2] + ', ' + kp[3] + '};\n';
+        keypad_vars += 'int __colPins[] = {' + kp[4] + ', ' + kp[5] + ', ' + kp[6] + ', ' + kp[7] + '};\n';
+        keypad_vars += "int __buttonVals[] = {1, 2, 3, 'A', 4, 5, 6, 'B', 7, 8, 9, 'C', '*', 0, '#', 'D'};\n";
+        Blockly.propc.definitions_["keypad_lib"] = '#include "keypad.h"';
+        Blockly.propc.global_vars_['keypad_pins'] = keypad_vars;
+        Blockly.propc.setups_['keypad_init'] = 'keypad_setup(4, 4, __rowPins, __colPins, __buttonVals);';
     }
     return '';
 };
@@ -1958,13 +1973,14 @@ Blockly.Blocks.keypad_read = {
         this.setTooltip(Blockly.MSG_KEYPAD_READ_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
         this.appendDummyInput()
-                .appendField("4x4 Keypad")
-                .appendField('', "PINS");
-        this.getField('PINS').setVisible(false);
+                .appendField("4x4 Keypad");
+        //        .appendField('', "PINS");
+        //this.getField('PINS').setVisible(false);
         this.setOutput(true, null);
-        this.keypadSetPins_ = '';
-        this.keypadSetPins();
-    },
+        //this.keypadSetPins_ = '';
+        //this.keypadSetPins();
+    } //,
+    /*
     onchange: function () {
         this.keypadSetPins();
     },
@@ -1982,6 +1998,7 @@ Blockly.Blocks.keypad_read = {
         }
         this.setWarningText(warnText);
     }
+    */
 };
 
 Blockly.propc.keypad_read = function () {
@@ -1990,10 +2007,11 @@ Blockly.propc.keypad_read = function () {
     {
         return '// ERROR: Missing Keypad initalize block!';
     } else {
-        var pins = this.getFieldValue('PINS');
-        pins = pins.substr(0, pins.length - 1);
+        //var pins = this.getFieldValue('PINS');
+        //pins = pins.substr(0, pins.length - 1);
 
-        return ['keypad_button(' + pins + ')', Blockly.propc.ORDER_ATOMIC];
+        //return ['keypad_button(' + pins + ')', Blockly.propc.ORDER_ATOMIC];
+        return ['keypad_read()', Blockly.propc.ORDER_ATOMIC];
     }
 };
 
