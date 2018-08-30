@@ -486,6 +486,7 @@ Blockly.MSG_ROBOT_DRIVE_STOP_TOOLTIP = "Robot drive stop: stops the robot from d
 Blockly.MSG_ROBOT_GET_TICKS_TOOLTIP = "Robot encoder counts: retrives the current encoder counts and stores them in the specified varialbes.";
 Blockly.MSG_ROBOT_ACTIVITYBOT_CALIBRATE_TOOLTIP = "ActivityBot calibrate: runs the ActivityBot calibration routine.";
 Blockly.MSG_ROBOT_ACTIVITYBOT_DISPLAY_CALIBRATION_TOOLTIP = "ActivityBot display calibration: displays the calibration results on the terminal.";
+Blockly.MSG_ROBOT_PARALLAXY_LOAD_TOOLTIP = "ActivityBot load firmware: loads the specified pre-written program to the robot.";
 Blockly.MSG_STRING_TO_NUMBER_TOOLTIP = "string to number: convert a number (integer) value to a string.";
 Blockly.MSG_NUMBER_TO_STRING_TOOLTIP = "number to string: convert a string representing a number to an integer.";
 Blockly.MSG_NUMBER_BINARY_TOOLTIP = "binary value: use to enter a binary number.";

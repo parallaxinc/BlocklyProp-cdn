@@ -2386,7 +2386,7 @@ Blockly.Blocks.custom_code_multiple = {
     helpUrl: Blockly.MSG_CONTROL_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_CUSTOM_CODE_MULTIPLE_TOOLTIP);
-        this.setColour(colorPalette.getColor('programming'));
+        this.setColour(colorPalette.getColor('system'));
         this.appendDummyInput()
                 .appendField(new Blockly.FieldCheckbox('FALSE', function (blockEdit) {
                     this.sourceBlock_.hideInputs(blockEdit);
@@ -2399,7 +2399,7 @@ Blockly.Blocks.custom_code_multiple = {
                 }), 'LABEL_SET');
         this.appendDummyInput('SET_COLOR')
                 .appendField('block color')
-                .appendField(new Blockly.FieldColour('#266999').setColours([
+                .appendField(new Blockly.FieldColour('#992673').setColours([
                     "#26994D", "#268F99", "#266999",
                     "#264399", "#392699", "#692699",
                     "#8F2699", "#992673", "#99264C"
