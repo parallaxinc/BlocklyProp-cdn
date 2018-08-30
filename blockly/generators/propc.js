@@ -438,10 +438,13 @@ Blockly.propc.finish = function (code) {
         if (methods.length > 0)
             spacer_funcs += '// ------ Functions ------\n';
 
-        //return setup + allDefs.replace(/\n\n+/g, '\n\n').replace(/\n*$/, '\n\n') + methods.join('\n\n') + '\n\n' + code + '\n\n';
-        return setup + allDefs.replace(/\n\n+/g, '\n\n').replace(/\n*$/, '\n\n') +
-                spacer_decs + declarations.join('\n\n').replace(/\n\n+/g, '\n').replace(/\n*$/, '\n') +
-                '\n// ------ Main Program ------\n' + code + spacer_funcs + methods.join('\n');
+        if (Blockly.propc.definitions_["pure_code"] === '/* PURE CODE ONLY */\n') {
+            return Blockly.propc.methods_["pure_code"];
+        } else {
+            return setup + allDefs.replace(/\n\n+/g, '\n\n').replace(/\n*$/, '\n\n') +
+                    spacer_decs + declarations.join('\n\n').replace(/\n\n+/g, '\n').replace(/\n*$/, '\n') +
+                    '\n// ------ Main Program ------\n' + code + spacer_funcs + methods.join('\n');
+        }
     }
 };
 /**
