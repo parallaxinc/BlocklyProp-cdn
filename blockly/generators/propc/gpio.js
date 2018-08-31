@@ -2439,7 +2439,9 @@ Blockly.Blocks.activitybot_display_calibration = {
         this.appendDummyInput()
                 .appendField(new Blockly.FieldDropdown([
                     ["ActivityBot 360\u00b0", "abcalibrate360.h"],
-                    ["ActivityBot", "abcalibrate.h"]]), "BOT")
+                    ["ActivityBot", "abcalibrate.h"],
+                    ["ActivityBot 360\u00b0 (Parallaxy)", "abcalibrate360.h"],
+                ]), "BOT")
                 .appendField("display calibration")
                 .appendField(new Blockly.FieldDropdown([
                     ['results', 'result'],
