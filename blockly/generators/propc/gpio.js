@@ -2438,9 +2438,9 @@ Blockly.Blocks.activitybot_display_calibration = {
         this.setColour(colorPalette.getColor('robot'));
         this.appendDummyInput()
                 .appendField(new Blockly.FieldDropdown([
-                    ["ActivityBot 360\u00b0", "abcalibrate360.h"],
-                    ["ActivityBot", "abcalibrate.h"],
-                    ["ActivityBot 360\u00b0 (Parallaxy)", "abcalibrate360.h"],
+                    ["ActivityBot 360\u00b0", '"abcalibrate360.h"'],
+                    ["ActivityBot", '"abcalibrate.h"'],
+                    ["ActivityBot 360\u00b0 (Parallaxy)", '"abcalibrate360.h" // Parallaxy'],
                 ]), "BOT")
                 .appendField("display calibration")
                 .appendField(new Blockly.FieldDropdown([
@@ -2454,7 +2454,7 @@ Blockly.propc.activitybot_display_calibration = function () {
     var bot = this.getFieldValue('BOT') || 'abdrive.h';
     var servo = '';
 
-    Blockly.propc.definitions_["activitybot_calibrate"] = servo + '#include "' + bot + '"';
+    Blockly.propc.definitions_["activitybot_calibrate"] = servo + '#include ' + bot;
     Blockly.propc.serial_terminal_ = true;
 
     if (bot === 'abdrive.h') {
