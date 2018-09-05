@@ -134,6 +134,7 @@ var profile = {
         description: "Propeller Activity Board",
         digital: [["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"], ["6", "6"], ["7", "7"], ["8", "8"], ["9", "9"], ["10", "10"], ["11", "11"], ["12", "12"], ["13", "13"], ["14", "14"], ["15", "15"], ["16", "16"], ["17", "17"], ["26", "26"], ["27", "27"]],
         analog: [["A0", "0"], ["A1", "1"], ["A2", "2"], ["A3", "3"]],
+        earphone_jack: "26, 27",
         sd_card: "22, 23, 24, 25",
         baudrate: 115200,
         contiguous_pins_start: 0,
@@ -152,21 +153,23 @@ var profile = {
     "heb": {
         description: "Hackable Electronic Badge",
         digital: [["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"], ["6", "6"], ["7", "7"], ["8", "8"], ["9", "9"], ["10", "10"], ["11", "11"]],
+        earphone_jack: "9, 10",
         analog: [],
         baudrate: 115200,
         contiguous_pins_start: 0,
         contiguous_pins_end: 11,
-        saves_to: [["Hackable Electronic Badge", "heb"], ["Hackable Electronic Badge WX", "heb-wx"]]
+        saves_to: [["Hackable Electronic Badge", "heb"], ["Badge WX", "heb-wx"]]
     },
     "heb-wx": {
-        description: "Hackable Electronic Badge WX",
+        description: "Badge WX",
         digital: [["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"], ["4", "4"], ["5", "5"], ["6", "6"], ["7", "7"], ["8", "8"], ["9", "9"], ["10", "10"], ["11", "11"]],
         analog: [],
+        earphone_jack: "0, 1",
         sd_card: "8, 7, 6, 5",
         baudrate: 115200,
         contiguous_pins_start: 0,
         contiguous_pins_end: 11,
-        saves_to: [["Hackable Electronic Badge", "heb"], ["Hackable Electronic Badge", "heb-wx"]]
+        saves_to: [["Hackable Electronic Badge", "heb"], ["Badge WX", "heb-wx"]]
     },
     "flip": {
         description: "Propeller FLiP or Project Board",
@@ -225,6 +228,7 @@ Blockly.propc.init = function (workspace) {
     Blockly.propc.varlength_ = {};
     Blockly.propc.serial_graphing_ = false;
     Blockly.propc.serial_terminal_ = false;
+    Blockly.propc.string_var_lengths = [];
 
     // Set up specific libraries for devices like the Scribbler or Badge
     if (profile.default.description === "Scribbler Robot") {
@@ -232,7 +236,7 @@ Blockly.propc.init = function (workspace) {
     } else if (profile.default.description === "Hackable Electronic Badge") {
         Blockly.propc.definitions_["badgetools"] = '#include "badgetools.h"';
         Blockly.propc.setups_["badgetools"] = 'badge_setup();';
-    } else if (profile.default.description === "Hackable Electronic Badge WX") {
+    } else if (profile.default.description === "Badge WX") {
         Blockly.propc.definitions_["badgetools"] = '#include "badgewxtools.h"';
         Blockly.propc.setups_["badgetools"] = 'badge_setup();';
     }
@@ -266,6 +270,7 @@ Blockly.propc.finish = function (code) {
     // Convert the definitions dictionary into a list.
     var imports = [];
     var methods = [];
+    var ui_system_settings = [];
     var declarations = [];
     var definitions = [];
     var function_vars = [];
@@ -283,8 +288,10 @@ Blockly.propc.finish = function (code) {
     for (var name in Blockly.propc.definitions_) {
         var def = Blockly.propc.definitions_[name];
         if (def.match(/^#include/) || def.match(/^#define/) || def.match(/^#if/) ||
-                def.match(/^#end/) || def.match(/^#else/) || def.match(/^#pragma/)) {
+            def.match(/^#end/) || def.match(/^#else/) || def.match(/^#pragma/)) {
             imports.push(def);
+        } else if (def.match(/\/\/ GRAPH_[A-Z]*_START:/)) {
+            ui_system_settings.push(def);
         } else {
             definitions.push(def);
         }
@@ -300,22 +307,11 @@ Blockly.propc.finish = function (code) {
         }
     }
 
-    for (var method in Blockly.propc.cog_methods_) {
-        for (var variable in Blockly.propc.vartype_) {
-            if (Blockly.propc.methods_[method].indexOf(variable) > -1) {
-                function_vars.push(variable);
-            }
-        }
-    }
 
     for (var method in Blockly.propc.methods_) {
         methods.push(Blockly.propc.methods_[method]);
     }
 
-    var bigStr = ' = "\\0                                                                                                                               ';
-    var endStr = '";';
-
-    var spaceAdd = '';
     for (var def in definitions) {
         for (var variable in Blockly.propc.vartype_) {
             if (definitions[def].indexOf("{{$var_type_" + variable + "}}") > -1) {
@@ -341,12 +337,33 @@ Blockly.propc.finish = function (code) {
         // Excludes variables with "__" in the name for now because those are buffers for private functions
         // TODO: This is a temporary patch until I can figure something better out -MM
         if (definitions[def].indexOf("char *") > -1 && definitions[def].indexOf("__") === -1 && definitions[def].indexOf("rfidBfr") === -1 ) {
-        //    definitions[def] = definitions[def].replace("char *", "char ").replace(";", "[128];");
-            definitions[def] = definitions[def].replace(/char \*(\s*)(\w+);/g, 'char *$1$2' + bigStr + spaceAdd + endStr);
-            spaceAdd += ' ';
+            definitions[def] = definitions[def].replace("char *", "char ").replace(";", "[64];");
+            //definitions[def] = definitions[def].replace(/char \*(\s*)(\w+);/g, 'char *$1$2' + bigStr + spaceAdd + endStr);
+            //spaceAdd += ' ';
         }
+        
+        // TODO: Temporary patch to correct some weirdness with char array pointer declarations:
+        definitions[def] = definitions[def].replace(/char \*(\w+)\[/g, 'char $1[');
+        
+        // Sets the length of string arrays based on the lengths specified in the string set length block.
+        var vl = Blockly.propc.string_var_lengths.length;
+        for (var vt = 0; vt < vl; vt++) {
+            if (definitions[def].indexOf(Blockly.propc.string_var_lengths[vt][0]) > 0) {
+                definitions[def] = 'char ' + Blockly.propc.string_var_lengths[vt][0] + '[' + Blockly.propc.string_var_lengths[vt][1] + '];';
+            }
+        }
+
+        for (var method in Blockly.propc.cog_methods_) {
+            console.log(Blockly.propc.methods_[method]);
+            console.log(definitions[def].replace(/[achintr]* \**(\w+)[\[\]0-9]*;/g, '$1'));
+            if (Blockly.propc.methods_[method].indexOf(definitions[def].replace(/[achintr]* (\w+)[\[\]0-9]*;/g, '$1')) > -1) {
+                function_vars.push(definitions[def]);
+            }
+        }
+
     }
 
+    
     for (var stack in Blockly.propc.stacks_) {
         definitions.push(Blockly.propc.stacks_[stack]);
     }
@@ -362,9 +379,11 @@ Blockly.propc.finish = function (code) {
     // Add volatile to variable declarations in cogs
     for (var idx = user_var_start; idx < user_var_end; idx++) {
         for (var idk in function_vars) {
-            if (definitions[idx].indexOf(function_vars[idk]) > 2 && definitions[idx].indexOf('volatile') === -1) {
+            if (definitions[idx] === function_vars[idk] && definitions[idx].indexOf('volatile') === -1) {
                 //TODO: uncomment this when optimization is utilized!
-                //definitions[idx] = 'volatile ' + definitions[idx];
+                if(inDemo) {
+                    definitions[idx] = 'volatile ' + definitions[idx];
+                }
             }
         }
     }
@@ -395,6 +414,9 @@ Blockly.propc.finish = function (code) {
             code = code.replace(/\(\(([^()]*)\)\)/g, '($1)');
         }
         
+        // Change strings assigned to variables to strcpy functions
+        code = code.replace(/(\w+)\s*=\s*\({0,1}"(.*)"\){0,1};/g, 'strcpy($1, "$2");\t\t\t// Save string into variable $1.');
+        
         code = 'int main()\n{\n' + setups.join('\n') + '\n' + code + '\n}';
         var setup = '';
         if (Blockly.propc.serial_terminal_) {
@@ -406,6 +428,7 @@ Blockly.propc.finish = function (code) {
                 profile.default.description !== "Propeller C (code-only)") {
             setup += "/* EMPTY_PROJECT */\n";
         }
+        setup += ui_system_settings.join('\n') + '\n\n';
 
         var spacer_decs = '';
         if (declarations.length > 0)
@@ -415,10 +438,13 @@ Blockly.propc.finish = function (code) {
         if (methods.length > 0)
             spacer_funcs += '// ------ Functions ------\n';
 
-        //return setup + allDefs.replace(/\n\n+/g, '\n\n').replace(/\n*$/, '\n\n') + methods.join('\n\n') + '\n\n' + code + '\n\n';
-        return setup + allDefs.replace(/\n\n+/g, '\n\n').replace(/\n*$/, '\n\n') +
-                spacer_decs + declarations.join('\n\n').replace(/\n\n+/g, '\n').replace(/\n*$/, '\n') +
-                '\n// ------ Main Program ------\n' + code + spacer_funcs + methods.join('\n');
+        if (Blockly.propc.definitions_["pure_code"] === '/* PURE CODE ONLY */\n') {
+            return Blockly.propc.methods_["pure_code"];
+        } else {
+            return setup + allDefs.replace(/\n\n+/g, '\n\n').replace(/\n*$/, '\n\n') +
+                    spacer_decs + declarations.join('\n\n').replace(/\n\n+/g, '\n').replace(/\n*$/, '\n') +
+                    '\n// ------ Main Program ------\n' + code + spacer_funcs + methods.join('\n');
+        }
     }
 };
 /**
@@ -628,5 +654,52 @@ Blockly.Field.prototype.render_ = function() {
     }
   }
   this.size_.width = width;
+};
+*/
+
+
+// REPLACES CORE FUNCTION:
+/**
+ * Return a sorted list of variable names for variable dropdown menus.
+ * Include a special option at the end for creating a new variable name.
+ * @return {!Array.<string>} Array of variable names.
+ * @this {!Blockly.FieldVariable}
+ */
+
+//vTODO: use this replacement to allow dropdowns of specific types (number, string, etc.)
+/*
+Blockly.FieldVariable.dropdownCreate = function() {
+  var blockType = null; 
+  if (this.sourceBlock_ && this.sourceBlock_.workspace) {
+    var variableList =
+        Blockly.Variables.allVariables(this.sourceBlock_.workspace);
+    blockType = this.sourceBlock_.type;
+  } else {
+    var variableList = [];
+  }
+  // Ensure that the currently selected variable is an option.
+  var name = this.getText();
+  if (name && variableList.indexOf(name) == -1) {
+    variableList.push(name);
+  }
+  variableList.sort(goog.string.caseInsensitiveCompare);
+  variableList.push(Blockly.Msg.RENAME_VARIABLE);
+  variableList.push(Blockly.Msg.NEW_VARIABLE);
+  // Variables are not language-specific, use the name as both the user-facing
+  // text and the internal representation.
+  var options = [];
+  var z = 0;
+  for (var x = 0; x < variableList.length; x++) {
+    if (blockType !== 'string_var_length') {
+      options[z] = [variableList[x], variableList[x]];
+      z++;
+    } else {
+      if (Blockly.propc.definitions_[name].indexOf('char') === 0) {
+          options[z] = [variableList[x], variableList[x]];
+          z++;
+      }
+    }
+  }
+  return options;
 };
 */

@@ -40,7 +40,8 @@ var graph_options = {
         onlyInteger: true
     },
     refreshRate: 250,
-    sampleTotal: 40
+    sampleTotal: 40,
+    graph_type: 'S'
 };
 
 var graph_data = {
@@ -70,9 +71,9 @@ var minVer = version_as_number(client_min_version);
  * @param {string} id ID of tab clicked.
  */
 function tabClick(id) {
-    
+
     var TABS_ = ['blocks', 'propc', 'xml'];
-    
+
     // If the XML tab was open, save and render the content.
     /* if (document.getElementById('tab_xml').className == 'active') {
      var xmlTextarea = document.getElementById('textarea_xml');
@@ -117,7 +118,7 @@ function tabClick(id) {
             Blockly.bindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
             Blockly.codeOnlyKeybind = false;
         }
-        
+
         if (id === 'tab_blocks') {
             for (var i = 0; i < btns.length; i++) {
                 btns[i].style.display = 'inline-block';
@@ -134,7 +135,7 @@ function tabClick(id) {
                 document.getElementById('menu-save-as-propc').style.display = 'block';
         }
     } else {
-        
+
         // Remove keybindings from block workspace if this is a code-only project.
         Blockly.unbindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
         Blockly.codeOnlyKeybind = true;
@@ -147,7 +148,8 @@ function tabClick(id) {
         document.getElementById('prop-btn-find-replace').style.display = 'inline-block';
         document.getElementById('prop-btn-undo').style.display = 'inline-block';
         document.getElementById('prop-btn-redo').style.display = 'inline-block';
-        document.getElementById('download-project').style.display = 'none';
+        $('.propc-only').removeClass('hidden');
+        //document.getElementById('download-project').style.display = 'none';
     }
 
     document.getElementById('content_' + selectedTab).style.display = 'block';
@@ -165,25 +167,34 @@ function tabClick(id) {
 // Populate the currently selected pane with content generated from the blocks.
 function renderContent(pane) {
     // Initialize the pane.
-    if (pane === 'blocks') {
+    if (pane === 'blocks' && projectData['board'] !== 'propcfile') {
         Blockly.mainWorkspace.render();
     } else if (pane === 'xml') {
         var xmlDom = null;
+        var xmlText = '';
         if (projectData['board'] === 'propcfile') {
-            xmlDom = Blockly.Xml.textToDom(propcAsBlocksXml());
+            xmlText = propcAsBlocksXml();
         } else {
             xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+            xmlText = Blockly.Xml.domToPrettyText(xmlDom);
         }
-        var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
         codeXml.setValue(xmlText);
         codeXml.gotoLine(0);
     } else if (pane === 'propc' && projectData['board'] !== 'propcfile') {
         prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
     } else if (pane === 'propc') {
         if (codePropC.getValue() === '') {
-            codePropC.setValue(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
+            codePropC.setValue(atob((projectData['code'].match(/<field name="CODE">(.*)<\/field>/) || ['', ''])[1] || ''));
+            codePropC.gotoLine(0);
         }
-        codePropC.gotoLine(0);
+        if (codePropC.getValue() === '') {
+            var blankProjectCode = '// ------ Libraries and Definitions ------\n';
+            blankProjectCode += '#include "simpletools.h"\n\n\n';
+            blankProjectCode += '// ------ Global Variables and Objects ------\n\n\n';
+            blankProjectCode += '// ------ Main Program ------\n';
+            blankProjectCode += 'int main() {\n\n\nwhile (1) {\n\n\n}}';
+            prettyCode(blankProjectCode);
+        }   
     }
 }
 
@@ -196,7 +207,7 @@ var prettyCode = function (raw_code) {
         'indent_size': 2
     });
     raw_code = raw_code.replace(/,\n[\s\xA0]+/g, ", ")
-    
+
             // improve the way reference and dereference operands are rendered
             .replace(/, & /g, ", &")
             .replace(/, \* /g, ", *")
@@ -204,19 +215,20 @@ var prettyCode = function (raw_code) {
             .replace(/\( \* /g, "(*")
             .replace(/char \* /g, "char *")
             .replace(/serial \* /g, "serial *")
+            .replace(/lcdParallel \* /g, "lcdParallel *")
             .replace(/colorPal \* /g, "colorPal *")
             .replace(/ws2812 \* /g, "ws2812 *")
             .replace(/i2c \* /g, "i2c *")
             .replace(/sound \* /g, "sound *")
             .replace(/FILE \* /g, "FILE* ")
-    
+
             // improve the way functions and arrays are rendered
-            .replace(/\)\s*[\n\r]\s*{/g,") {")
+            .replace(/\)\s*[\n\r]\s*{/g, ") {")
             .replace(/\[([0-9]*)\]\s*=\s*{\s*([0-9xXbBA-F,\s]*)\s*};/g, function (str, m1, m2) {
-                    m2 = m2.replace(/\s/g, '').replace(/,/g, ', ');
-                    return "[" + m1 + "] = {" + m2 + "};";
-                });
-    
+                m2 = m2.replace(/\s/g, '').replace(/,/g, ', ');
+                return "[" + m1 + "] = {" + m2 + "};";
+            });
+
     codePropC.setValue(raw_code);
     codePropC.gotoLine(0);
 };
@@ -263,7 +275,9 @@ function init(blockly) {
         if (projectData['code'].length < 43) {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
         }
-        loadToolbox(projectData['code']);
+        if (projectData['board'] !== 'propcfile') {
+            loadToolbox(projectData['code']);
+        }
     }
 
     // if the project is a propc code-only project, enable code editing.
@@ -331,39 +345,61 @@ function cloudCompile(text, action, successHandler) {
         else if (propcCode.indexOf("SERIAL_GRAPHING USED") > -1)
             terminalNeeded = 'graph';
 
-        $.ajax({
-            'method': 'POST',
-            'url': baseUrl + 'rest/compile/c/' + action + '?id=' + idProject,
-            'data': {"code": propcCode}
-        }).done(function (data) {
-            if (data.error || typeof data.error === "undefined") {
-                // console.log(data);
-                // Get message as a string, or blank if undefined
-                var message = (typeof data['message'] === "string") ? data['message'] : (typeof data.error !== "undefined") ? data['message'].toString() : "";
-                alert("BlocklyProp was unable to compile your project:\n" + message
-                    + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
-            } else {
-                var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
-                $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
-                if (data.success) {
-                    successHandler(data, terminalNeeded);
+        if (isOffline) {
+            // Compiler optimization options:
+            // -O0 (None)
+            // -O1 (Mixed)
+            // -O2 (Speed)
+            // -Os (Size)
+            localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
+                if (data.error) {
+                    console.log(data);
+                    // Get message as a string, or blank if undefined
+                    alert("BlocklyProp was unable to compile your project:\n" + data['message'] 
+                        + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                } else {
+                    var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+                    $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
+                    if (data.success && data.binary) {
+                        successHandler(data, terminalNeeded);
+                    }
+                    
+                    // Scoll automatically to the bottom after new data is added
+                    document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
                 }
-                
-                // Scoll automatically to the bottom after new data is added
-                document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
-            }
-        }).fail(function (data) {
-            // console.log(data);
-            var message = (typeof data === "string") ? data : data.toString();
-            alert("BlocklyProp was unable to compile your project:\n----------\n" + message
-                + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
-        });
+            });
+        } else {
+            $.ajax({
+                'method': 'POST',
+                'url': baseUrl + 'rest/compile/c/' + action + '?id=' + idProject,
+                'data': {"code": propcCode}
+            }).done(function (data) {
+                if (data.error || typeof data.error === "undefined") {
+                    // console.log(data);
+                    // Get message as a string, or blank if undefined
+                    var message = (typeof data['message'] === "string") ? data['message'] : (typeof data.error !== "undefined") ? data['message'].toString() : "";
+                    alert("BlocklyProp was unable to compile your project:\n" + message
+                            + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                } else {
+                    var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+                    $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
+                    if (data.success) {
+                        successHandler(data, terminalNeeded);
+                    }
+
+                    // Scoll automatically to the bottom after new data is added
+                    document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
+                }
+            }).fail(function (data) {
+                // console.log(data);
+                var message = (typeof data === "string") ? data : data.toString();
+                alert("BlocklyProp was unable to compile your project:\n----------\n" + message
+                        + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+            });
+        }
     }
 }
 
-/**
- *
- */
 function compile() {
     cloudCompile('Compile', 'compile', function (data, terminalNeeded) {});
 }
@@ -412,7 +448,9 @@ function loadInto(modal_message, compile_command, load_option, load_action) {
                         var success = true;
                         var coded = (load_option === "CODE" || load_option === "CODE_VERBOSE");
                         if (coded) {
-                            message.forEach(function(x){success = success && x.substr(0,3) < 100;});
+                            message.forEach(function (x) {
+                                success = success && x.substr(0, 3) < 100;
+                            });
                         }
                         //Display results
                         var result = '';
@@ -422,7 +460,9 @@ function loadInto(modal_message, compile_command, load_option, load_action) {
                         } else {
                             //Failed (or not coded); Show the details
                             var error = [];
-                            message.forEach(function(x){error.push(x.substr((coded) ? 4 : 0));});
+                            message.forEach(function (x) {
+                                error.push(x.substr((coded) ? 4 : 0));
+                            });
                             result = ((coded) ? ' Failed!' : "") + '\n\n-------- loader messages --------\n' + error.join('\n');
                         }
 
@@ -461,7 +501,7 @@ function loadInto(modal_message, compile_command, load_option, load_action) {
         alert("No device detected - ensure it is connected, powered, and selected in the ports list.\n\nMake sure your BlocklyPropClient is up-to-date.");
     } else {
         alert("BlocklyPropClient not available to communicate with a microcontroller."
-            + "\n\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac).");
+                + "\n\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac).");
     }
 }
 
@@ -502,7 +542,7 @@ function serial_console() {
                     connString += c_buf;
                     if (connString.indexOf(baudrate.toString(10)) > -1) {
                         connStrYet = true;
-                        if(document.getElementById('serial-conn-info')) {
+                        if (document.getElementById('serial-conn-info')) {
                             document.getElementById('serial-conn-info').innerHTML = connString.trim();
                             // send remainder of string to terminal???  Haven't seen any leak through yet...
                         }
@@ -522,7 +562,7 @@ function serial_console() {
                 connString = '';
                 connStrYet = false;
                 connection.close();
-                if(document.getElementById('serial-conn-info')) {
+                if (document.getElementById('serial-conn-info')) {
                     document.getElementById('serial-conn-info').innerHTML = '';
                 }
                 updateTermBox(0);
@@ -561,7 +601,7 @@ function serial_console() {
         };
 
         active_connection = 'websocket';
-        if(document.getElementById('serial-conn-info')) {
+        if (document.getElementById('serial-conn-info')) {
             document.getElementById('serial-conn-info').innerHTML = 'Connection established with ' +
                     msg_to_send.portPath + ' at baudrate ' + msg_to_send.baudrate;
         }
@@ -570,7 +610,7 @@ function serial_console() {
         $('#console-dialog').on('hidden.bs.modal', function () {
             if (msg_to_send.action !== 'close') { // because this is getting called multiple times...?
                 msg_to_send.action = 'close';
-                if(document.getElementById('serial-conn-info')) {
+                if (document.getElementById('serial-conn-info')) {
                     document.getElementById('serial-conn-info').innerHTML = '';
                 }
                 active_connection = null;
@@ -585,7 +625,6 @@ function serial_console() {
 }
 
 function graphing_console() {
-    var newGraph = false;
     var propcCode = Blockly.propc.workspaceToCode(Blockly.mainWorkspace);
 
     // If there are graph settings, extract them
@@ -605,24 +644,50 @@ function graphing_console() {
 
         graph_options.refreshRate = Number(graph_settings_str[0]);
 
-        if (graph_settings_str[3] === '0' && graph_settings_str[4] === '0')
-            graph_options.axisY = {
-                type: Chartist.AutoScaleAxis,
-            };
-        else
+        graph_options.graph_type = graph_settings_str[2];
+        if (Number(graph_settings_str[3]) !== 0 && Number(graph_settings_str[4]) !== 0) {
             graph_options.axisY = {
                 type: Chartist.AutoScaleAxis,
                 low: Number(graph_settings_str[3]),
-                high: Number(graph_settings_str[4])
+                high: Number(graph_settings_str[4]),
+                onlyInteger: true
             };
+        } else {
+            graph_options.axisY = {
+                type: Chartist.AutoScaleAxis,
+                onlyInteger: true
+            };
+        }
+        $('#graph_x-axis_label').css('display', 'block');
+        graph_options.showPoint = false;
+        graph_options.showLine = true;
+        if (graph_settings_str[2] === 'X') {
+            $('#graph_x-axis_label').css('display', 'none');
+            if (Number(graph_settings_str[5]) !== 0 || Number(graph_settings_str[6]) !== 0) {
+                graph_options.axisX = {
+                    type: Chartist.AutoScaleAxis,
+                    low: Number(graph_settings_str[5]),
+                    high: Number(graph_settings_str[6]),
+                    onlyInteger: true
+                };
+            } else {
+                graph_options.axisX = {
+                    type: Chartist.AutoScaleAxis,
+                    onlyInteger: true
+                };
+            }
+            graph_options.showPoint = true;
+            graph_options.showLine = false;
+        }
 
-        if (graph_settings_str[2] === 'S')
+        if (graph_options.graph_type === 'S' || graph_options.graph_type === 'X')
             graph_options.sampleTotal = Number(graph_settings_str[1]);
 
         if (graph === null) {
             graph_reset();
             graph_temp_string = '';
             graph = new Chartist.Line('#serial_graphing', graph_data, graph_options);
+            console.log(graph_options);
         } else {
             graph.update(graph_data, graph_options);
         }
@@ -639,9 +704,9 @@ function graphing_console() {
                 } else {
                     connection.send('+++ open port ' + getComPort());
                 }
-                
-            graphStartStop('start');
-            
+
+                graphStartStop('start');
+
             };
             // Log errors
             connection.onerror = function (error) {
@@ -659,7 +724,7 @@ function graphing_console() {
                     connString += c_buf;
                     if (connString.indexOf(baudrate.toString(10)) > -1) {
                         connStrYet = true;
-                        if(document.getElementById('graph-conn-info')) {
+                        if (document.getElementById('graph-conn-info')) {
                             document.getElementById('graph-conn-info').innerHTML = connString.trim();
                             // send remainder of string to terminal???  Haven't seen any leak through yet...
                         }
@@ -687,13 +752,13 @@ function graphing_console() {
                 action: 'open'
             };
 
-            if(document.getElementById('graph-conn-info')) {
+            if (document.getElementById('graph-conn-info')) {
                 document.getElementById('graph-conn-info').innerHTML = 'Connection established with ' +
                         msg_to_send.portPath + ' at baudrate ' + msg_to_send.baudrate;
             }
-            
+
             client_ws_connection.send(JSON.stringify(msg_to_send));
-            
+
             if (!graph_interval_id) {
                 graphStartStop('start');
             }
@@ -702,11 +767,11 @@ function graphing_console() {
                 graphStartStop('stop');
                 if (msg_to_send.action !== 'close') { // because this is getting called multiple times.... ?
                     msg_to_send.action = 'close';
-                    if(document.getElementById('graph-conn-info')) {
+                    if (document.getElementById('graph-conn-info')) {
                         document.getElementById('graph-conn-info').innerHTML = '';
                     }
                     client_ws_connection.send(JSON.stringify(msg_to_send));
-                }  
+                }
             });
 
         } else {
@@ -714,7 +779,7 @@ function graphing_console() {
         }
 
         $('#graphing-dialog').modal('show');
-        if(document.getElementById('btn-graph-play')) {
+        if (document.getElementById('btn-graph-play')) {
             document.getElementById('btn-graph-play').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="15"><path d="M5.5,2 L4,2 4,11 5.5,11 Z M8.5,2 L10,2 10,11 8.5,11 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>';
         }
     } else {
@@ -722,36 +787,35 @@ function graphing_console() {
     }
 }
 
-var graphStartStop = function(action) {
+var graphStartStop = function (action) {
     if (action === 'start' || action === 'play') {
         graph_new_labels();
         if (graph_interval_id) {
-            clearInterval(graph_interval_id);            
+            clearInterval(graph_interval_id);
         }
         graph_interval_id = setInterval(function () {
             graph.update(graph_data);
             graph_update_labels();
-        }, graph_options.refreshRate);        
+        }, graph_options.refreshRate);
     } else if (action === 'stop' || action === 'pause') {
         clearInterval(graph_interval_id);
         graph_interval_id = null;
-    } 
+    }
     if (action === 'stop') {
         graph_paused = false;
-        graph_reset();        
-        graph_play('play');        
+        graph_reset();
+        graph_play('play');
     }
     if (action === 'clear') {
-        graph_reset();                
+        graph_reset();
     }
     if (action === 'play') {
-        console.log(graph_data.series[0].length);
         if (graph_data.series[0].length === 0) {
             graph_reset();
         }
         graph_paused = false;
         graph_start_playing = true;
-    } 
+    }
     if (action === 'pause' && graph_temp_data.slice(-1)[0]) {
         graph_paused = true;
         graph_temp_string = '';
@@ -774,34 +838,12 @@ var check_com_ports = function () {
             } else {
                 // else keep port list clear (searching...)
                 set_port_list();
-            }      
+            }
         }
     }
 };
 
-// set communication port list
-//   leave data unspecified when searching
-var set_port_list = function (data) {
-    data = (data ? data : 'searching');
-    var selected_port = $("#comPort").val();
-    $("#comPort").empty();
-    if (typeof(data) === 'object' && data.length) {
-        data.forEach(function (port) {
-            $("#comPort").append($('<option>', {
-                text: port
-            }));
-        });
-        ports_available = true;
-    } else {
-        $("#comPort").append($('<option>', {
-            text: (data === 'searching') ? 'Searching...' : 'No devices found'
-        }));
-        ports_available = false;
-    };
-    select_com_port(selected_port);
-};
-
- var select_com_port = function (com_port) {
+var select_com_port = function (com_port) {
     if (com_port !== null) {
         $("#comPort").val(com_port);
     }
@@ -881,7 +923,7 @@ function graph_new_data(stream) {
                     // convert to seconds:
                     // Uses Propeller system clock (CNT) left shifted by 16.
                     // Assumes 80MHz clock frequency.
-                    ts = ts / 1220.703125; 
+                    ts = ts / 1220.703125;
                 }
                 if (!graph_timestamp_start || graph_timestamp_start === 0) {
                     graph_timestamp_start = ts;
@@ -900,15 +942,31 @@ function graph_new_data(stream) {
                     graph_temp_data[row].unshift(ts + graph_time_multiplier -
                             graph_timestamp_start);
                     var graph_csv_temp = (Math.round(graph_temp_data[row][0] * 10000) / 10000) + ',';
-                    for (var j = 2; j < graph_temp_data[row].length; j++) {
-                        graph_csv_temp += graph_temp_data[row][j] + ',';
-                        graph_data.series[j - 2].push({
-                            x: graph_temp_data[row][0],
-                            y: graph_temp_data[row][j] || null
-                        });
-                        if (graph_temp_data[row][0] > graph_options.sampleTotal)                         
-                            graph_data.series[j - 2].shift();
+
+                    if (graph_options.graph_type === 'X') {   // xy scatter plot
+                        var jk = 0;
+                        for (var j = 2; j < graph_temp_data[row].length; j = j + 2) {
+                            graph_csv_temp += graph_temp_data[row][j] + ',' + graph_temp_data[row][j + 1] + ',';
+                            graph_data.series[jk].push({
+                                x: graph_temp_data[row][j] || null,
+                                y: graph_temp_data[row][j + 1] || null
+                            });
+                            if (graph_temp_data[row][0] > graph_options.sampleTotal)
+                                graph_data.series[jk].shift();
+                            jk++;
+                        }
+                    } else {    // Time series graph
+                        for (var j = 2; j < graph_temp_data[row].length; j++) {
+                            graph_csv_temp += graph_temp_data[row][j] + ',';
+                            graph_data.series[j - 2].push({
+                                x: graph_temp_data[row][0],
+                                y: graph_temp_data[row][j] || null
+                            });
+                            if (graph_temp_data[row][0] > graph_options.sampleTotal)
+                                graph_data.series[j - 2].shift();
+                        }                        
                     }
+
                     graph_csv_data.push(graph_csv_temp.slice(0, -1).split(','));
 
                     // limits total number of data points collected to prevent memory issues
@@ -920,12 +978,12 @@ function graph_new_data(stream) {
                 graph_temp_string = '';
             } else {
                 if (!graph_data_ready) {            // wait for a full set of data to
-                    if (stream[k] === '\r')  {      // come in before graphing, ends up
+                    if (stream[k] === '\r') {      // come in before graphing, ends up
                         graph_data_ready = true;    // tossing the first point but prevents
                     }                               // garbage from mucking up the graph.
-                } else { 
+                } else {
                     // make sure it's a number, comma, CR, or LF
-                    if ('0123456789.,\r\n'.indexOf(stream[k]) > -1) {
+                    if ('-0123456789.,\r\n'.indexOf(stream[k]) > -1) {
                         graph_temp_string += stream[k];
                     }
                 }
@@ -951,7 +1009,7 @@ function graph_reset() {
 }
 
 function graph_play(setTo) {
-    if(document.getElementById('btn-graph-play')) {
+    if (document.getElementById('btn-graph-play')) {
         var play_state = document.getElementById('btn-graph-play').innerHTML;
         if (setTo !== 'play' && (play_state.indexOf('pause') > -1 || play_state.indexOf('<!--p') === -1)) {
             document.getElementById('btn-graph-play').innerHTML = '<!--play--><svg xmlns="http://www.w3.org/2000/svg" width="14" height="15"><path d="M4,3 L4,11 10,7 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>';
@@ -989,7 +1047,7 @@ function downloadGraph() {
             var svgGraph = document.getElementById('serial_graphing'),
                     pattern = new RegExp('xmlns="http://www.w3.org/2000/xmlns/"', 'g'),
                     findY = 'class="ct-label ct-horizontal ct-end"',
-                    chartStyle = '<style>.ct-double-octave:after,.ct-major-eleventh:after,.ct-major-second:after,.ct-major-seventh:after,.ct-major-sixth:after,.ct-major-tenth:after,.ct-major-third:after,.ct-major-twelfth:after,.ct-minor-second:after,.ct-minor-seventh:after,.ct-minor-sixth:after,.ct-minor-third:after,.ct-octave:after,.ct-perfect-fifth:after,.ct-perfect-fourth:after,.ct-square:after{content:"";clear:both}.ct-label{fill:rgba(0,0,0,.4);color:rgba(0,0,0,.4);font-size:.75rem;line-height:1}.ct-grid-background,.ct-line{fill:none}.ct-chart-bar .ct-label,.ct-chart-line .ct-label{display:block;display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}.ct-chart-donut .ct-label,.ct-chart-pie .ct-label{dominant-baseline:central}.ct-label.ct-horizontal.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-label.ct-horizontal.ct-end{-webkit-box-align:flex-start;-webkit-align-items:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-label.ct-vertical.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-end;-webkit-justify-content:flex-end;-ms-flex-pack:flex-end;justify-content:flex-end;text-align:right;text-anchor:end}.ct-label.ct-vertical.ct-end{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-chart-bar .ct-label.ct-horizontal.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;text-align:center;text-anchor:start}.ct-chart-bar .ct-label.ct-horizontal.ct-end{-webkit-box-align:flex-start;-webkit-align-items:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:center;-webkit-justify-content:center;-ms-flex-pack:center;justify-content:center;text-align:center;text-anchor:start}.ct-chart-bar.ct-horizontal-bars .ct-label.ct-horizontal.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-chart-bar.ct-horizontal-bars .ct-label.ct-horizontal.ct-end{-webkit-box-align:flex-start;-webkit-align-items:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-chart-bar.ct-horizontal-bars .ct-label.ct-vertical.ct-start{-webkit-box-align:center;-webkit-align-items:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:flex-end;-webkit-justify-content:flex-end;-ms-flex-pack:flex-end;justify-content:flex-end;text-align:right;text-anchor:end}.ct-chart-bar.ct-horizontal-bars .ct-label.ct-vertical.ct-end{-webkit-box-align:center;-webkit-align-items:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:end}.ct-grid{stroke:rgba(0,0,0,.2);stroke-width:1px;stroke-dasharray:2px}.ct-point{stroke-width:10px;stroke-linecap:round}.ct-line{stroke-width:4px}.ct-area{stroke:none;fill-opacity:.1}.ct-bar{fill:none;stroke-width:10px}.ct-slice-donut{fill:none;stroke-width:60px}.ct-series-a .ct-bar,.ct-series-a .ct-line,.ct-series-a .ct-point,.ct-series-a .ct-slice-donut{stroke:#d70206}.ct-series-a .ct-area,.ct-series-a .ct-slice-donut-solid,.ct-series-a .ct-slice-pie{fill:#d70206}.ct-series-b .ct-bar,.ct-series-b .ct-line,.ct-series-b .ct-point,.ct-series-b .ct-slice-donut{stroke:#f05b4f}.ct-series-b .ct-area,.ct-series-b .ct-slice-donut-solid,.ct-series-b .ct-slice-pie{fill:#f05b4f}.ct-series-c .ct-bar,.ct-series-c .ct-line,.ct-series-c .ct-point,.ct-series-c .ct-slice-donut{stroke:#f4c63d}.ct-series-c .ct-area,.ct-series-c .ct-slice-donut-solid,.ct-series-c .ct-slice-pie{fill:#f4c63d}.ct-series-d .ct-bar,.ct-series-d .ct-line,.ct-series-d .ct-point,.ct-series-d .ct-slice-donut{stroke:#d17905}.ct-series-d .ct-area,.ct-series-d .ct-slice-donut-solid,.ct-series-d .ct-slice-pie{fill:#d17905}.ct-series-e .ct-bar,.ct-series-e .ct-line,.ct-series-e .ct-point,.ct-series-e .ct-slice-donut{stroke:#453d3f}.ct-series-e .ct-area,.ct-series-e .ct-slice-donut-solid,.ct-series-e .ct-slice-pie{fill:#453d3f}.ct-series-f .ct-bar,.ct-series-f .ct-line,.ct-series-f .ct-point,.ct-series-f .ct-slice-donut{stroke:#59922b}.ct-series-f .ct-area,.ct-series-f .ct-slice-donut-solid,.ct-series-f .ct-slice-pie{fill:#59922b}.ct-series-g .ct-bar,.ct-series-g .ct-line,.ct-series-g .ct-point,.ct-series-g .ct-slice-donut{stroke:#0544d3}.ct-series-g .ct-area,.ct-series-g .ct-slice-donut-solid,.ct-series-g .ct-slice-pie{fill:#0544d3}.ct-series-h .ct-bar,.ct-series-h .ct-line,.ct-series-h .ct-point,.ct-series-h .ct-slice-donut{stroke:#6b0392}.ct-series-h .ct-area,.ct-series-h .ct-slice-donut-solid,.ct-series-h .ct-slice-pie{fill:#6b0392}.ct-series-i .ct-bar,.ct-series-i .ct-line,.ct-series-i .ct-point,.ct-series-i .ct-slice-donut{stroke:#f05b4f}.ct-series-i .ct-area,.ct-series-i .ct-slice-donut-solid,.ct-series-i .ct-slice-pie{fill:#f05b4f}.ct-series-j .ct-bar,.ct-series-j .ct-line,.ct-series-j .ct-point,.ct-series-j .ct-slice-donut{stroke:#dda458}.ct-series-j .ct-area,.ct-series-j .ct-slice-donut-solid,.ct-series-j .ct-slice-pie{fill:#dda458}.ct-series-k .ct-bar,.ct-series-k .ct-line,.ct-series-k .ct-point,.ct-series-k .ct-slice-donut{stroke:#eacf7d}.ct-series-k .ct-area,.ct-series-k .ct-slice-donut-solid,.ct-series-k .ct-slice-pie{fill:#eacf7d}.ct-series-l .ct-bar,.ct-series-l .ct-line,.ct-series-l .ct-point,.ct-series-l .ct-slice-donut{stroke:#86797d}.ct-series-l .ct-area,.ct-series-l .ct-slice-donut-solid,.ct-series-l .ct-slice-pie{fill:#86797d}.ct-series-m .ct-bar,.ct-series-m .ct-line,.ct-series-m .ct-point,.ct-series-m .ct-slice-donut{stroke:#b2c326}.ct-series-m .ct-area,.ct-series-m .ct-slice-donut-solid,.ct-series-m .ct-slice-pie{fill:#b2c326}.ct-series-n .ct-bar,.ct-series-n .ct-line,.ct-series-n .ct-point,.ct-series-n .ct-slice-donut{stroke:#6188e2}.ct-series-n .ct-area,.ct-series-n .ct-slice-donut-solid,.ct-series-n .ct-slice-pie{fill:#6188e2}.ct-series-o .ct-bar,.ct-series-o .ct-line,.ct-series-o .ct-point,.ct-series-o .ct-slice-donut{stroke:#a748ca}.ct-series-o .ct-area,.ct-series-o .ct-slice-donut-solid,.ct-series-o .ct-slice-pie{fill:#a748ca}.ct-square{display:block;position:relative;width:100%}.ct-square:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:100%}.ct-square:after{display:table}.ct-square>svg{display:block;position:absolute;top:0;left:0}.ct-minor-second{display:block;position:relative;width:100%}.ct-minor-second:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:93.75%}.ct-minor-second:after{display:table}.ct-minor-second>svg{display:block;position:absolute;top:0;left:0}.ct-major-second{display:block;position:relative;width:100%}.ct-major-second:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:88.8888888889%}.ct-major-second:after{display:table}.ct-major-second>svg{display:block;position:absolute;top:0;left:0}.ct-minor-third{display:block;position:relative;width:100%}.ct-minor-third:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:83.3333333333%}.ct-minor-third:after{display:table}.ct-minor-third>svg{display:block;position:absolute;top:0;left:0}.ct-major-third{display:block;position:relative;width:100%}.ct-major-third:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:80%}.ct-major-third:after{display:table}.ct-major-third>svg{display:block;position:absolute;top:0;left:0}.ct-perfect-fourth{display:block;position:relative;width:100%}.ct-perfect-fourth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:75%}.ct-perfect-fourth:after{display:table}.ct-perfect-fourth>svg{display:block;position:absolute;top:0;left:0}.ct-perfect-fifth{display:block;position:relative;width:100%}.ct-perfect-fifth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:66.6666666667%}.ct-perfect-fifth:after{display:table}.ct-perfect-fifth>svg{display:block;position:absolute;top:0;left:0}.ct-minor-sixth{display:block;position:relative;width:100%}.ct-minor-sixth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:62.5%}.ct-minor-sixth:after{display:table}.ct-minor-sixth>svg{display:block;position:absolute;top:0;left:0}.ct-golden-section{display:block;position:relative;width:100%}.ct-golden-section:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:61.804697157%}.ct-golden-section:after{content:"";display:table;clear:both}.ct-golden-section>svg{display:block;position:absolute;top:0;left:0}.ct-major-sixth{display:block;position:relative;width:100%}.ct-major-sixth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:60%}.ct-major-sixth:after{display:table}.ct-major-sixth>svg{display:block;position:absolute;top:0;left:0}.ct-minor-seventh{display:block;position:relative;width:100%}.ct-minor-seventh:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:56.25%}.ct-minor-seventh:after{display:table}.ct-minor-seventh>svg{display:block;position:absolute;top:0;left:0}.ct-major-seventh{display:block;position:relative;width:100%}.ct-major-seventh:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:53.3333333333%}.ct-major-seventh:after{display:table}.ct-major-seventh>svg{display:block;position:absolute;top:0;left:0}.ct-octave{display:block;position:relative;width:100%}.ct-octave:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:50%}.ct-octave:after{display:table}.ct-octave>svg{display:block;position:absolute;top:0;left:0}.ct-major-tenth{display:block;position:relative;width:100%}.ct-major-tenth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:40%}.ct-major-tenth:after{display:table}.ct-major-tenth>svg{display:block;position:absolute;top:0;left:0}.ct-major-eleventh{display:block;position:relative;width:100%}.ct-major-eleventh:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:37.5%}.ct-major-eleventh:after{display:table}.ct-major-eleventh>svg{display:block;position:absolute;top:0;left:0}.ct-major-twelfth{display:block;position:relative;width:100%}.ct-major-twelfth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:33.3333333333%}.ct-major-twelfth:after{display:table}.ct-major-twelfth>svg{display:block;position:absolute;top:0;left:0}.ct-double-octave{display:block;position:relative;width:100%}.ct-double-octave:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:25%}.ct-double-octave:after{display:table}.ct-double-octave>svg{display:block;position:absolute;top:0;left:0}.ct-series-a .ct-line {stroke-width: 1px;stroke: #00f;}.ct-series-b .ct-line {stroke-width: 1px;stroke: #0bb;}.ct-series-c .ct-line {stroke-width: 1px;stroke: #0d0;}.ct-series-d .ct-line {stroke-width: 1px;stroke: #dd0;}.ct-series-e .ct-line {stroke-width: 1px;stroke: #f90;}.ct-series-f .ct-line {stroke-width: 1px;stroke: #f00;}.ct-series-g .ct-line {stroke-width: 1px;stroke: #c0c;}.ct-series-h .ct-line {stroke-width: 1px;stroke: #000;}.ct-series-i .ct-line {stroke-width: 1px;stroke: #777;}.ct-series-j .ct-line {stroke-width: 1px;}text{font-family:sans-serif;}</style>',
+                    chartStyle = '<style>.ct-perfect-fourth:after,.ct-square:after{content:"";clear:both}.ct-label{fill:rgba(0,0,0,.4);color:rgba(0,0,0,.4);font-size:.75rem;line-height:1}.ct-grid-background,.ct-line{fill:none}.ct-chart-line .ct-label{display:block;display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}.ct-chart-donut .ct-label,.ct-chart-pie .ct-label{dominant-baseline:central}.ct-label.ct-horizontal.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-label.ct-horizontal.ct-end{-webkit-box-align:flex-start;-webkit-align-items:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-label.ct-vertical.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-end;-webkit-justify-content:flex-end;-ms-flex-pack:flex-end;justify-content:flex-end;text-align:right;text-anchor:end}.ct-label.ct-vertical.ct-end{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-grid{stroke:rgba(0,0,0,.2);stroke-width:1px;stroke-dasharray:2px}.ct-point{stroke-width:10px;stroke-linecap:round}.ct-line{stroke-width:4px}.ct-area{stroke:none;fill-opacity:.1}.ct-series-a .ct-line,.ct-series-a .ct-point{stroke: #00f;}.ct-series-a .ct-area{fill:#d70206}.ct-series-b .ct-line,.ct-series-b .ct-point{stroke: #0bb;}.ct-series-b .ct-area{fill:#f05b4f}.ct-series-c .ct-line,.ct-series-c .ct-point{stroke: #0d0;}.ct-series-c .ct-area{fill:#f4c63d}.ct-series-d .ct-line,.ct-series-d .ct-point{stroke: #dd0;}.ct-series-d .ct-area{fill:#d17905}.ct-series-e .ct-line,.ct-series-e .ct-point{stroke-width: 1px;stroke: #f90;}.ct-series-e .ct-area{fill:#453d3f}.ct-series-f .ct-line,.ct-series-f .ct-point{stroke: #f00;}.ct-series-f .ct-area{fill:#59922b}.ct-series-g .ct-line,.ct-series-g .ct-point{stroke:#c0c}.ct-series-g .ct-area{fill:#0544d3}.ct-series-h .ct-line,.ct-series-h .ct-point{stroke:#000}.ct-series-h .ct-area{fill:#6b0392}.ct-series-i .ct-line,.ct-series-i .ct-point{stroke:#777}.ct-series-i .ct-area{fill:#f05b4f}.ct-square{display:block;position:relative;width:100%}.ct-square:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:100%}.ct-square:after{display:table}.ct-square>svg{display:block;position:absolute;top:0;left:0}.ct-perfect-fourth{display:block;position:relative;width:100%}.ct-perfect-fourth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:75%}.ct-perfect-fourth:after{display:table}.ct-perfect-fourth>svg{display:block;position:absolute;top:0;left:0}.ct-line {stroke-width: 1px;}.ct-point {stroke-width: 2px;}text{font-family:sans-serif;}</style>',
                     svgxml = new XMLSerializer().serializeToString(svgGraph);
             svgxml = svgxml.replace(pattern, '');
             svgxml = svgxml.replace(/foreignObject/g, 'text');
@@ -1039,14 +1097,20 @@ function graph_new_labels() {
     var graph_csv_temp = '';
     var labelsvg = '<svg width="60" height="300">';
     graph_csv_temp += '"time",';
+    var labelClass = [1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+    var labelPre = ["","","","","","","","","","","","","",""];
+    if (graph_options.graph_type === 'X') {
+        labelClass = [1,1,2,2,3,3,4,4,5,5,6,6,7,7];
+        labelPre = ["x: ","y: ","x: ","y: ","x: ","y: ","x: ","y: ","x: ","y: ","x: ","y: ","x: ","y: "];
+    }
     for (var t = 0; t < graph_labels.length; t++) {
         labelsvg += '<g id="labelgroup' + (t + 1) + '" transform="translate(0,' + (t * 30 + 25) + ')">';
         labelsvg += '<rect x="0" y = "0" width="60" height="26" rx="3" ry="3" id="label' + (t + 1) + '" ';
-        labelsvg += 'style="stroke:1px;stroke-color:blue;" class="ct-marker-' + (t + 1) + '"/><rect x="3" y = "12"';
+        labelsvg += 'style="stroke:1px;stroke-color:blue;" class="ct-marker-' + labelClass[t] + '"/><rect x="3" y="12"';
         labelsvg += 'width="54" height="11" rx="3" ry="3" id="value' + (t + 1) + 'bkg" style="fill:rgba';
         labelsvg += '(255,255,255,.7);stroke:none;"/><text id="label' + (t + 1) + 'text" x="3" ';
-        labelsvg += 'y="9" style="font-family:Arial;font-size: 9px;fill:#fff;font-weight:bold;">' + graph_labels[t];
-        labelsvg += '</text><text id="gValue' + (t + 1) + '" x="5" y="21" style="align:right;';
+        labelsvg += 'y="9" style="font-family:Arial;font-size: 9px;fill:#fff;font-weight:bold;">' + labelPre[t];
+        labelsvg += graph_labels[t] + '</text><text id="gValue' + (t + 1) + '" x="5" y="21" style="align:right;';
         labelsvg += 'font-family:Arial;font-size: 10px;fill:#000;"></text></g>';
         graph_csv_temp += '"' + graph_labels[t].replace(/"/g, '_') + '",';
     }

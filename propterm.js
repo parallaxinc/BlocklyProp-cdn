@@ -94,32 +94,36 @@ $(document).ready(function () {
 });
 
 function processKey(code) {
+    var t_str = String.fromCharCode(code);
+    
     //Emit key code to properly destination
     if (active_connection !== null && active_connection !== 'simulated' && active_connection !== 'websocket') {
         if (client_version >= minEnc64Ver) {
-            var t_str = String.fromCharCode(code);
             active_connection.send(btoa(t_str));
             if (echo_keys) {
                 displayInTerm(t_str);
             }
         } else {
-            active_connection.send(String.fromCharCode(code));
+            active_connection.send(t_str);
             if (trap_echos) {
                 echo_trap.push(code);
             }
         }    
     } else if (active_connection === 'simulated') {
-        updateTermBox(String.fromCharCode(code));
+        displayInTerm(t_str);
     } else if (active_connection === 'websocket') {
         var msg_to_send = {
             type: 'serial-terminal',
             outTo: 'terminal',
             portPath: getComPort(),
             baudrate: baudrate.toString(10),
-            msg: String.fromCharCode(code),
+            msg: t_str,
             action: 'msg'
         };
         client_ws_connection.send(JSON.stringify(msg_to_send));
+        if (echo_keys) {
+            displayInTerm(t_str);
+        }
     } 
 }
 
