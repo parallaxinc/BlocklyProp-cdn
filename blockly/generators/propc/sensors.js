@@ -1847,9 +1847,14 @@ Blockly.Blocks.sirc_get = {
     init: function () {
         this.setTooltip(Blockly.MSG_SIRC_GET_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
+        if (projectData['board'] && projectData['board'] === "heb-wx") {
+            this.appendDummyInput()
+                .appendField("Sony Remote value received");
+        } else {
+            this.appendDummyInput()
                 .appendField("Sony Remote value received from PIN")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
+        }
         this.setInputsInline(true);
         this.setPreviousStatement(false, null);
         this.setNextStatement(false, null);
@@ -1858,8 +1863,12 @@ Blockly.Blocks.sirc_get = {
 };
 
 Blockly.propc.sirc_get = function () {
-    var pin = this.getFieldValue('PIN');
-
+    var pin = '';
+    if (projectData['board'] && projectData['board'] === "heb-wx") {
+        pin = '23';
+    } else {
+        pin = this.getFieldValue('PIN');
+    }
     if (!this.disabled) {
         Blockly.propc.definitions_["sirc"] = '#include "sirc.h"';
         Blockly.propc.setups_["sirc"] = "sirc_setTimeout(70);";
