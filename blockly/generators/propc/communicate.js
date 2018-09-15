@@ -3845,8 +3845,7 @@ Blockly.Blocks.wx_config_page = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        var boardType = projectData['board'];
-        if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+        if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
         {
             this.setWarningText('WARNING: You must use a Simple WX\ninitialize block at the beginning of your program!');
         } else {
@@ -3863,11 +3862,10 @@ Blockly.Blocks.wx_config_page = {
 
 Blockly.propc.wx_config_page = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
     {
         return '// ERROR: Simple WX is not initialized!\n';
     } else {
@@ -3920,8 +3918,7 @@ Blockly.Blocks.wx_set_widget = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        var boardType = projectData['board'];
-        if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+        if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
         {
             this.setWarningText('WARNING: You must use a Simple WX\ninitialize block at the beginning of your program!');
         } else {
@@ -4044,11 +4041,10 @@ Blockly.Blocks.wx_set_widget = {
 
 Blockly.propc.wx_set_widget = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
     {
         return '// ERROR: Simple WX is not initialized!\n';
     } else {
@@ -4097,11 +4093,10 @@ Blockly.Blocks.wx_send_widget = {
 
 Blockly.propc.wx_send_widget = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
     {
         return '// ERROR: Simple WX is not initialized!\n';
     } else {
@@ -4131,11 +4126,10 @@ Blockly.Blocks.wx_read_widgets = {
 
 Blockly.propc.wx_read_widgets = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
     {
         return '// ERROR: Simple WX is not initialized!\n';
     } else {
@@ -4173,11 +4167,10 @@ Blockly.Blocks.wx_get_widget = {
 
 Blockly.propc.wx_get_widget = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
     {
         return '// ERROR: Simple WX is not initialized!\n';
     } else {
@@ -4204,11 +4197,10 @@ Blockly.Blocks.wx_evt_connected = {
 
 Blockly.propc.wx_evt_connected = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
     {
         return '// ERROR: Simple WX is not initialized!\n';
     } else {
@@ -4232,11 +4224,10 @@ Blockly.Blocks.wx_reconnect = {
 
 Blockly.propc.wx_reconnect = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && boardType !== 'heb-wx')
+    if (allBlocks.toString().indexOf('Simple WX initialize') === -1 && projectData['board'] !== 'heb-wx')
     {
         return '// ERROR: Simple WX is not initialized!\n';
     } else {
@@ -4344,7 +4335,13 @@ Blockly.Blocks.wx_scan_multiple = {
         this.setWarningText(null);
         // not used, but allows this block to share functions from serial_scan_multiple block
         this.ser_pins = [];
-        //this.serPins();
+    },
+    setPrefix_: function (details) {
+        var prefixVisible = false;
+        if (details['ACTION'] === 'POST')
+            prefixVisible = true;
+        this.getInput('PREFIX').setVisible(prefixVisible);
+        var data = this.getFieldValue('VARNAME');
     },
     mutationToDom: Blockly.Blocks['serial_scan_multiple'].mutationToDom,
     domToMutation: Blockly.Blocks['serial_scan_multiple'].domToMutation,
@@ -4355,8 +4352,7 @@ Blockly.Blocks.wx_scan_multiple = {
     updateSerPin: function () {},
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        var boardType = projectData['board'];
-        if (allBlocks.toString().indexOf('WX initialize') === -1 && boardType !== 'heb-wx')
+        if (allBlocks.toString().indexOf('WX initialize') === -1 && projectData['board'] !== 'heb-wx')
         {
             this.setWarningText('WARNING: You must use a WX\ninitialize block at the beginning of your program!');
         } else {
@@ -4392,11 +4388,10 @@ Blockly.Blocks.wx_scan_multiple = {
 
 Blockly.propc.wx_scan_multiple = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.toString().indexOf('WX initialize') > -1 || boardType === 'heb-wx')
+    if (allBlocks.toString().indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx')
     {
         var handle = Blockly.propc.variableDB_.getName(this.getFieldValue('HANDLE'), Blockly.Variables.NAME_TYPE);
         var conn = this.getFieldValue('CONNECTION');
@@ -4484,7 +4479,7 @@ Blockly.Blocks.wx_print_multiple = {
 };
 
 Blockly.propc.wx_print_multiple = function () {
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
     return Blockly.propc.console_print_multiple();
@@ -4519,7 +4514,9 @@ Blockly.Blocks.wx_scan_string = {
         this.getInput('PREFIX').setVisible(prefixVisible);
         var data = this.getFieldValue('VARNAME');
         this.removeInput('STORE');
-
+        if (data === 'item' && details['ACTION'] === 'TCP') {
+            data = 'wxBuffer';
+        }
         this.appendDummyInput('STORE')
                 .appendField('store string in')
                 .appendField(new Blockly.FieldVariable(data), 'VARNAME');
@@ -4533,16 +4530,42 @@ Blockly.Blocks.wx_scan_string = {
         if (Blockly.Names.equals(oldName, this.getFieldValue('VARNAME')))
             this.setFieldValue(newName, 'VARNAME');
     },
-    onchange: Blockly.Blocks['wx_scan_multiple'].onchange
+    onchange: function () {
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        if (allBlocks.toString().indexOf('WX initialize') === -1 && projectData['board'] !== 'heb-wx')
+        {
+            this.setWarningText('WARNING: You must use a WX\ninitialize block at the beginning of your program!');
+        } else {
+            var warnTxt = null;
+            var thisPosition = Number(this.getRelativeToSurfaceXY().y);
+
+            if (this.getFieldValue('CONNECTION') === 'TCP') {
+                warnTxt = 'You must use a WX buffer block before this\nblock and you must store the string in the buffer\nvarialbe when scanning a string from a TCP connection!';
+            }
+            for (var ik = 0; ik < allBlocks.length; ik++) {
+                if (allBlocks[ik].toString().indexOf('Simple WX') === 0) {
+                    warnTxt = 'WARNING: You cannot use Advanced WX and\nSimple WX blocks together in your project!';
+                } else if (allBlocks[ik].type === 'wx_buffer') {
+                    var bufPosition = Number(allBlocks[ik].getRelativeToSurfaceXY().y);
+                    if (allBlocks[ik].getFieldValue('BUFFER') === this.getFieldValue('VARNAME') && thisPosition > bufPosition) {
+                        warnTxt = null;
+                    }
+                }
+            }
+            if (this.optionList_ && this.workspace && this.optionList_.length < 1) {
+                warnTxt = 'WX scan must have at least one search term.';
+            }
+            this.setWarningText(warnTxt);
+        }
+    }
 };
 
 Blockly.propc.wx_scan_string = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx'))
+    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx'))
     {
         var handle = Blockly.propc.variableDB_.getName(this.getFieldValue('HANDLE'), Blockly.Variables.NAME_TYPE);
         var conn = this.getFieldValue('CONNECTION');
@@ -4592,11 +4615,10 @@ Blockly.Blocks.wx_send_string = {
 
 Blockly.propc.wx_send_string = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx'))
+    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx'))
     {
         var data = Blockly.propc.valueToCode(this, 'DATA', Blockly.propc.ORDER_NONE);
         var handle = Blockly.propc.variableDB_.getName(this.getFieldValue('HANDLE'), Blockly.Variables.NAME_TYPE);
@@ -4646,11 +4668,10 @@ Blockly.Blocks.wx_receive_string = {
 
 Blockly.propc.wx_receive_string = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx'))
+    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx'))
     {
         var data = Blockly.propc.variableDB_.getName(this.getFieldValue('DATA'), Blockly.Variables.NAME_TYPE);
         var handle = Blockly.propc.variableDB_.getName(this.getFieldValue('HANDLE'), Blockly.Variables.NAME_TYPE);
@@ -4697,11 +4718,10 @@ Blockly.Blocks.wx_poll = {
 
 Blockly.propc.wx_poll = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx'))
+    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx'))
     {
         var id = Blockly.propc.variableDB_.getName(this.getFieldValue('ID'), Blockly.Variables.NAME_TYPE);
         var event = Blockly.propc.variableDB_.getName(this.getFieldValue('EVENT'), Blockly.Variables.NAME_TYPE);
@@ -4804,11 +4824,10 @@ Blockly.Blocks.wx_listen = {
 
 Blockly.propc.wx_listen = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx'))
+    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx'))
     {
         var path = Blockly.propc.valueToCode(this, 'PATH', Blockly.propc.ORDER_NONE);
         var protocol = this.getFieldValue('PROTOCOL');
@@ -4844,8 +4863,7 @@ Blockly.Blocks.wx_join = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        var boardType = projectData['board'];
-        if (allBlocks.toString().indexOf('WX initialize') === -1 && boardType !== 'heb-wx')
+        if (allBlocks.toString().indexOf('WX initialize') === -1 && projectData['board'] !== 'heb-wx')
         {
             this.setWarningText('WARNING: You must use a WX\ninitialize block at the beginning of your program!');
         } else {
@@ -4856,11 +4874,10 @@ Blockly.Blocks.wx_join = {
 
 Blockly.propc.wx_join = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx')
+    if (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx')
     {
         var ssid = this.getFieldValue('SSID') || '';
         var pass = this.getFieldValue('PASS') || '';
@@ -5001,7 +5018,7 @@ Blockly.Blocks.wx_mode = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        if (allBlocks.toString().indexOf('WX initialize') === -1 && boardType !== 'heb-wx')
+        if (allBlocks.toString().indexOf('WX initialize') === -1 && projectData['board'] !== 'heb-wx')
         {
             this.setWarningText('WARNING: You must use a WX\ninitialize block at the beginning of your program!');
         }
@@ -5010,11 +5027,10 @@ Blockly.Blocks.wx_mode = {
 
 Blockly.propc.wx_mode = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx')
+    if (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx')
     {
         var mode = this.getFieldValue('MODE');
         var action = this.getFieldValue('ACTION');
@@ -5039,43 +5055,15 @@ Blockly.Blocks.wx_buffer = {
         this.setTooltip(Blockly.MSG_AWX_BUFFER_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
-                .appendField("WX buffer use default")
-                .appendField(new Blockly.FieldCheckbox("TRUE", function (action) {
-                    this.sourceBlock_.setPrefix_({"ACTION": action});
-                }), "DEFAULT")
+                .appendField("WX buffer use variable")
+                .appendField(new Blockly.FieldVariable('wxBuffer'), "BUFFER")
                 .appendField("set size to")
                 .appendField(new Blockly.FieldTextInput('64',
                         Blockly.FieldTextInput.numberValidator), "SIZE")
-                .appendField("bytes ");
-        this.appendDummyInput('BUF')
-                .appendField("set")
-                .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), "BUFFER")
-                .appendField("as buffer");
-        this.getInput('BUF').setVisible(false);
+                .appendField("bytes");
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    mutationToDom: function () {
-        var container = document.createElement('mutation');
-        var action = this.getFieldValue('DEFAULT');
-        container.setAttribute('action', action);
-        return container;
-    },
-    domToMutation: function (xmlElement) {
-        var action = xmlElement.getAttribute('action');
-        this.setPrefix_({"ACTION": action});
-    },
-    setPrefix_: function (details) {
-        var data = this.getFieldValue('BUFFER');
-        this.removeInput('BUF');
-        if (details["ACTION"] === 'FALSE' || details["ACTION"] === false || details["ACTION"] === 'false') {
-            this.appendDummyInput('BUF')
-                    .appendField("set")
-                    .appendField(new Blockly.FieldVariable(data || Blockly.LANG_VARIABLES_GET_ITEM), "BUFFER")
-                    .appendField("as buffer");
-            this.getInput('BUF').setVisible(true);
-        }
     },
     getVarType: function () {
         return "String";
@@ -5093,23 +5081,16 @@ Blockly.Blocks.wx_buffer = {
 
 Blockly.propc.wx_buffer = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx'))
-    {
+    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx')) {
         var size = this.getFieldValue('SIZE') || '64';
-        var def = this.getFieldValue('DEFAULT');
         var code = '';
-        if (def === "TRUE") {
-            code += 'wifi_bufferSize(' + size + ');\n';
-        } else {
-            var buffer = Blockly.propc.variableDB_.getName(this.getFieldValue('BUFFER'), Blockly.Variables.NAME_TYPE);
-            code += 'wifi_setBuffer(' + buffer + ',' + size + ');\n';
-            Blockly.propc.vartype_[buffer] = 'char';
-            Blockly.propc.varlength_[buffer] = size;
-        }
+        var buffer = Blockly.propc.variableDB_.getName(this.getFieldValue('BUFFER'), Blockly.Variables.NAME_TYPE);
+        code += 'wifi_setBuffer(' + buffer + ',' + size + ');\n';
+        Blockly.propc.vartype_[buffer] = 'char';
+        Blockly.propc.varlength_[buffer] = size;
         return code;
     } else {
         return '// ERROR: WX is not initialized!\n';
@@ -5165,11 +5146,10 @@ Blockly.Blocks.wx_disconnect = {
 
 Blockly.propc.wx_disconnect = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
     }
-    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx'))
+    if (allBlocks.indexOf('Simple WX initialize') === -1 && (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx'))
     {
         return 'wifi_disconnect(' + Blockly.propc.variableDB_.getName(this.getFieldValue('ID'), Blockly.Variables.NAME_TYPE) + ');\n';
     } else {
@@ -5192,7 +5172,7 @@ Blockly.Blocks.wx_ip = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        if (allBlocks.toString().indexOf('WX initialize') === -1 && boardType !== 'heb-wx')
+        if (allBlocks.toString().indexOf('WX initialize') === -1 && projectData['board'] !== 'heb-wx')
         {
             this.setWarningText('WARNING: You must use a WX\ninitialize block at the beginning of your program!');
         }
@@ -5201,15 +5181,14 @@ Blockly.Blocks.wx_ip = {
 
 Blockly.propc.wx_ip = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    var boardType = projectData['board'];
-    if (boardType === 'heb-wx') {
+    if (projectData['board'] === 'heb-wx') {
         if (allBlocks.indexOf('Simple WX initialize') > -1) {
             var runInit = Blockly.propc.wx_init();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
         } else {
             var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
         }
     }
-    if (allBlocks.indexOf('WX initialize') > -1 || boardType === 'heb-wx')
+    if (allBlocks.indexOf('WX initialize') > -1 || projectData['board'] === 'heb-wx')
     {
         var mode = this.getFieldValue('MODE');
         if (!this.disabled) {

@@ -336,10 +336,12 @@ Blockly.propc.finish = function (code) {
         // Currently applying a fix to allocate ~128 bytes to char array pointers because they are myseriouly getting compiled to the same memory location in the prop - ugh.
         // Excludes variables with "__" in the name for now because those are buffers for private functions
         // TODO: This is a temporary patch until I can figure something better out -MM
-        if (definitions[def].indexOf("char *") > -1 && definitions[def].indexOf("__") === -1 && definitions[def].indexOf("rfidBfr") === -1 ) {
+        if (definitions[def].indexOf("char *") > -1 && definitions[def].indexOf("__") === -1 && definitions[def].indexOf("rfidBfr") === -1  && definitions[def].indexOf("wxBuffer") === -1) {
             definitions[def] = definitions[def].replace("char *", "char ").replace(";", "[64];");
             //definitions[def] = definitions[def].replace(/char \*(\s*)(\w+);/g, 'char *$1$2' + bigStr + spaceAdd + endStr);
             //spaceAdd += ' ';
+        } else if (definitions[def].indexOf("wxBuffer") > -1) {
+            definitions[def] = definitions[def].replace("char *", "char ").replace("wxBuffer;", "wxBuffer[64];");
         }
         
         // TODO: Temporary patch to correct some weirdness with char array pointer declarations:
@@ -415,7 +417,13 @@ Blockly.propc.finish = function (code) {
         }
         
         // Change strings assigned to variables to strcpy functions
-        code = code.replace(/(\w+)\s*=\s*\({0,1}"(.*)"\){0,1};/g, 'strcpy($1, "$2");\t\t\t// Save string into variable $1.');
+        code = code.replace(/(\w+)\s*=\s*\({0,1}"(.*)"\){0,1};/g, function(m, p1, p2) {
+            if(p2.indexOf(',') === 0 && p2.indexOf(', "') > -1) {
+                return m;
+            } else {
+                return 'strcpy(' + p1 + ', "' + p2 + '");\t\t\t// Save string into variable ' + p1 + '.';
+            }
+        });
         
         code = 'int main()\n{\n' + setups.join('\n') + '\n' + code + '\n}';
         var setup = '';
@@ -596,6 +604,20 @@ Blockly.Names.prototype.safeName_ = function (name) {
         }
     }
     return name;
+};
+
+var findBlocksByType = function(blockType) {
+    var blockList = Blockly.getMainWorkspace().getAllBlocks();
+    var blockMatchList = [];
+    for (var idx = 0; idx < blockList.length; idx++) {
+        if (blockList[idx].type === blockType) {
+            blockMatchList.push(blockList[idx].id);
+        }
+    }
+    if (blockMatchList.length > 0) {
+        return blockMatchList;
+    }
+    return null;
 };
 
 // polyfill that removes duplicates from an array and sorts it
