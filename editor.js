@@ -53,8 +53,9 @@ $(document).ready(function () {
         //Decode and parse project data coming from a sharelink
         var projectRaw = atob($("meta[name=projectlink]").attr("content"));
         projectlink = JSON.parse(projectRaw);
-        console.log(projectlink);
-        loadProjectData(projectlink);
+        //console.log(projectlink);
+        setupWorkspace(projectlink);
+        //loadProjectData(projectlink);
     } else if (!idProject && !isOffline) {
         window.location = baseUrl;
 
