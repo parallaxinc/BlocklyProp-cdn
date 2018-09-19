@@ -2682,7 +2682,16 @@ Blockly.Blocks.oled_clear_screen = {
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField("OLED command")
-                .appendField(new Blockly.FieldDropdown([["clear screen", "CLS"], ["sleep", "SLEEP"], ["wake", "WAKE"], ["invert", "INV"]]), "CMD");
+                .appendField(new Blockly.FieldDropdown([
+                        ["clear screen", "CLS"], 
+                        ["sleep", "SLEEP"], 
+                        ["wake", "WAKE"], 
+                        ["invert", "INV"],
+                        ["orient pins up", "O-UP"]
+                        ["orient pins down", "O-DOWN"]
+                        ["orient pins left", "O-LEFT"]
+                        ["orient pins right", "O-RIGHT"]
+                ]), "CMD");
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -2716,6 +2725,14 @@ Blockly.propc.oled_clear_screen = function () {
             code += 'oledc_sleep();\n';
         } else if (cmd === 'INV') {
             code += 'oledc_invertDisplay();\n';
+        } else if (cmd === 'O-UP') {
+            code += 'oledc_setRotation(0);\n';
+        } else if (cmd === 'O-DOWN') {
+            code += 'oledc_setRotation(2);\n';
+        } else if (cmd === 'O-LEFT') {
+            code += 'oledc_setRotation(1);\n';
+        } else if (cmd === 'O-RIGHT') {
+            code += 'oledc_setRotation(3);\n';
         }
         return code;
     }
