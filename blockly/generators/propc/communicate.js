@@ -2687,9 +2687,9 @@ Blockly.Blocks.oled_clear_screen = {
                         ["sleep", "SLEEP"], 
                         ["wake", "WAKE"], 
                         ["invert", "INV"],
-                        ["orient pins up", "O-UP"]
-                        ["orient pins down", "O-DOWN"]
-                        ["orient pins left", "O-LEFT"]
+                        ["orient pins up", "O-UP"],
+                        ["orient pins down", "O-DOWN"],
+                        ["orient pins left", "O-LEFT"],
                         ["orient pins right", "O-RIGHT"]
                 ]), "CMD");
         this.setInputsInline(true);

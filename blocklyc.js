@@ -113,7 +113,7 @@ function tabClick(id) {
     }
     if (projectData['board'] !== 'propcfile') {
 
-        // Reinstate keybindings from block workspace if this is a code-only project.
+        // Reinstate keybindings from block workspace if this is not a code-only project.
         if (Blockly.codeOnlyKeybind === true) {
             Blockly.bindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
             Blockly.codeOnlyKeybind = false;
@@ -259,17 +259,6 @@ function init(blockly) {
     codeXml.setReadOnly(true);
 
     window.Blockly = blockly;
-
-    // Make the 'Blocks' tab line up with the toolbox.
-    /*
-     if (Blockly.Toolbox) {
-     window.setTimeout(function () {
-     document.getElementById('tab_blocks').style.minWidth =
-     (Blockly.Toolbox.width - 38) + 'px';
-     // Account for the 19 pixel margin and on each side.
-     }, 1);
-     }
-     */
 
     if (projectData !== null) {
         if (projectData['code'].length < 43) {
@@ -636,7 +625,7 @@ function graphing_console() {
         var graph_settings_temp = propcCode.substring(graph_settings_start, graph_settings_end).split(':');
         var graph_settings_str = graph_settings_temp[1].split(',');
 
-        // GRAPH_SETTINGS:rate,x_axis_val,x_axis_type,y_min,y_max:GRAPH_SETTINGS_END //
+        // GRAPH_SETTINGS_START:rate,x_axis_val,x_axis_type,y_min,y_max:GRAPH_SETTINGS_END //
 
         var graph_labels_end = propcCode.indexOf(":GRAPH_LABELS_END //") + 20;
         var graph_labels_temp = propcCode.substring(graph_labels_start, graph_labels_end).split(':');
@@ -645,7 +634,7 @@ function graphing_console() {
         graph_options.refreshRate = Number(graph_settings_str[0]);
 
         graph_options.graph_type = graph_settings_str[2];
-        if (Number(graph_settings_str[3]) !== 0 && Number(graph_settings_str[4]) !== 0) {
+        if (Number(graph_settings_str[3]) !== 0 || Number(graph_settings_str[4]) !== 0) {
             graph_options.axisY = {
                 type: Chartist.AutoScaleAxis,
                 low: Number(graph_settings_str[3]),
@@ -712,8 +701,6 @@ function graphing_console() {
             connection.onerror = function (error) {
                 console.log('WebSocket Error');
                 console.log(error);
-                //connection.close();
-                //connection = new WebSocket(url);
             };
 
             connection.onmessage = function (e) {
