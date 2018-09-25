@@ -1771,6 +1771,7 @@ Blockly.Blocks.shift_in = {
         for (var t = 2; t < 33; t++) {
             shiftBytes.push([t.toString(10), t.toString(10)]);
         }
+        this.pinDropdown = profile.default.digital;
         this.setTooltip(Blockly.MSG_SHIFT_IN_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
@@ -1779,24 +1780,107 @@ Blockly.Blocks.shift_in = {
                         shiftBytes), "BITS")
                 .appendField("bits")
                 .appendField(new Blockly.FieldDropdown([["MSB first", "MSB"], ["LSB first", "LSB"]]), "MODE")
-                .appendField(new Blockly.FieldDropdown([["before clock", "PRE"], ["after clock", "POST"]]), "ORDER")
+                .appendField(new Blockly.FieldDropdown([["before clock", "PRE"], ["after clock", "POST"]]), "ORDER");
+        this.appendDummyInput('DATA_PIN')
                 .appendField("DATA")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "DATA")
+                .appendField(new Blockly.FieldDropdown(this.pinDropdown), "DATA");
+        this.appendDummyInput('CLK_PIN')
                 .appendField("CLK")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "CLK");
+                .appendField(new Blockly.FieldDropdown(this.pinDropdown), "CLK");
+        /*
+        this.otherPin = [null, null];
+        this.moveBefore = [null, null];
+        this.addPinMenu("DATA", 'SET_PIN1', 0);
+        this.addPinMenu("CLK", null, 1);
+        */
         this.setInputsInline(true);
         this.setOutput(true, "Number");
+    },
+    setDropdownPinList: function() {
+        var v_list = [];
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        for (var x = 0; x < allBlocks.length; x++) {
+            if (allBlocks[x].type === 'constant_define') {
+                var v_name = allBlocks[x].getFieldValue('CONSTANT_NAME');
+                if (v_name) {
+                    v_list.push([v_name, 'MY_' + v_name]);
+                }
+            }
+        }
+        this.pinDropdown = profile.default.digital.concat(v_list);
+        var d_pin = this.getFieldValue("DATA");
+        var c_pin = this.getFieldValue("CLK");
+        this.removeInput('DATA_PIN');
+        this.removeInput('CLK_PIN');
+        this.appendDummyInput('DATA_PIN')
+                .appendField("DATA")
+                .appendField(new Blockly.FieldDropdown(this.pinDropdown), "DATA");
+        this.appendDummyInput('CLK_PIN')
+                .appendField("CLK")
+                .appendField(new Blockly.FieldDropdown(this.pinDropdown), "CLK");
+        this.setFieldValue(d_pin, 'DATA');
+        this.setFieldValue(c_pin, 'CLK');
     }
+    /*
+    ,
+    addPinMenu: function (label, moveBefore, id_num) {
+        this.appendDummyInput('SET_PIN' + id_num.toString(10))
+                .appendField(label, 'LABEL')
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['other', 'other']]), function (op) {
+                    this.sourceBlock_.setToOther(op, moveBefore, id_num);
+                }), "PIN" + id_num.toString(10));
+        this.moveBefore[id_num] = moveBefore;
+    },
+    setToOther: function (op, moveBefore, id_num) {
+        if (op === 'other') {
+            this.otherPin[id_num] = true;
+            var label = this.getFieldValue('LABEL');
+            this.removeInput('SET_PIN' + id_num.toString(10));
+            this.appendValueInput('PIN' + id_num.toString(10))
+                    .appendField(label)
+                    .setCheck('Number')
+                    .appendField('A,' + profile.default.digital.toString(), 'RANGEVALS' + id_num.toString(10));
+            this.getField('RANGEVALS' + id_num.toString(10)).setVisible(false);
+            if (moveBefore) {
+                this.moveInputBefore('PIN' + id_num.toString(10), moveBefore);
+            }
+        }
+    },
+    mutationToDom: function () {
+        var container = document.createElement('mutation');
+        for (var idx = 0; idx < this.otherPin.length; idx++) {
+            container.setAttribute('otherpin' + idx.toString(10), this.otherPin[idx]);
+        }
+        return container;
+    },
+    domToMutation: function (xmlElement) {
+        for (var idx = 0; idx < this.otherPin.length; idx++) {
+            var op = xmlElement.getAttribute('otherpin' + idx.toString(10));
+            if (op === 'true') {
+                this.setToOther('other', this.moveBefore[idx], idx);
+            }
+        }
+    }
+    */
 };
 
 Blockly.propc.shift_in = function () {
+    var pin = [this.getFieldValue('DATA'), this.getFieldValue('CLK')];
+    /*
+    var pin = ['0','0'];
+    for (var idx = 0; idx < this.otherPin.length; idx++) {
+        if (this.otherPin[idx]) {
+            pin[idx] = Blockly.propc.valueToCode(this, 'PIN' + idx.toString(10), Blockly.propc.ORDER_ATOMIC) || '0';
+        } else {
+            pin[idx] = this.getFieldValue("PIN" + idx.toString(10));
+        }
+    }
+    */
     var bits = this.getFieldValue('BITS');
     var mode = this.getFieldValue('MODE');
     var ord = this.getFieldValue('ORDER');
-    var dat = this.getFieldValue('DATA');
-    var clk = this.getFieldValue('CLK');
 
-    return ['shift_in(' + dat + ', ' + clk + ', ' + mode + ord + ', ' + bits + ')', Blockly.propc.ORDER_NONE];
+    return ['shift_in(' + pin[0] + ', ' + pin[1] + ', ' + mode + ord + ', ' + bits + ')', Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.shift_out = {
