@@ -866,12 +866,12 @@ Blockly.Blocks.wait_pin = {
         this.setTooltip(Blockly.MSG_WAIT_PIN_TOOLTIP);
         this.setColour(colorPalette.getColor('system'));
         this.appendValueInput("PIN")
-            .setCheck("Number")
-            .appendField("wait until")
-            .appendField(new Blockly.FieldDropdown([["PIN","(1 << x)"], ["pin mask","x"]]), "PINTYPE");
+                .setCheck("Number")
+                .appendField("wait until")
+                .appendField(new Blockly.FieldDropdown([["PIN","(1 << x)"], ["pin mask","x"]]), "PINTYPE");
         this.appendValueInput("STATE")
-            .setCheck("Number")
-            .appendField(new Blockly.FieldDropdown([["is","waitpeq"], ["is not","waitpne"]]), "FUNC");
+                .setCheck("Number")
+                .appendField(new Blockly.FieldDropdown([["is","waitpeq"], ["is not","waitpne"]]), "FUNC");
         this.setInputsInline(true);
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, "Block");
@@ -1100,7 +1100,6 @@ Blockly.Blocks.high_low_value = {
         this.setColour(colorPalette.getColor('programming'));
         this.appendDummyInput()
                 .appendField(new Blockly.FieldDropdown([["high", "1"], ["low", "0"]]), 'VALUE');
-
         this.setOutput(true, 'Number');
         this.setPreviousStatement(false, null);
         this.setNextStatement(false, null);
