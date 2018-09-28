@@ -389,6 +389,8 @@ Blockly.Blocks.base_freqout = {
             this.getField('RANGEVALS0').setVisible(false);
             if (moveBefore) {
                 this.moveInputBefore('PIN', moveBefore);
+            } else {
+                this.render();
             }
         }
     },
@@ -1080,7 +1082,7 @@ Blockly.Blocks.ab_volt_in = {
         this.setColour(colorPalette.getColor('io'));
         this.appendDummyInput()
                 .appendField("A/D channel")
-                .appendField(new Blockly.FieldDropdown([["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"]]), "CHANNEL")
+                .appendField(new Blockly.FieldDropdown(profile.default.analog), "CHANNEL")
                 .appendField("read (0-5V) in volt-100ths");
         this.setOutput(true, 'Number');
         this.setPreviousStatement(false, null);
