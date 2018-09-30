@@ -148,6 +148,7 @@ Blockly.Blocks.PIR_Sensor = {
         this.setTooltip(Blockly.MSG_PIR_SENSOR_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
         this.pinChoices = ['PIN'];
+        this.otherPin = [false];
         this.addPinMenu("PIR sensor PIN", null, 0);
         this.setInputsInline(true);
         this.setNextStatement(false, null);
@@ -177,19 +178,51 @@ Blockly.Blocks.sound_impact_run = {
     init: function () {
         this.setTooltip(Blockly.MSG_SOUND_IMPACT_RUN_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Sound Impact initialize PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
+        this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
+        this.updateConstMenu();
+    },
+    updateConstMenu: function (ov, nv) {
+        this.v_list = [];
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        for (var x = 0; x < allBlocks.length; x++) {
+            if (allBlocks[x].type === 'constant_define') {
+                var v_name = allBlocks[x].getFieldValue('CONSTANT_NAME');
+                if (v_name === ov && nv) {
+                    v_name = nv;
+                }
+                if (v_name) {
+                    this.v_list.push([v_name, v_name]);
+                }
+            }
+        }
+        this.v_list = uniq_fast(this.v_list);
+        this.setPinMenus(ov, nv);
+    },
+    setPinMenus: function (ov, nv) {
+        var m1 = this.getFieldValue('PIN');
+        this.removeInput('PINS');
+        this.appendDummyInput('PINS')
+                .appendField("Sound Impact initialize PIN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN");
+        if (m1 && m1 === ov && nv) {
+            this.setFieldValue(nv, 'PIN');
+        } else if (m1) {
+            this.setFieldValue(m1, 'PIN');
+        }
     }
 };
 
 Blockly.propc.sound_impact_run = function () {
     if (!this.disabled) {
+        var pin = this.getFieldValue('PIN');
+        if (profile.default.digital.toString().indexOf(pin + ',' + pin) === -1) {
+            pin = 'MY_' + pin;
+        }
         Blockly.propc.definitions_["sound_impact"] = '#include "soundimpact.h"';
-        Blockly.propc.setups_["sound_impact"] = 'int *__soundimpactcog = soundImpact_run(' + this.getTitleValue('PIN') + ');';
+        Blockly.propc.setups_["sound_impact"] = 'int *__soundimpactcog = soundImpact_run(' + pin + ');';
     }
 
     return '';
@@ -336,7 +369,6 @@ Blockly.Blocks.colorpal_get_colors_raw = {
     },
     domToMutation: function (xmlElement) {
         var cpin = xmlElement.getAttribute('cpin');
-        //this.updateCpin();
         this.cp_pins = JSON.parse(xmlElement.getAttribute('pinmenu'));
         if (cpin === 'null') {
             cpin = null;
@@ -514,22 +546,46 @@ Blockly.Blocks.fp_scanner_init = {
     init: function () {
         this.setTooltip(Blockly.MSG_FPS_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Fingerprint Scanner initialize RX")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "RXPIN")
-                .appendField("TX")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "TXPIN");
+        this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var m1 = this.getFieldValue('RXPIN');
+        var m2 = this.getFieldValue('TXPIN');
+        this.removeInput('PINS');
+        this.appendDummyInput()
+                .appendField("Fingerprint Scanner initialize RX")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "RXPIN")
+                .appendField("TX")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "TXPIN");
+        if (m1 && m1 === ov && nv) {
+            this.setFieldValue(nv, 'RXPIN');
+        } else if (m1) {
+            this.setFieldValue(m1, 'RXPIN');
+        }
+
+        if (m2 && m2 === ov && nv) {
+            this.setFieldValue(nv, 'TXPIN');
+        } else if (m2) {
+            this.setFieldValue(m2, 'TXPIN');
+        }
     }
 };
 
 Blockly.propc.fp_scanner_init = function () {
-    var rxpin = this.getFieldValue('RXPIN');
-    var txpin = this.getFieldValue('TXPIN');
-
     if (!this.disabled) {
+        var rxpin = this.getFieldValue('RXPIN');
+        var txpin = this.getFieldValue('TXPIN');
+        if (profile.default.digital.toString().indexOf(rxpin + ',' + rxpin) === -1) {
+            rxpin = 'MY_' + rxpin;
+        }
+        if (profile.default.digital.toString().indexOf(pin_out + ',' + pin_out) === -1) {
+            txpin = 'MY_' + txpin;
+        }
         Blockly.propc.global_vars_["fpScannerObj"] = 'fpScanner *fpScan;';
         Blockly.propc.definitions_["fpScannerDef"] = '#include "fingerprint.h"';
         Blockly.propc.setups_["fpScanner"] = 'fpScan = fingerprint_open(' + txpin + ', ' + rxpin + ');';
@@ -953,31 +1009,46 @@ Blockly.Blocks.lsm9ds1_init = {
     init: function () {
         this.setTooltip(Blockly.MSG_LSM9DS1_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("IMU initialize SCL")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_SCL")
-                .appendField("SDIO")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_SDIO")
-                .appendField("CS_AG")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_CSAG")
-                .appendField("CS_M")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_CSM");
-
+        this.appendDummyInput('PINS');
         this.setInputsInline(false);
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var mv = ['PIN_SCL', 'PIN_SCL', 'PIN_CSAG', 'PIN_CSM'];
+        var m = [this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_CSAG'), this.getFieldValue('PIN_CSM')];
+        this.removeInput('PINS');
+        this.appendDummyInput('PINS')
+                .appendField("IMU initialize SCL")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SCL")
+                .appendField("SDIO")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SDIO")
+                .appendField("CS_AG")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CSAG")
+                .appendField("CS_M")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CSM");
+        for (var i = 0; i < 4; i++) {
+            if (m[i] && m[i] === ov && nv) {
+                this.setFieldValue(nv, mv[i]);
+            } else if (m[i]) {
+                this.setFieldValue(m[i], mv[i]);
+            }
+        }
     }
 };
 
 Blockly.propc.lsm9ds1_init = function () {
-    var pin_scl = this.getFieldValue('PIN_SCL');
-    var pin_sio = this.getFieldValue('PIN_SDIO');
-    var pin_csa = this.getFieldValue('PIN_CSAG');
-    var pin_csm = this.getFieldValue('PIN_CSM');
-
+    var pin = [this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_SDIO'), this.getFieldValue('PIN_CSAG'), this.getFieldValue('PIN_CSM')];
+    for (var i = 0; i < 3; i++) {
+        if (profile.default.digital.toString().indexOf(pin[i] + ',' + pin[i]) === -1) {
+            pin[i] = 'MY_' + pin[i];
+        }
+    }
     if (!this.disabled) {
         Blockly.propc.definitions_["include_lsm9ds1"] = '#include "lsm9ds1.h"';
-        Blockly.propc.setups_["lsm9ds1_init"] = 'imu_init(' + pin_scl + ', ' + pin_sio + ', ' + pin_csa + ', ' + pin_csm + ');';
+        Blockly.propc.setups_["lsm9ds1_init"] = 'imu_init(' + pin[0] + ', ' + pin[1] + ', ' + pin[2] + ', ' + pin[3] + ');';
         Blockly.propc.global_vars_["lsm9ds1_vars"] = 'float __imuX, __imuY, __imuZ, __compI;\n';
     }
     return '';
@@ -1299,19 +1370,40 @@ Blockly.Blocks.GPS_init = {
     init: function () {
         this.setTooltip(Blockly.MSG_GPS_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("GPS module initialize TX")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "TXPIN")
-                .appendField("baud")
-                .appendField(new Blockly.FieldDropdown([["9600", "9600"], ["2400", "2400"], ["4800", "4800"], ["19200", "19200"]]), "BAUD");
-
+        this.appendDummyInput('PINS');
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var m = this.getFieldValue('TXPIN');
+        var b = this.getFieldValue('BAUD')
+        this.removeInput('PINS');
+        this.appendDummyInput('PINS')
+                .appendField("GPS module initialize TX")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "TXPIN")
+                .appendField("baud")
+                .appendField(new Blockly.FieldDropdown([
+                    ["9600", "9600"], 
+                    ["2400", "2400"], 
+                    ["4800", "4800"], 
+                    ["19200", "19200"]
+                ]), "BAUD");
+        this.setFieldValue(b ,'BAUD')
+        if (m && m === ov && nv) {
+            this.setFieldValue(nv, 'TXPIN');
+        } else if (m) {
+            this.setFieldValue(m, 'TXPIN');
+        }
     }
 };
 
 Blockly.propc.GPS_init = function () {
     var tx_pin = this.getFieldValue('TXPIN');
+    if (profile.default.digital.toString().indexOf(tx_pin + ',' + tx_pin) === -1) {
+        tx_pin = 'MY_' + tx_pin;
+    }
     var baud = this.getFieldValue('BAUD');
 
     if (!this.disabled) {
@@ -1778,16 +1870,33 @@ Blockly.Blocks.rfid_enable = {
     init: function () {
         this.setTooltip(Blockly.MSG_RFID_ENABLE_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("RFID initialize EN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_IN");
-        this.appendDummyInput()
-                .appendField("SOUT")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_OUT");
-
+        this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var m1 = this.getFieldValue('PIN_IN');
+        var m2 = this.getFieldValue('PIN_OUT');
+        this.removeInput('PINS');
+        this.appendDummyInput('PINS')
+                .appendField("RFID initialize EN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_IN")
+                .appendField("SOUT")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_OUT");
+        if (m1 && m1 === ov && nv) {
+            this.setFieldValue(nv, 'PIN_IN');
+        } else if (m1) {
+            this.setFieldValue(m1, 'PIN_IN');
+        }
+
+        if (m2 && m2 === ov && nv) {
+            this.setFieldValue(nv, 'PIN_OUT');
+        } else if (m2) {
+            this.setFieldValue(m2, 'PIN_OUT');
+        }
     }
 };
 
@@ -1795,6 +1904,14 @@ Blockly.propc.rfid_enable = function () {
     if (!this.disbaled) {
         var pin_in = this.getFieldValue('PIN_IN');
         var pin_out = this.getFieldValue('PIN_OUT');
+
+        if (profile.default.digital.toString().indexOf(pin_in + ',' + pin_in) === -1) {
+            pin_in = 'MY_' + pin_in;
+        }
+        if (profile.default.digital.toString().indexOf(pin_out + ',' + pin_out) === -1) {
+            pin_out = 'MY_' + pin_out;
+        }
+    
         Blockly.propc.definitions_["rfidser"] = '#include "rfidser.h"';
         Blockly.propc.global_vars_["rfidser"] = 'rfidser *rfid;';
         Blockly.propc.setups_["rfidser_setup"] = 'rfid = rfid_open(' + pin_out + ',' + pin_in + ');';
@@ -1885,21 +2002,38 @@ Blockly.Blocks.keypad_initialize = {
     init: function () {
         this.setTooltip(Blockly.MSG_KEYPAD_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("4x4 Keypad initialize PINS left")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P0")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P1")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P2")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P3")
-                .appendField('|')
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P4")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P5")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P6")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P7")
-                .appendField("right");
+        this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var m = [];
+        for (i = 0; i < 8; i++) {
+            m[i] = this.getFieldValue('P' + i.toString(10));
+        }
+        this.removeInput('PINS');
+        this.appendDummyInput('PINS')
+                .appendField("4x4 Keypad initialize PINS left")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P0")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P1")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P2")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P3")
+                .appendField('|')
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P4")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P5")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P6")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P7")
+                .appendField("right");
+        for (i = 0; i < 8; i++) {
+            if (m[i] && m[i] === ov && nv) {
+                this.setFieldValue(nv, 'P' + i.toString(10));
+            } else if (m[i]) {
+                this.setFieldValue(m[i], 'P' + i.toString(10));
+            }
+        }
     }
 };
 
@@ -1908,6 +2042,9 @@ Blockly.propc.keypad_initialize = function () {
         var kp = [];
         for (var k = 0; k < 8; k++) {
             kp[k] = this.getFieldValue('P' + k);
+            if (profile.default.digital.toString().indexOf(kp[k] + ',' + kp[k]) === -1) {
+                kp[k] = 'MY_' + kp[k];
+            }
         }
         var keypad_vars = 'int __rowPins[] = {' + kp[0] + ', ' + kp[1] + ', ' + kp[2] + ', ' + kp[3] + '};\n';
         keypad_vars += 'int __colPins[] = {' + kp[4] + ', ' + kp[5] + ', ' + kp[6] + ', ' + kp[7] + '};\n';

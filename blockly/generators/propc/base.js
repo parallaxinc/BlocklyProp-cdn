@@ -2305,12 +2305,8 @@ Blockly.Blocks.constant_define = {
             // Find all the blocks that have my value and tell them to update it
             var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
             for (var x = 0; x < allBlocks.length; x++) {
-                if (allBlocks[x] && allBlocks[x].type === 'constant_value') {
+                if (allBlocks[x] && allBlocks[x].updateConstMenu) {
                     allBlocks[x].updateConstMenu.call(allBlocks[x], ov, nv);
-                }
-                var func = allBlocks[x].setDropdownPinList;
-                if (func) {
-                    func.call(allBlocks[x]);
                 }
             }
         }
@@ -2354,6 +2350,7 @@ Blockly.propc.constant_define = function () {
 Blockly.Blocks.constant_value = {
     helpUrl: Blockly.MSG_VALUES_HELPURL,
     init: function () {
+        this.v_list = [];
         this.setTooltip(Blockly.MSG_CONSTANT_VALUE_TOOLTIP);
         this.setColour(colorPalette.getColor('programming'));
         this.appendDummyInput('VALUE_LIST')
@@ -2367,7 +2364,7 @@ Blockly.Blocks.constant_value = {
     },
     updateConstMenu: function (ov, nv) {
         var v_check = true;
-        var v_list = [];
+        this.v_list = [];
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
         for (var x = 0; x < allBlocks.length; x++) {
             if (allBlocks[x].type === 'constant_define') {
@@ -2376,19 +2373,19 @@ Blockly.Blocks.constant_value = {
                     v_name = nv;
                 }
                 if (v_name) {
-                    v_list.push([v_name, v_name]);
+                    this.v_list.push([v_name, v_name]);
                 }
                 v_check = false;
             }
         }
         if (v_check) {
-            v_list.push(['MYVALUE', 'MYVALUE']);
+            this.v_list.push(['MYVALUE', 'MYVALUE']);
         }
         var m = this.getFieldValue('VALUE');
 
         this.removeInput('VALUE_LIST');
         this.appendDummyInput('VALUE_LIST')
-                .appendField(new Blockly.FieldDropdown(uniq_fast(v_list)), "VALUE");
+                .appendField(new Blockly.FieldDropdown(uniq_fast(this.v_list)), "VALUE");
         if (m && m === ov && nv) {
             this.setFieldValue(nv, 'VALUE');
         } else if (m) {
