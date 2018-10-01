@@ -219,6 +219,7 @@ var prettyCode = function (raw_code) {
             .replace(/colorPal \* /g, "colorPal *")
             .replace(/ws2812 \* /g, "ws2812 *")
             .replace(/i2c \* /g, "i2c *")
+            .replace(/talk \* /g, "talk *")
             .replace(/sound \* /g, "sound *")
             .replace(/FILE \* /g, "FILE* ")
 
