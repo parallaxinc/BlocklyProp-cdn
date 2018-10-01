@@ -2011,7 +2011,7 @@ Blockly.Blocks.keypad_initialize = {
     updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
     setPinMenus: function (ov, nv) {
         var m = [];
-        for (i = 0; i < 8; i++) {
+        for (var i = 0; i < 8; i++) {
             m[i] = this.getFieldValue('P' + i.toString(10));
         }
         this.removeInput('PINS');
