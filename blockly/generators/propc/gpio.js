@@ -1432,17 +1432,21 @@ Blockly.propc.wav_play = function () {
         Blockly.propc.definitions_["include wavplayer"] = '#include "wavplayer.h"';
 
         var initFound = false;
+        var wPinFound = false;
 
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
         for (var x = 0; x < allBlocks.length; x++) {
             if (allBlocks[x].type === 'sd_init') {
                 initFound = true;
             }
+            if (allBlocks[x].type === 'wav_set_pins') {
+                wPinFound = true;
+            }
         }
         if (!initFound) {
             Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');';
         }
-        if (projectData["board"] === "heb-wx") {
+        if (projectData["board"] === "heb-wx" && !wPinFound) {
             Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + profile.default.earphone_jack + ');';
         }
     }
@@ -1521,7 +1525,7 @@ Blockly.propc.wav_set_pins = function () {
         pin_right = '-1';
     }
     /*
-    // TODO: is wav_close is added, uncomment the commented out code in this block
+    // TODO: if wav_close is added, uncomment the commented out code in this block
 
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
     var wavePinBlockCount = 0;

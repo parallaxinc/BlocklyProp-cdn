@@ -886,9 +886,19 @@ Blockly.Blocks.heb_text_to_speech_say = {
 Blockly.propc.heb_text_to_speech_say = function () {
     var str = Blockly.propc.valueToCode(this, "STRING", Blockly.propc.ORDER_NONE);
 
-    Blockly.propc.definitions_["TTS"] = '#include "text2speech.h"';
-    Blockly.propc.global_vars_["TTS"] = 'talk *tts_talk;';
-    Blockly.propc.setups_["TTS"] = 'tts_talk = talk_run(' + profile.default.earphone_jack + ');\ntalk_set_speaker(tts_talk, 1, 100);';
+    if (!this.disabled) {
+        var pins = profile.default.earphone_jack;
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        for (var x = 0; x < allBlocks.length; x++) {
+            if (allBlocks[x].type === 'heb_text_to_speech_pins') {
+                pins = allBlocks[x].getFieldValue('PINL') + ',' + allBlocks[x].getFieldValue('PINR');
+            }
+        }
+
+        Blockly.propc.definitions_["TTS"] = '#include "text2speech.h"';
+        Blockly.propc.global_vars_["TTS"] = 'talk *tts_talk;';
+        Blockly.propc.setups_["TTS"] = 'tts_talk = talk_run(' + pins + ');\ntalk_set_speaker(tts_talk, 1, 100);';
+    }
 
     var code = 'talk_say(tts_talk, ' + str + ');\n';
     return code;
@@ -910,10 +920,69 @@ Blockly.Blocks.heb_text_to_speech_spell = {
 Blockly.propc.heb_text_to_speech_spell = function () {
     var str = Blockly.propc.valueToCode(this, "STRING", Blockly.propc.ORDER_NONE);
 
-    Blockly.propc.definitions_["TTS"] = '#include "text2speech.h"';
-    Blockly.propc.global_vars_["TTS"] = 'talk *tts_talk;';
-    Blockly.propc.setups_["TTS"] = 'tts_talk = talk_run(' + profile.default.earphone_jack + ');\ntalk_set_speaker(tts_talk, 1, 100);';
+    if (!this.disabled) {
+        var pins = profile.default.earphone_jack;
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        for (var x = 0; x < allBlocks.length; x++) {
+            if (allBlocks[x].type === 'heb_text_to_speech_pins') {
+                pins = allBlocks[x].getFieldValue('PINL') + ',' + allBlocks[x].getFieldValue('PINR');
+            }
+        }
+
+        Blockly.propc.definitions_["TTS"] = '#include "text2speech.h"';
+        Blockly.propc.global_vars_["TTS"] = 'talk *tts_talk;';
+        Blockly.propc.setups_["TTS"] = 'tts_talk = talk_run(' + pins + ');\ntalk_set_speaker(tts_talk, 1, 100);';
+    }
 
     var code = 'talk_spell(tts_talk, ' + str + ');\n';
     return code;
+};
+
+Blockly.Blocks.heb_text_to_speech_pins = {
+    helpUrl: Blockly.MSG_AUDIO_HELPURL,
+    init: function () {
+        var pins = profile.default.earphone_jack.split(',')
+        pins[0] = pins[0].trim();
+        pins[1] = pins[1].trim();
+        this.setTooltip(Blockly.MSG_HEB_TEXT_TO_SPEECH_PINS_TOOLTIP);
+        this.setColour(colorPalette.getColor('io'));
+        this.appendDummyInput('PINS')
+                .appendField("TTS set output left PIN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['None','-1']])), "PINL")
+                .appendField("right PIN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['None','-1']])), "PINR");
+        this.setFieldValue(pins[0], 'PINL');
+        this.setFieldValue(pins[1], 'PINR');
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+    }
+};
+
+Blockly.propc.heb_text_to_speech_pins = function () {
+    return '';
+};
+
+Blockly.Blocks.heb_text_to_speech_volume = {
+    helpUrl: Blockly.MSG_AUDIO_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_HEB_TEXT_TO_SPEECH_VOLUME_TOOLTIP);
+        this.setColour(colorPalette.getColor('io'));
+        this.appendDummyInput('PINS')
+                .appendField("TTS set volume")
+                .appendField(new Blockly.FieldDropdown([['0','0'],['1','1'],['2','2'],['3','3'],['4','4'],['5','5'],['6','6'],['7','7']]), "VOL");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+    }
+};
+
+Blockly.propc.heb_text_to_speech_volume = function () {
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+    for (var x = 0; x < allBlocks.length; x++) {
+        if (allBlocks[x].type === 'heb_text_to_speech_say' || allBlocks[x].type === 'heb_text_to_speech_spell') {
+            return 'talk_setVolume(tts_talk, ' + this.getFieldValue('VOL') + ');\n';
+        }
+    }
+    return '// WARNING: You must use a TTS say or TTS spell block to use a TTS set volume block.\n';
 };

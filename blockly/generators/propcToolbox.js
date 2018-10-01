@@ -1102,6 +1102,8 @@ xmlToolbox += '            <block type="sound_init" exclude="activity-board,"></
 xmlToolbox += '            <block type="sound_play"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '        <category key="category_hackable-electronic-badge_text-to-speech" >';
+xmlToolbox += '            <block type="heb_text_to_speech_pins"></block>';
+xmlToolbox += '            <block type="heb_text_to_speech_volume"></block>';
 xmlToolbox += '            <block type="heb_text_to_speech_say">';
 xmlToolbox += '                <value name="STRING">';
 xmlToolbox += '                    <block type="string_type_block">';
