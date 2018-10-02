@@ -965,7 +965,7 @@ xmlToolbox += '            <block type="lsm9ds1_tilt"></block>';
 xmlToolbox += '            <block type="lsm9ds1_heading"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '        <category key="category_sensor-input_mma7455" include="other,">';
-xmlToolbox += '            <block type="mma7455_init"></block>';
+xmlToolbox += '            <block type="MMA7455_init"></block>';
 xmlToolbox += '            <block type="MMA7455_acceleration"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '        <category key="category_sensor-input_memsic-2axis" >';
