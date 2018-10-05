@@ -414,16 +414,7 @@ Blockly.propc.finish = function (code) {
         while (code.match(/\(\(([^()]*)\)\)/g)) {
             code = code.replace(/\(\(([^()]*)\)\)/g, '($1)');
         }
-        
-        // Change strings assigned to variables to strcpy functions
-        code = code.replace(/(\w+)\s*=\s*\({0,1}"(.*)"\){0,1};/g, function(m, p1, p2) {
-            if(p2.indexOf(',') === 0 && p2.indexOf(', "') > -1) {
-                return m;
-            } else {
-                return 'strcpy(' + p1 + ', "' + p2 + '");\t\t\t// Save string into variable ' + p1 + '.';
-            }
-        });
-        
+
         code = 'int main()\n{\n' + setups.join('\n') + '\n' + code + '\n}';
         var setup = '';
         if (Blockly.propc.serial_terminal_) {
@@ -446,12 +437,23 @@ Blockly.propc.finish = function (code) {
             spacer_funcs += '// ------ Functions ------\n';
 
         if (Blockly.propc.definitions_["pure_code"] === '/* PURE CODE ONLY */\n') {
-            return Blockly.propc.methods_["pure_code"];
+            code = Blockly.propc.methods_["pure_code"];
         } else {
-            return setup + allDefs.replace(/\n\n+/g, '\n\n').replace(/\n*$/, '\n\n') +
+            code = setup + allDefs.replace(/\n\n+/g, '\n\n').replace(/\n*$/, '\n\n') +
                     spacer_decs + declarations.join('\n\n').replace(/\n\n+/g, '\n').replace(/\n*$/, '\n') +
                     '\n// ------ Main Program ------\n' + code + spacer_funcs + methods.join('\n');
         }
+
+        // Change strings assigned to variables to strcpy functions
+        code = code.replace(/(\w+)\s*=\s*\({0,1}"(.*)"\){0,1};/g, function(m, p1, p2) {
+            if(p2.indexOf(',') === 0 && p2.indexOf(', "') > -1) {
+                return m;
+            } else {
+                return 'strcpy(' + p1 + ', "' + p2 + '");\t\t\t// Save string into variable ' + p1 + '.';
+            }
+        });
+
+        return code;
     }
 };
 /**

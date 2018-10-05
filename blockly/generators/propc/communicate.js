@@ -670,6 +670,10 @@ Blockly.propc.console_print_multiple = function () {
         code = '// ERROR: You cannot use Advanced WX blocks with Simple WX blocks!';
     }
 
+    if (projectData['board'] === 'heb-wx' && this.type === 'wx_print_multiple') {
+        var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
+    }
+
     return code;
 };
 
@@ -4617,12 +4621,7 @@ Blockly.Blocks.wx_print_multiple = {
     }
 };
 
-Blockly.propc.wx_print_multiple = function () {
-    if (projectData['board'] === 'heb-wx') {
-        var runInit = Blockly.propc.wx_init_adv();  // Runs the propc generator from the init block, since it's not included in the badge WX board type.
-    }
-    return Blockly.propc.console_print_multiple();
-};
+Blockly.propc.wx_print_multiple = Blockly.propc.console_print_multiple;
 
 Blockly.Blocks.wx_scan_string = {
     helpUrl: Blockly.MSG_AWX_HELPURL,
