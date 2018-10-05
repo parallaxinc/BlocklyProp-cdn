@@ -1596,7 +1596,7 @@ Blockly.propc.find_substring = function () {
     } else {
         if (!this.disabled) {
             Blockly.propc.methods_['find_sub_zero'] = 'int str_loc(char *__strS, char *__subS, int __sLoc) { ';
-            Blockly.propc.methods_['find_sub_zero'] += '__sLoc = (sLoc < 0 ? 0 : sLoc);\nsLoc = (__sLoc >= strlen(__strS) ? strlen(__strS) - 1 : sLoc);\n';
+            Blockly.propc.methods_['find_sub_zero'] += '__sLoc = constrainInt(__sLoc, 0, strlen(__strS) - 1);\n';
             Blockly.propc.methods_['find_sub_zero'] += 'char* __pos = strstr(__strS + __sLoc, __subS); return (__pos - __strS); }\n';
             Blockly.propc.method_declarations_["find_sub_zero"] = 'int str_loc(char *, char *, int);\n';
         }
@@ -2410,7 +2410,7 @@ Blockly.propc.constant_value = function () {
 
 
 Blockly.Blocks.custom_code_multiple = {
-    helpUrl: Blockly.MSG_CONTROL_HELPURL,
+    helpUrl: Blockly.MSG_SYSTEM_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_CUSTOM_CODE_MULTIPLE_TOOLTIP);
         this.setColour(colorPalette.getColor('system'));
