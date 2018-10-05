@@ -1100,7 +1100,7 @@ xmlToolbox += '            <block type="sound_init" include="activity-board,">';
 xmlToolbox += '                <field name="PINL">26</field>';
 xmlToolbox += '                <field name="PINR">27</field>';
 xmlToolbox += '            </block>';
-xmlToolbox += '            <block type="sound_init" exclude="activity-board,"></block>';
+xmlToolbox += '            <block type="sound_init" include="flip,other,"></block>';
 xmlToolbox += '            <block type="sound_play"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '        <category key="category_hackable-electronic-badge_text-to-speech" >';
