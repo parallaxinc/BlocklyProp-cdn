@@ -1396,7 +1396,7 @@ Blockly.propc.sound_play = function () {
     
     if (projectData['board'] && !this.disabled) {
         if (projectData['board'] === "heb" || projectData['board'] === "heb-wx") {
-            Blockly.propc.setups_["sound_start"] = 'audio0 = sound_run(' + profile.default.earphone_jack + ');';
+            Blockly.propc.setups_["sound_start"] = 'audio0 = sound_run(' + profile.default.earphone_jack_inverted + ');';
         }
         Blockly.propc.definitions_["include_soundplayer"] = '#include "sound.h"';
         Blockly.propc.definitions_["sound_define_0"] = 'sound* audio0;';       

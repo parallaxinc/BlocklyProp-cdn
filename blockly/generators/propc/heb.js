@@ -887,7 +887,7 @@ Blockly.propc.heb_text_to_speech_say = function () {
     var str = Blockly.propc.valueToCode(this, "STRING", Blockly.propc.ORDER_NONE);
 
     if (!this.disabled) {
-        var pins = profile.default.earphone_jack;
+        var pins = profile.default.earphone_jack_inverted;
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
         for (var x = 0; x < allBlocks.length; x++) {
             if (allBlocks[x].type === 'heb_text_to_speech_pins') {
@@ -921,7 +921,7 @@ Blockly.propc.heb_text_to_speech_spell = function () {
     var str = Blockly.propc.valueToCode(this, "STRING", Blockly.propc.ORDER_NONE);
 
     if (!this.disabled) {
-        var pins = profile.default.earphone_jack;
+        var pins = profile.default.earphone_jack_inverted;
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
         for (var x = 0; x < allBlocks.length; x++) {
             if (allBlocks[x].type === 'heb_text_to_speech_pins') {
