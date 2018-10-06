@@ -349,8 +349,11 @@ Blockly.propc.finish = function (code) {
         
         // Sets the length of string arrays based on the lengths specified in the string set length block.
         var vl = Blockly.propc.string_var_lengths.length;
+        //console.log(definitions[def]);
+        //console.log(Blockly.propc.string_var_lengths);
         for (var vt = 0; vt < vl; vt++) {
-            if (definitions[def].indexOf(Blockly.propc.string_var_lengths[vt][0]) > 0) {
+            var varMatch = new RegExp('char\\s+' + Blockly.propc.string_var_lengths[vt][0] + '\\[');
+            if (definitions[def].match(varMatch)) {
                 definitions[def] = 'char ' + Blockly.propc.string_var_lengths[vt][0] + '[' + Blockly.propc.string_var_lengths[vt][1] + '];';
             }
         }

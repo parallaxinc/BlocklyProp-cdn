@@ -182,17 +182,17 @@ Blockly.Blocks.controls_if = {
         }
     },
     decompose: function (workspace) {
-        var containerBlock = Blockly.Block.obtain(workspace, 'controls_if_if');
+        var containerBlock = workspace.newBlock('controls_if_if');
         containerBlock.initSvg();
         var connection = containerBlock.getInput('STACK').connection;
         for (var x = 1; x <= this.elseifCount_; x++) {
-            var elseifBlock = Blockly.Block.obtain(workspace, 'controls_if_elseif');
+            var elseifBlock = workspace.newBlock('controls_if_elseif');
             elseifBlock.initSvg();
             connection.connect(elseifBlock.previousConnection);
             connection = elseifBlock.nextConnection;
         }
         if (this.elseCount_) {
-            var elseBlock = Blockly.Block.obtain(workspace, 'controls_if_else');
+            var elseBlock = workspace.newBlock('controls_if_else');
             elseBlock.initSvg();
             connection.connect(elseBlock.previousConnection);
         }
@@ -200,7 +200,7 @@ Blockly.Blocks.controls_if = {
     },
     compose: function (containerBlock) {
         // Disconnect the else input blocks and remove the inputs.
-        if (this.elseCount_) {
+        if (this.elseCount_ && this.getInput('ELSE')) {
             this.removeInput('ELSE');
         }
         this.elseCount_ = 0;
@@ -532,17 +532,17 @@ Blockly.Blocks.controls_select = {
         }
     },
     decompose: function (workspace) {
-        var containerBlock = Blockly.Block.obtain(workspace, 'controls_select_select');
+        var containerBlock = workspace.newBlock('controls_select_select');
         containerBlock.initSvg();
         var connection = containerBlock.getInput('STACK').connection;
         for (var x = 1; x <= this.elseifCount_; x++) {
-            var elseifBlock = Blockly.Block.obtain(workspace, 'controls_select_case');
+            var elseifBlock = workspace.newBlock('controls_select_case');
             elseifBlock.initSvg();
             connection.connect(elseifBlock.previousConnection);
             connection = elseifBlock.nextConnection;
         }
         if (this.elseCount_) {
-            var elseBlock = Blockly.Block.obtain(workspace, 'controls_select_default');
+            var elseBlock = workspace.newBlock('controls_select_default');
             elseBlock.initSvg();
             connection.connect(elseBlock.previousConnection);
         }
@@ -556,8 +556,12 @@ Blockly.Blocks.controls_select = {
         this.elseCount_ = 0;
         // Disconnect all the elseif input blocks and remove the inputs.
         for (var x = this.elseifCount_; x > 0; x--) {
-            this.removeInput('SEL' + x);
-            this.removeInput('CASE' + x);
+            if (this.getInput('SEL' + x)) {
+                this.removeInput('SEL' + x);
+            }
+            if (this.getInput('CASE' + x)) {
+                this.removeInput('CASE' + x);
+            }
         }
         this.elseifCount_ = 0;
         // Rebuild the block's optional inputs.

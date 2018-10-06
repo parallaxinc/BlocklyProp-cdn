@@ -724,6 +724,12 @@ function initToolbox(profileName) {
             maxScale: 3,
             minScale: 0.3,
             scaleSpeed: 1.2
+        },
+        grid: {
+            spacing: 20,
+            length: 5,
+            colour: '#fcfcfc',
+            snap: false
         }
     });
 
