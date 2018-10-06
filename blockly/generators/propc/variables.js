@@ -235,7 +235,9 @@ Blockly.Blocks.array_get = {
     buildArrayMenu: function (v_list) {
         //if (v_list.length > 0) {
             var toConn = this.getInput('NUM').connection.targetConnection;
-            this.removeInput('NUM');
+            if(this.getInput('NUM')) {
+                this.removeInput('NUM');
+            }
             this.appendValueInput('NUM')
                     .setCheck('Number')
                     .appendField('array')
@@ -395,7 +397,9 @@ Blockly.Blocks.array_fill = {
     },
     buildArrayMenu: function (v_list) {
         var currList = this.getFieldValue("NUM") || '10,20,30,40,50';
-        this.removeInput('NUMS');
+        if(this.getInput('NUMS')) {
+            this.removeInput('NUMS');
+        }
         var fi = this.getFieldValue('NUM');
         this.appendDummyInput('NUMS')
                 .appendField('array fill')
@@ -513,7 +517,9 @@ Blockly.Blocks.array_set = {
     },
     buildArrayMenu: function (v_list) {
         var toConn = this.getInput('NUM').connection.targetConnection;
-        this.removeInput('NUM');
+        if(this.getInput('NUM')) {
+            this.removeInput('NUM');
+        }
         this.appendValueInput('NUM')
                 .appendField('array')
                 .setCheck('Number')
@@ -595,7 +601,9 @@ Blockly.Blocks.array_clear = {
         this.updateArrayMenu();
     },
     buildArrayMenu: function (v_list) {
-        this.removeInput('NUM');
+        if(this.getInput('NUM')) {
+            this.removeInput('NUM');
+        }
         this.appendDummyInput('NUM')
                 .appendField('array clear')
                 .appendField(new Blockly.FieldDropdown(v_list || [["list", "list"]]), "VAR");

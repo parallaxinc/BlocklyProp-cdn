@@ -96,7 +96,9 @@ Blockly.Blocks.math_number = {
                 }
                 if (this.outputConnection.targetBlock().getInputWithBlock(this) !== this.connection_id_) {
                     var theVal = this.getFieldValue('NUM');
-                    this.removeInput('MAIN');
+                    if (this.getInput('MAIN')) {
+                        this.removeInput('MAIN');
+                    }
                     if (rangeVals[0] === 'S') {
                         var theNum = Number(theVal);
                         if (theNum > range[1])
@@ -117,7 +119,9 @@ Blockly.Blocks.math_number = {
             } else {
                 if (this.connection_id_) {
                     var theVal = this.getFieldValue('NUM');
-                    this.removeInput('MAIN');
+                    if (this.getInput('MAIN')) {
+                        this.removeInput('MAIN');
+                    }
                     this.appendDummyInput('MAIN')
                             .appendField(new Blockly.FieldTextInput(theVal,
                                     Blockly.FieldTextInput.numberValidator), 'NUM');
@@ -164,7 +168,9 @@ Blockly.Blocks.math_number = {
                         this.setFieldValue('(' + range[0].toString(10) + ' to ' + range[1].toString(10) + ')', 'TITLE');
                     }
                 } else {
-                    this.removeInput('MAIN');
+                    if (this.getInput('MAIN')) {
+                        this.removeInput('MAIN');
+                    }
                     this.appendDummyInput('MAIN')
                             .appendField(new Blockly.FieldTextInput(data,
                                     Blockly.FieldTextInput.numberValidator), 'NUM')
@@ -172,7 +178,9 @@ Blockly.Blocks.math_number = {
                 }
             } else {
                 if (this.getField('TITLE')) {
-                    this.removeInput('MAIN');
+                    if (this.getInput('MAIN')) {
+                        this.removeInput('MAIN');
+                    }
                     if (rangeVals[0] === 'S') {
                         this.appendDummyInput('MAIN')
                                 .appendField(new Blockly.FieldRange(data, range[0].toString(10), range[1].toString(10)), 'NUM');
@@ -186,7 +194,9 @@ Blockly.Blocks.math_number = {
             this.setFieldValue(rangeVals.toString(), 'RVALS');
         } else {
             if (this.getField('TITLE')) {
-                this.removeInput('MAIN');
+                if (this.getInput('MAIN')) {
+                    this.removeInput('MAIN');
+                }
                 this.appendDummyInput('MAIN')
                         .appendField(new Blockly.FieldTextInput(data,
                                 Blockly.FieldTextInput.numberValidator), 'NUM');
@@ -257,7 +267,7 @@ Blockly.Blocks.math_arithmetic = {
         }
     },
     decompose: function (workspace) {
-        var containerBlock = Blockly.Block.obtain(workspace, 'math_arithmatic_container');
+        var containerBlock = workspace.newBlock('math_arithmatic_container');
         containerBlock.initSvg();
         var connection = containerBlock.getInput('STACK').connection;
         if (this.myChildren_.charCodeAt(0) > 'B'.charCodeAt(0)) {
@@ -943,7 +953,8 @@ Blockly.Blocks.string_var_length = {
                 .appendField('variable')
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR_NAMEZ')
                 .appendField('to')
-                .appendField(new Blockly.FieldTextInput("64", Blockly.FieldTextInput.numberValidator), "VAR_LENZ");
+                .appendField(new Blockly.FieldTextInput("64", Blockly.FieldTextInput.numberValidator), "VAR_LENZ")
+                .appendField('bytes');
         this.myChildren_ = 1;
         this.myConnection_ = null;
         this.setMutator(new Blockly.Mutator(['string_var_length_var']));
@@ -972,7 +983,7 @@ Blockly.Blocks.string_var_length = {
         }
     },
     decompose: function (workspace) {
-        var containerBlock = Blockly.Block.obtain(workspace, 'string_var_length_container');
+        var containerBlock = workspace.newBlock('string_var_length_container');
         containerBlock.initSvg();
         var connection = containerBlock.getInput('STACK').connection;
         if (this.myChildren_ > 0) {
@@ -1035,6 +1046,20 @@ Blockly.Blocks.string_var_length = {
             if (Blockly.Names.equals(oldName, this.getFieldValue('VAR_NAME' + i.toString(10)))) {
                 this.setFieldValue(newName, 'VAR_NAME' + i.toString(10));
             }
+        }
+    },
+    onchange: function () {
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        var strVarBlocksCount = 0;
+        for (var x = 0; x < allBlocks.length; x++) {
+            if (allBlocks[x].type === 'string_var_length') {
+                strVarBlocksCount++;
+            }
+        }
+        if (strVarBlocksCount > 1) {
+            this.setWarningText('WARNING! Only use one of these blocks!');
+        } else {
+            this.setWarningText(null);
         }
     }
 };
@@ -1141,7 +1166,9 @@ Blockly.Blocks.comment = {
             action = this.getFieldValue('ACTION');
         }
         var data = this.getFieldValue('COMMENT_TEXT');
-        this.removeInput('MAIN');
+        if (this.getInput('MAIN')) {
+            this.removeInput('MAIN');
+        }
         if (action === 'COMMENT') {
             this.setColour(colorPalette.getColor('programming'));
             this.appendDummyInput('MAIN')
@@ -1597,7 +1624,7 @@ Blockly.propc.find_substring = function () {
         if (!this.disabled) {
             Blockly.propc.methods_['find_sub_zero'] = 'int str_loc(char *__strS, char *__subS, int __sLoc) { ';
             Blockly.propc.methods_['find_sub_zero'] += '__sLoc = constrainInt(__sLoc, 0, strlen(__strS) - 1);\n';
-            Blockly.propc.methods_['find_sub_zero'] += 'char* __pos = strstr(__strS + __sLoc, __subS); return (__pos - __strS); }\n';
+            Blockly.propc.methods_['find_sub_zero'] += 'char* __pos = strstr(__strS + __sLoc, __subS); return (__pos) ? (__pos - __strS) : -1; }\n';
             Blockly.propc.method_declarations_["find_sub_zero"] = 'int str_loc(char *, char *, int);\n';
         }
         var code = '';
@@ -2383,7 +2410,9 @@ Blockly.Blocks.constant_value = {
         }
         var m = this.getFieldValue('VALUE');
 
-        this.removeInput('VALUE_LIST');
+        if (this.getInput('VALUE_LIST')) {
+            this.removeInput('VALUE_LIST');
+        }
         this.appendDummyInput('VALUE_LIST')
                 .appendField(new Blockly.FieldDropdown(uniq_fast(this.v_list)), "VALUE");
         if (m && m === ov && nv) {

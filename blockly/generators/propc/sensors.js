@@ -61,7 +61,9 @@ Blockly.Blocks.sensor_ping = {
         if (op === 'other') {
             this.otherPin[pinOpt] = true;
             var label = this.getFieldValue('LABEL');
-            this.removeInput('SET_PIN');
+            if(this.getInput('SET_PIN')) {
+                this.removeInput('SET_PIN');
+            }
             this.appendValueInput(this.pinChoices[pinOpt])
                     .appendField(label)
                     .setCheck('Number')
@@ -203,7 +205,9 @@ Blockly.Blocks.sound_impact_run = {
     },
     setPinMenus: function (ov, nv) {
         var m1 = this.getFieldValue('PIN');
-        this.removeInput('PINS');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
         this.appendDummyInput('PINS')
                 .appendField("Sound Impact initialize PIN")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN");
@@ -556,7 +560,9 @@ Blockly.Blocks.fp_scanner_init = {
     setPinMenus: function (ov, nv) {
         var m1 = this.getFieldValue('RXPIN');
         var m2 = this.getFieldValue('TXPIN');
-        this.removeInput('PINS');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
         this.appendDummyInput()
                 .appendField("Fingerprint Scanner initialize RX")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "RXPIN")
@@ -1019,7 +1025,9 @@ Blockly.Blocks.lsm9ds1_init = {
     setPinMenus: function (ov, nv) {
         var mv = ['PIN_SCL', 'PIN_SCL', 'PIN_CSAG', 'PIN_CSM'];
         var m = [this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_CSAG'), this.getFieldValue('PIN_CSM')];
-        this.removeInput('PINS');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
         this.appendDummyInput('PINS')
                 .appendField("IMU initialize SCL")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SCL")
@@ -1181,8 +1189,12 @@ Blockly.Blocks.lsm9ds1_tilt = {
     setAxes_: function (details) {
         var theVar1 = this.getFieldValue('VAR1');
         var theVar2 = this.getFieldValue('VAR2');
-        this.removeInput('TILT1');
-        this.removeInput('TILT2');
+        if(this.getInput('TILT1')) {
+            this.removeInput('TILT1');
+        }
+        if(this.getInput('TILT2')) {
+            this.removeInput('TILT2');
+        }
         if (details['ACTION'] === 'X') {
             this.appendDummyInput('TILT1')
                     .appendField("store y-tilt in", 'A1')
@@ -1290,7 +1302,9 @@ Blockly.Blocks.lsm9ds1_heading = {
     },
     setAxes_: function (details) {
         var theVar = this.getFieldValue('VAR');
-        this.removeInput('MENU2');
+        if(this.getInput('MENU2')) {
+            this.removeInput('MENU2');
+        }
         var wh = details['ACTION'][details['ACTION'].length - 1];
         if (wh === ')')
             wh = details['ACTION'][details['ACTION'].length - 2];
@@ -1379,7 +1393,9 @@ Blockly.Blocks.GPS_init = {
     setPinMenus: function (ov, nv) {
         var m = this.getFieldValue('TXPIN');
         var b = this.getFieldValue('BAUD')
-        this.removeInput('PINS');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
         this.appendDummyInput('PINS')
                 .appendField("GPS module initialize TX")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "TXPIN")
@@ -1880,7 +1896,9 @@ Blockly.Blocks.rfid_enable = {
     setPinMenus: function (ov, nv) {
         var m1 = this.getFieldValue('PIN_IN');
         var m2 = this.getFieldValue('PIN_OUT');
-        this.removeInput('PINS');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
         this.appendDummyInput('PINS')
                 .appendField("RFID initialize EN")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_IN")
@@ -2014,7 +2032,9 @@ Blockly.Blocks.keypad_initialize = {
         for (var i = 0; i < 8; i++) {
             m[i] = this.getFieldValue('P' + i.toString(10));
         }
-        this.removeInput('PINS');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
         this.appendDummyInput('PINS')
                 .appendField("4x4 Keypad initialize PINS left")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P0")

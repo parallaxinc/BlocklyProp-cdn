@@ -309,8 +309,8 @@ function compile_lib(working_directory, source_file, target_filename, libraries,
         // TODO: handle compiler output...?
 
         // the *entire* stdout and stderr (buffered)
-        //console.log('stdout: ${stdout}');
-        //console.log('stderr: ${stderr}');
+        console.log(stdout);
+        console.log(stderr);
 
         cleanUpAll(source_directory);
         return callback([true, "Library compile successful\n", null]);
@@ -368,8 +368,8 @@ function compile_binary(working_directory, action, source_file, binaries, librar
             }
 
             // the *entire* stdout and stderr (buffered)
-            //console.log('stdout: ${stdout}');
-            //console.log('stderr: ${stderr}');
+            console.log(stdout);
+            console.log(stderr);
             
             data['message'] = "Compile successful!";
 	        data.success = true;
