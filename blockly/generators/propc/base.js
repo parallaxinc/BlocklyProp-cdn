@@ -1816,20 +1816,14 @@ Blockly.propc.get_substring = function () {
         code += '__scBfr[__stIdx] = 0;\n';
         code += 'strcpy(' + toStr + ', __scBfr);\n';
     } else {
-        //code += '__stIdx = 0;\nfor(__ssIdx = ' + sst + '; __ssIdx < ' + snd + ';';
-        //code += '__ssIdx++) {\n__scBfr[__stIdx] = ' + frStr + '[__ssIdx]; __stIdx++; }\n';
-
         code += "substr (" + toStr + ", " + frStr + ", " + sst + ", " + snd + pt + ");\n";
 
         if (!this.disabled) {
-            var fn_code = "void substr (char *__outStr, char *__inStr, int __startPos, int __toPos) {\n";
-            fn_code += "unsigned int __len = (int)strlen(__inStr);\nunsigned int __strLen = __startPos - __toPos;\n";
-            fn_code += "if (__startPos < 0) {\n__startPos = __len + __startPos;\n}\nif (__startPos < 0) {\n";
-            fn_code += "__startPos = 0;\n}\nif ((unsigned int)__startPos > __len) {\n__startPos = __len;\n}\n";
-            fn_code += "__len = strlen (&__inStr[__startPos]);\nif (__strLen > __len) {\n__strLen = __len;\n";
-            fn_code += "}\nmemcpy(__outStr, __inStr + __startPos, __strLen);\n__outStr[__strLen] = 0;\n}";
+            var fn_code = "void substr(char *__outStr, char *__inStr, int __startPos, int __toPos) {";
+            fn_code += "int j = 0;\nfor (int i = (__startPos < 0 ? 0 : __startPos); i <= (__toPos > ";
+            fn_code += "(int) strlen(__inStr) ? (int) strlen(__inStr) : __toPos); i++) {__outStr[j] = ";
+            fn_code += "__inStr[i];\nj++;}__outStr[j] = 0;}";
 
-            //Blockly.propc.definitions_['__ssIdx'] = 'int __ssIdx, __stIdx;';
             Blockly.propc.methods_['substr'] = fn_code;
             Blockly.propc.method_declarations_['substr'] = 'void substr (char *, char *, int, int);\n';
         }
