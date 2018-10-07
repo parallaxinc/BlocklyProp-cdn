@@ -628,7 +628,7 @@ Blockly.propc.eeprom_write = function () {
         } else if (type === 'NUMBER') {
             code += 'ee_putInt(' + data + ', (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
         } else {
-            code += 'ee_putStr(' + data + ', (strlen(' + data + ') + 1), (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
+            code += 'ee_putStr(' + data + ', ((int) strlen(' + data + ') + 1), (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
         }
     }
     return code;
