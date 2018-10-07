@@ -1115,7 +1115,7 @@ Blockly.Blocks.string_length = {
 
 Blockly.propc.string_length = function () {
     var text = Blockly.propc.valueToCode(this, 'VALUE', Blockly.propc.ORDER_NONE);
-    return ['strlen(' + text + ')', Blockly.propc.ORDER_NONE];
+    return ['((int) strlen(' + text + '))', Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.high_low_value = {
@@ -1623,7 +1623,7 @@ Blockly.propc.find_substring = function () {
     } else {
         if (!this.disabled) {
             Blockly.propc.methods_['find_sub_zero'] = 'int str_loc(char *__strS, char *__subS, int __sLoc) { ';
-            Blockly.propc.methods_['find_sub_zero'] += '__sLoc = constrainInt(__sLoc, 0, strlen(__strS) - 1);\n';
+            Blockly.propc.methods_['find_sub_zero'] += '__sLoc = constrainInt(__sLoc, 0, (int) strlen(__strS) - 1);\n';
             Blockly.propc.methods_['find_sub_zero'] += 'char* __pos = strstr(__strS + __sLoc, __subS); return (__pos) ? (__pos - __strS) : -1; }\n';
             Blockly.propc.method_declarations_["find_sub_zero"] = 'int str_loc(char *, char *, int);\n';
         }
@@ -1678,7 +1678,7 @@ Blockly.propc.get_char_at_position = function () {
     var code = '0';
 
     if (this.type === 'get_char_at_position') {
-        code = data + '[(' + pos + '>strlen(' + data + ')?strlen(' + data + '):' + pos + ')-1]';
+        code = data + '[(' + pos + '>(int)strlen(' + data + ')?(int)strlen(' + data + '):' + pos + ')-1]';
     } else {
         code = data + '[' + pos + ']';
     }
@@ -1740,7 +1740,7 @@ Blockly.propc.set_char_at_position = function () {
     Blockly.propc.vartype_[data] = 'char *';
 
     if (this.type === 'set_char_at_position') {
-        return data + '[(' + pos + '>strlen(' + data + ')?strlen(' + data + '):' + pos + ')-1] = ' + chr + '\n;';
+        return data + '[(' + pos + '>(int)strlen(' + data + ')?(int)strlen(' + data + '):' + pos + ')-1] = ' + chr + '\n;';
     } else {
         return data + '[' + pos + '] = ' + chr + '\n;';
     }
@@ -1811,8 +1811,8 @@ Blockly.propc.get_substring = function () {
     if (this.type === 'get_substring') {
         Blockly.propc.definitions_['str_Buffer'] = 'char *__scBfr;';
 
-        code += '__stIdx = 0;\nfor(__ssIdx = (' + sst + '-1); __ssIdx <= (' + snd + ' <= strlen(' + frStr;
-        code += ')?' + snd + ':strlen(' + frStr + '))-1; __ssIdx++) {\n__scBfr[__stIdx] = ' + frStr + '[__ssIdx]; __stIdx++; }\n';
+        code += '__stIdx = 0;\nfor(__ssIdx = (' + sst + '-1); __ssIdx <= (' + snd + ' <= (int)strlen(' + frStr;
+        code += ')?' + snd + ':(int)strlen(' + frStr + '))-1; __ssIdx++) {\n__scBfr[__stIdx] = ' + frStr + '[__ssIdx]; __stIdx++; }\n';
         code += '__scBfr[__stIdx] = 0;\n';
         code += 'strcpy(' + toStr + ', __scBfr);\n';
     } else {
@@ -1823,7 +1823,7 @@ Blockly.propc.get_substring = function () {
 
         if (!this.disabled) {
             var fn_code = "void substr (char *__outStr, char *__inStr, int __startPos, int __toPos) {\n";
-            fn_code += "unsigned int __len = strlen(__inStr);\nunsigned int __strLen = __startPos - __toPos;\n";
+            fn_code += "unsigned int __len = (int)strlen(__inStr);\nunsigned int __strLen = __startPos - __toPos;\n";
             fn_code += "if (__startPos < 0) {\n__startPos = __len + __startPos;\n}\nif (__startPos < 0) {\n";
             fn_code += "__startPos = 0;\n}\nif ((unsigned int)__startPos > __len) {\n__startPos = __len;\n}\n";
             fn_code += "__len = strlen (&__inStr[__startPos]);\nif (__strLen > __len) {\n__strLen = __len;\n";
@@ -2077,7 +2077,7 @@ Blockly.propc.string_trim = function () {
         var fn_code = '';
         fn_code += 'void str_trim(char *out, char *str)\n{\nconst char *end;\n\n';
         fn_code += 'while(isspace((unsigned char)*str)) str++;\nif(*str == 0)\n{\n*out = 0;\nreturn;\n';
-        fn_code += '}\nend = str + strlen(str) - 1;\nwhile(end > str && isspace((unsigned char)*end)) end--;\n';
+        fn_code += '}\nend = str + (int)strlen(str) - 1;\nwhile(end > str && isspace((unsigned char)*end)) end--;\n';
         fn_code += 'end++;\n\nmemcpy(out, str, end - str);\nout[end - str] = 0;\n}';
 
         //Blockly.propc.definitions_['__ssIdx'] = 'int __ssIdx, __stIdx;';
