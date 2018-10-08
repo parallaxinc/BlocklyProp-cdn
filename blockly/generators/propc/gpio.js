@@ -923,7 +923,17 @@ Blockly.Blocks.fb360_setup = {
                 pinWarn = null;
             }
             if (blockName === 'fb360_init' && !this.getInput('SET_PIN')) {
-                pinWarn = null;
+                //pinWarn = null;
+            }
+            if (this.otherPin) {
+                myPin = Blockly.propc.valueToCode(this, 'PIN', Blockly.propc.ORDER_ATOMIC);
+                if (!isNaN(parseFloat(myPin)) && isFinite(myPin)) {
+                    if (blocks[x].getFieldValue('PIN') === myPin || blocks[x].getFieldValue('FB') === myPin) {
+                        pinWarn = null; 
+                    }
+                } else {
+                    pinWarn = null;
+                }
             }
             this.setWarningText(pinWarn);
         }
