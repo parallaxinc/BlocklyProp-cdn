@@ -728,7 +728,7 @@ function initToolbox(profileName) {
         grid: {
             spacing: 20,
             length: 5,
-            colour: '#fcfcfc',
+            colour: '#fbfbfb',
             snap: false
         }
     });

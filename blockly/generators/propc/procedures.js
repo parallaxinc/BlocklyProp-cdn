@@ -660,8 +660,7 @@ Blockly.Blocks['procedures_callreturn'] = {
     },
     getProcedureCall: Blockly.Blocks['procedures_callnoreturn'].getProcedureCall,
     renameProcedure: Blockly.Blocks['procedures_callnoreturn'].renameProcedure,
-    setProcedureParameters_:
-            Blockly.Blocks['procedures_callnoreturn'].setProcedureParameters_,
+    setProcedureParameters_: Blockly.Blocks['procedures_callnoreturn'].setProcedureParameters_,
     updateShape_: Blockly.Blocks['procedures_callnoreturn'].updateShape_,
     mutationToDom: Blockly.Blocks['procedures_callnoreturn'].mutationToDom,
     domToMutation: Blockly.Blocks['procedures_callnoreturn'].domToMutation,
@@ -720,21 +719,14 @@ Blockly.propc.procedures_callreturn = function () {
                 Blockly.propc.ORDER_NONE) || 'null';
     }
     var code = funcName + '(' + args.join(', ') + ')';
-    return [code, Blockly.propc.ORDER_UNARY_POSTFIX];
+    if (this.type === 'procedures_callnoreturn') {
+        return code + ';\n';
+    } else {
+        return [code, Blockly.propc.ORDER_UNARY_POSTFIX];
+    }
 };
 
-Blockly.propc.procedures_callnoreturn = function () {
-    // Call a procedure with no return value.
-    var funcName = Blockly.propc.variableDB_.getName(this.getFieldValue('NAME'),
-            Blockly.Procedures.NAME_TYPE);
-    var args = [];
-    for (var x = 0; x < this.arguments_.length; x++) {
-        args[x] = Blockly.propc.valueToCode(this, 'ARG' + x,
-                Blockly.propc.ORDER_NONE) || 'null';
-    }
-    var code = funcName + '(' + args.join(', ') + ');\n';
-    return code;
-};
+Blockly.propc.procedures_callnoreturn = Blockly.propc.procedures_callreturn;
 
 Blockly.propc.procedures_ifreturn = function () {
     // Conditionally return value from a procedure.

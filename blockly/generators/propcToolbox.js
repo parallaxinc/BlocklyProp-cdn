@@ -757,7 +757,7 @@ xmlToolbox += '                    </block>';
 xmlToolbox += '                </value>';
 xmlToolbox += '            </block>';
 xmlToolbox += '        </category>';
-xmlToolbox += '        <category key="category_communicate_serial-terminal" exclude="heb-wx,">';
+xmlToolbox += '        <category key="category_communicate_serial-terminal" >';
 xmlToolbox += '            <block type="console_print">';
 xmlToolbox += '                <value name="MESSAGE">';
 xmlToolbox += '                    <block type="string_type_block"></block>';
