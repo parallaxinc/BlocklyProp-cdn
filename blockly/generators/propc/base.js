@@ -62,147 +62,166 @@ Blockly.Blocks.math_number = {
                 .setVisible(false);
         this.setOutput(true, 'Number');
         this.connection_id_ = null;
-        this.onchange();
+        this.currentInputType = 'number0';
+        //this.onchange();
     },
-    onchange: function () {
-        var rangeVals = ['N', '-100', '100', '0'];
-        var range = [-100, 100, 0];
-        var data = this.getFieldValue('NUM');
+    onchange: function (event) {
+        if (event.type === Blockly.Events.CHANGE || event.type === Blockly.Events.MOVE) {
+            var rangeVals = ['N', '-100', '100', '0'];
+            var range = [-100, 100, 0];
+            var data = this.getFieldValue('NUM');
 
-        if (this.outputConnection) {
-            if (this.outputConnection.targetBlock() !== null) {
-                var key, inputvalue, _connectedField;
-                var _blockFields = this.outputConnection.targetBlock().getInputWithBlock(this).fieldRow;
-                for (key in _blockFields) {
-                    if (_blockFields.hasOwnProperty(key) && !isNaN(parseInt(key, 10))) {
-                        inputvalue = _blockFields[key].name || ' ';
-                        if (inputvalue.substring(0, 9) === "RANGEVALS") {
-                            _connectedField = inputvalue;
-                            break;
+            if (this.outputConnection) {
+                if (this.outputConnection.targetBlock() !== null) {
+                    var key, inputvalue, _connectedField;
+                    var _blockFields = this.outputConnection.targetBlock().getInputWithBlock(this).fieldRow;
+                    for (key in _blockFields) {
+                        if (_blockFields.hasOwnProperty(key) && !isNaN(parseInt(key, 10))) {
+                            inputvalue = _blockFields[key].name || ' ';
+                            if (inputvalue.substring(0, 9) === "RANGEVALS") {
+                                _connectedField = inputvalue;
+                                break;
+                            }
                         }
                     }
-                }
-                var sourceBlock_ = this.outputConnection.targetBlock();
-                if (sourceBlock_) {
-                    var fieldListing = sourceBlock_.getFieldValue(_connectedField);
-                    if (fieldListing) {
-                        rangeVals = fieldListing.split(',');
-                        if (rangeVals[0] === 'S' || rangeVals[0] === 'R' || rangeVals[0] === 'A') {
-                            var idx;
-                            for (idx = 1; idx <= rangeVals.length; idx++)
-                                range[idx - 1] = Number(rangeVals[idx]);
+                    var sourceBlock_ = this.outputConnection.targetBlock();
+                    if (sourceBlock_) {
+                        var fieldListing = sourceBlock_.getFieldValue(_connectedField);
+                        if (fieldListing) {
+                            rangeVals = fieldListing.split(',');
+                            if (rangeVals[0] === 'S' || rangeVals[0] === 'R' || rangeVals[0] === 'A') {
+                                var idx;
+                                for (idx = 1; idx <= rangeVals.length; idx++)
+                                    range[idx - 1] = Number(rangeVals[idx]);
+                            }
                         }
                     }
-                }
-                if (this.outputConnection.targetBlock().getInputWithBlock(this) !== this.connection_id_) {
-                    var theVal = this.getFieldValue('NUM');
-                    if (this.getInput('MAIN')) {
-                        this.removeInput('MAIN');
+                    if (this.outputConnection.targetBlock().getInputWithBlock(this) !== this.connection_id_) {
+                        var theVal = this.getFieldValue('NUM');
+
+                        if (rangeVals[0] === 'S') {
+                            var theNum = Number(theVal);
+                            if (theNum > range[1])
+                                theNum = range[1];
+                            if (theNum < range[0])
+                                theNum = range[0];
+                            this.setWarningText(null);
+                            
+                            if (this.currentInputType !== 'slider' + range[0].toString(10) + 'to' + range[1].toString(10)) {
+                                if (this.getInput('MAIN')) {
+                                    this.removeInput('MAIN');
+                                }
+                                this.appendDummyInput('MAIN')
+                                        .appendField(new Blockly.FieldRange(theNum.toString(10),
+                                                range[0].toString(10), range[1].toString(10)), 'NUM');
+                                this.currentInputType = 'slider' + range[0].toString(10) + 'to' + range[1].toString(10);
+                            }
+                        } else if (this.currentInputType !== 'number' + theVal) {
+                            if (this.getInput('MAIN')) {
+                                this.removeInput('MAIN');
+                            }
+                            this.appendDummyInput('MAIN')
+                                    .appendField(new Blockly.FieldTextInput(theVal,
+                                            Blockly.FieldTextInput.numberValidator), 'NUM');
+                            this.currentInputType = 'number' + theVal;
+                        }
                     }
-                    if (rangeVals[0] === 'S') {
-                        var theNum = Number(theVal);
-                        if (theNum > range[1])
-                            theNum = range[1];
-                        if (theNum < range[0])
-                            theNum = range[0];
+                    this.connection_id_ = this.outputConnection.targetBlock().getInputWithBlock(this);
+                } else {
+                    if (this.connection_id_) {
+                        var theVal = this.getFieldValue('NUM');
+                        if (this.currentInputType !== 'number' + theVal) {
+                            if (this.getInput('MAIN')) {
+                                this.removeInput('MAIN');
+                            }
+                            this.appendDummyInput('MAIN')
+                                    .appendField(new Blockly.FieldTextInput(theVal,
+                                            Blockly.FieldTextInput.numberValidator), 'NUM');
+                            this.currentInputType = 'number' + theVal;
+                        }
+                    }
+                    this.connection_id_ = null;
+                    rangeVals = ['N', '-100', '100', '0'];
+                }
+            }
+            range[2] = Number(this.getFieldValue('NUM'));
+            if (rangeVals) {
+                if (rangeVals[0] === 'R') {
+                    if (range[2] < range[0]) {
+                        this.setWarningText('WARNING: Your value is too small!  It must be greater than or equal to ' + range[0].toString(10));
+                    } else if (range[2] > range[1]) {
+                        this.setWarningText('WARNING: Your value is too large!  It must be less than or equal to ' + range[1].toString(10));
+                    } else {
                         this.setWarningText(null);
-                        this.appendDummyInput('MAIN')
-                                .appendField(new Blockly.FieldRange(theNum.toString(10),
-                                        range[0].toString(10), range[1].toString(10)), 'NUM');
+                    }
+                } else if (rangeVals[0] === 'A') {
+                    var warnMsg = 'none';
+                    var idx;
+                    for (idx = 0; idx < range.length; idx++)
+                        if (range[2] === Number(rangeVals[idx]))
+                            warnMsg = 'match';
+                    if (warnMsg === 'none') {
+                        this.setWarningText('WARNING: The value you entered is not available or not allowed!');
                     } else {
+                        this.setWarningText(null);
+                    }
+                } else if (rangeVals[0] === 'S') {
+                    this.setWarningText(null);
+                } else {
+                    this.setWarningText(null);
+                }
+                if (rangeVals[0] === 'R' && (range[2] < range[0] || range[2] > range[1]) && Math.abs(range[0] - range[1]) <= 10000000) {
+                    if (this.getField('TITLE')) {
+                        if (range[1] >= 2147483647) {
+                            this.setFieldValue('(\u2265 ' + range[0].toString(10) + ')', 'TITLE');
+                        } else if (range[0] <= -2147483647) {
+                            this.setFieldValue('(\u2264' + range[1].toString(10) + ')', 'TITLE');
+                        } else if (Math.abs(range[0]) === Math.abs(range[1])) {
+                            this.setFieldValue('(+/- ' + Math.abs(range[0]).toString(10) + ')', 'TITLE');
+                        } else {
+                            this.setFieldValue('(' + range[0].toString(10) + ' to ' + range[1].toString(10) + ')', 'TITLE');
+                        }
+                    } else {
+                        if (this.getInput('MAIN')) {
+                            this.removeInput('MAIN');
+                        }
                         this.appendDummyInput('MAIN')
-                                .appendField(new Blockly.FieldTextInput(theVal,
-                                        Blockly.FieldTextInput.numberValidator), 'NUM');
+                                .appendField(new Blockly.FieldTextInput(data,
+                                        Blockly.FieldTextInput.numberValidator), 'NUM')
+                                .appendField('', 'TITLE');
+                        this.currentInputType = 'titlenumber' + data;
+                    }
+                } else {
+                    if (this.getField('TITLE')) {
+                        if (this.getInput('MAIN')) {
+                            this.removeInput('MAIN');
+                        }
+                        if (rangeVals[0] === 'S') {
+                            this.appendDummyInput('MAIN')
+                                    .appendField(new Blockly.FieldRange(data, range[0].toString(10), range[1].toString(10)), 'NUM');
+                            this.currentInputType = 'slider' + range[0].toString(10) + 'to' + range[1].toString(10);
+                        } else {
+                            this.appendDummyInput('MAIN')
+                                    .appendField(new Blockly.FieldTextInput(data,
+                                            Blockly.FieldTextInput.numberValidator), 'NUM');
+                            this.currentInputType = 'number' + data;
+                        }
                     }
                 }
-                this.connection_id_ = this.outputConnection.targetBlock().getInputWithBlock(this);
+                this.setFieldValue(rangeVals.toString(), 'RVALS');
             } else {
-                if (this.connection_id_) {
-                    var theVal = this.getFieldValue('NUM');
-                    if (this.getInput('MAIN')) {
-                        this.removeInput('MAIN');
-                    }
-                    this.appendDummyInput('MAIN')
-                            .appendField(new Blockly.FieldTextInput(theVal,
-                                    Blockly.FieldTextInput.numberValidator), 'NUM');
-                }
-                this.connection_id_ = null;
-                rangeVals = ['N', '-100', '100', '0'];
-            }
-        }
-        range[2] = Number(this.getFieldValue('NUM'));
-        if (rangeVals) {
-            if (rangeVals[0] === 'R') {
-                if (range[2] < range[0]) {
-                    this.setWarningText('WARNING: Your value is too small!  It must be greater than or equal to ' + range[0].toString(10));
-                } else if (range[2] > range[1]) {
-                    this.setWarningText('WARNING: Your value is too large!  It must be less than or equal to ' + range[1].toString(10));
-                } else {
-                    this.setWarningText(null);
-                }
-            } else if (rangeVals[0] === 'A') {
-                var warnMsg = 'none';
-                var idx;
-                for (idx = 0; idx < range.length; idx++)
-                    if (range[2] === Number(rangeVals[idx]))
-                        warnMsg = 'match';
-                if (warnMsg === 'none') {
-                    this.setWarningText('WARNING: The value you entered is not available or not allowed!');
-                } else {
-                    this.setWarningText(null);
-                }
-            } else if (rangeVals[0] === 'S') {
-                this.setWarningText(null);
-            } else {
-                this.setWarningText(null);
-            }
-            if (rangeVals[0] === 'R' && (range[2] < range[0] || range[2] > range[1]) && Math.abs(range[0] - range[1]) <= 10000000) {
                 if (this.getField('TITLE')) {
-                    if (range[1] >= 2147483647) {
-                        this.setFieldValue('(\u2265 ' + range[0].toString(10) + ')', 'TITLE');
-                    } else if (range[0] <= -2147483647) {
-                        this.setFieldValue('(\u2264' + range[1].toString(10) + ')', 'TITLE');
-                    } else if (Math.abs(range[0]) === Math.abs(range[1])) {
-                        this.setFieldValue('(+/- ' + Math.abs(range[0]).toString(10) + ')', 'TITLE');
-                    } else {
-                        this.setFieldValue('(' + range[0].toString(10) + ' to ' + range[1].toString(10) + ')', 'TITLE');
-                    }
-                } else {
                     if (this.getInput('MAIN')) {
                         this.removeInput('MAIN');
                     }
                     this.appendDummyInput('MAIN')
                             .appendField(new Blockly.FieldTextInput(data,
-                                    Blockly.FieldTextInput.numberValidator), 'NUM')
-                            .appendField('', 'TITLE');
+                                    Blockly.FieldTextInput.numberValidator), 'NUM');
+                    this.currentInputType = 'number' + data;
                 }
-            } else {
-                if (this.getField('TITLE')) {
-                    if (this.getInput('MAIN')) {
-                        this.removeInput('MAIN');
-                    }
-                    if (rangeVals[0] === 'S') {
-                        this.appendDummyInput('MAIN')
-                                .appendField(new Blockly.FieldRange(data, range[0].toString(10), range[1].toString(10)), 'NUM');
-                    } else {
-                        this.appendDummyInput('MAIN')
-                                .appendField(new Blockly.FieldTextInput(data,
-                                        Blockly.FieldTextInput.numberValidator), 'NUM');
-                    }
-                }
+                this.setFieldValue('', 'RVALS');
+                this.setWarningText(null);
             }
-            this.setFieldValue(rangeVals.toString(), 'RVALS');
-        } else {
-            if (this.getField('TITLE')) {
-                if (this.getInput('MAIN')) {
-                    this.removeInput('MAIN');
-                }
-                this.appendDummyInput('MAIN')
-                        .appendField(new Blockly.FieldTextInput(data,
-                                Blockly.FieldTextInput.numberValidator), 'NUM');
-            }
-            this.setFieldValue('', 'RVALS');
-            this.setWarningText(null);
         }
     }
 };

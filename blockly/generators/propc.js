@@ -19,7 +19,7 @@
 
 /**
  * @fileoverview Helper functions for generating Prop-c for blocks.
- * @author michel@creatingfuture.eu (Michel Lampo)
+ * @author Matthew Matz, Michel Lampo
  */
 'use strict';
 
@@ -252,16 +252,18 @@ Blockly.propc.init = function (workspace) {
             Blockly.propc.variableDB_.reset();
         }
 
+        //Blockly.propc.variableDB_.setVariableMap(workspace.getVariableMap());    // USE WHEN CORE IS UPDATED
+
         var defvars = [];
         var variables = Blockly.Variables.allVariables(workspace);
+        //var variables = Blockly.Variables.allUsedVarModels(workspace);    // USE WHEN CORE IS UPDATED
         for (var x = 0; x < variables.length; x++) {
             var varName = Blockly.propc.variableDB_.getName(variables[x],
+            //var varName = Blockly.propc.variableDB_.getName(variables[x].getId(),    // USE WHEN CORE IS UPDATED
                     Blockly.Variables.NAME_TYPE);
             defvars[x] = '{{$var_type_' + varName + '}} ' + varName + '{{$var_length_' + varName + '}};';
+            Blockly.propc.definitions_['variable' + x.toString(10)] = defvars[x];
         }
-
-        for (var vardef in defvars)
-            Blockly.propc.definitions_['variable' + vardef.toString(10)] = defvars[vardef];
     }
 };
 /**
@@ -338,8 +340,6 @@ Blockly.propc.finish = function (code) {
         // Exclude variables with "__" in the name for now because those are buffers for private functions
         if (definitions[def].indexOf("char *") > -1 && definitions[def].indexOf("__") === -1 && definitions[def].indexOf("rfidBfr") === -1  && definitions[def].indexOf("wxBuffer") === -1) {
             definitions[def] = definitions[def].replace("char *", "char ").replace(";", "[64];");
-            //definitions[def] = definitions[def].replace(/char \*(\s*)(\w+);/g, 'char *$1$2' + bigStr + spaceAdd + endStr);
-            //spaceAdd += ' ';
         } else if (definitions[def].indexOf("wxBuffer") > -1) {
             definitions[def] = definitions[def].replace("char *", "char ").replace("wxBuffer;", "wxBuffer[64];");
         }
@@ -349,8 +349,6 @@ Blockly.propc.finish = function (code) {
         
         // Sets the length of string arrays based on the lengths specified in the string set length block.
         var vl = Blockly.propc.string_var_lengths.length;
-        //console.log(definitions[def]);
-        //console.log(Blockly.propc.string_var_lengths);
         for (var vt = 0; vt < vl; vt++) {
             var varMatch = new RegExp('char\\s+' + Blockly.propc.string_var_lengths[vt][0] + '\\[');
             if (definitions[def].match(varMatch)) {
@@ -359,8 +357,6 @@ Blockly.propc.finish = function (code) {
         }
 
         for (var method in Blockly.propc.cog_methods_) {
-            console.log(Blockly.propc.methods_[method]);
-            console.log(definitions[def].replace(/[achintr]* \**(\w+)[\[\]0-9]*;/g, '$1'));
             if (Blockly.propc.methods_[method].indexOf(definitions[def].replace(/[achintr]* (\w+)[\[\]0-9]*;/g, '$1')) > -1) {
                 function_vars.push(definitions[def]);
             }
@@ -555,8 +551,25 @@ if (!Object.keys) {
             return result;
         };
     }());
-}
-;
+};
+
+/*
+// NOTE: Replaces core function!                   // USE WHEN CORE IS UPDATED
+Blockly.Field.prototype.render_ = function() {
+    if (!this.visible_) {
+      this.size_.width = 0;
+      return;
+    }
+  
+    // Replace the text.
+    if (this.textElement_) {
+        this.textElement_.textContent = this.getDisplayText_();
+        this.updateWidth();
+    } 
+};
+*/
+
+  
 
 // NOTE: Replaces core function!
 Blockly.BlockSvg.prototype.setCollapsed = function (b) {
@@ -662,49 +675,3 @@ function uniq_fast(a) {
         return tmpOut;
     }
 }
-
-// REPLACES CORE FUNCTION:
-/**
- * Return a sorted list of variable names for variable dropdown menus.
- * Include a special option at the end for creating a new variable name.
- * @return {!Array.<string>} Array of variable names.
- * @this {!Blockly.FieldVariable}
- */
-
-// TODO: use this replacement to allow dropdowns of specific types (number, string, etc.)
-/*
-Blockly.FieldVariable.dropdownCreate = function() {
-  var blockType = null; 
-  if (this.sourceBlock_ && this.sourceBlock_.workspace) {
-    var variableList =
-        Blockly.Variables.allVariables(this.sourceBlock_.workspace);
-    blockType = this.sourceBlock_.type;
-  } else {
-    var variableList = [];
-  }
-  // Ensure that the currently selected variable is an option.
-  var name = this.getText();
-  if (name && variableList.indexOf(name) == -1) {
-    variableList.push(name);
-  }
-  variableList.sort(goog.string.caseInsensitiveCompare);
-  variableList.push(Blockly.Msg.RENAME_VARIABLE);
-  variableList.push(Blockly.Msg.NEW_VARIABLE);
-  // Variables are not language-specific, use the name as both the user-facing
-  // text and the internal representation.
-  var options = [];
-  var z = 0;
-  for (var x = 0; x < variableList.length; x++) {
-    if (blockType !== 'string_var_length') {
-      options[z] = [variableList[x], variableList[x]];
-      z++;
-    } else {
-      if (Blockly.propc.definitions_[name].indexOf('char') === 0) {
-          options[z] = [variableList[x], variableList[x]];
-          z++;
-      }
-    }
-  }
-  return options;
-};
-*/
