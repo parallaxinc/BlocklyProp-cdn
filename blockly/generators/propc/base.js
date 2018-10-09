@@ -958,110 +958,172 @@ Blockly.propc.custom_code = function () {
     return code;
 };
 
+
 Blockly.Blocks.string_var_length = {
     helpUrl: Blockly.MSG_STRINGS_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_STRING_VAR_LENGTH_TOOLTIP);
         this.setColour(colorPalette.getColor('math'));
         this.setInputsInline(false);
-        this.setPreviousStatement(true, "Block");
-        this.setNextStatement(true, null);
         this.appendDummyInput()
                 .appendField('String variable set size of');
-        this.appendDummyInput('VARZ')
-                .appendField('variable')
-                .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR_NAMEZ')
-                .appendField('to')
-                .appendField(new Blockly.FieldTextInput("64", Blockly.FieldTextInput.numberValidator), "VAR_LENZ")
-                .appendField('bytes');
-        this.myChildren_ = 1;
-        this.myConnection_ = null;
-        this.setMutator(new Blockly.Mutator(['string_var_length_var']));
+        this.optionList_ = ['var'];
+        this.v_list = ['MYVALUE', 'MYVALUE'];
+        this.updateConstMenu();
+        this.updateShape_();
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true);
+        this.setMutator(new Blockly.Mutator(['string_var_length_var', 'string_var_length_con']));
     },
     mutationToDom: function () {
         // Create XML to represent menu options.
         var container = document.createElement('mutation');
-        container.setAttribute('vars', this.myChildren_.toString(10));
+        container.setAttribute('options', JSON.stringify(this.optionList_));
         return container;
     },
     domToMutation: function (container) {
         // Parse XML to restore the menu options.
-        this.myChildren_ = parseInt(container.getAttribute('vars'));
-        if (this.getInput('VARZ')) {
-            this.removeInput('VARZ');
-        }
-        if (this.myChildren_ > 0) {
-            for (var i = 1; i <= this.myChildren_; i++) {
-                this.appendDummyInput('VAR' + i.toString(10))
-                        .appendField('variable')
-                        .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR_NAME' + i.toString(10))
-                        .appendField('to')
-                        .appendField(new Blockly.FieldTextInput("64", Blockly.FieldTextInput.numberValidator), "VAR_LEN" + i.toString(10))
-                        .appendField('bytes');
+        var value = JSON.parse(container.getAttribute('options'));
+	if (!value || value === []) {
+	    value = [];
+	    var i = parseInt(container.getAttribute('vars') || '1');
+            for (var j = 0; j < i; j++) {
+                value.push('var');
             }
-        }
+	}
+        this.optionList_ = value;
+        this.updateConstMenu();
+        this.updateShape_();
     },
     decompose: function (workspace) {
+        // Populate the mutator's dialog with this block's components.
         var containerBlock = workspace.newBlock('string_var_length_container');
         containerBlock.initSvg();
         var connection = containerBlock.getInput('STACK').connection;
-        if (this.myChildren_ > 0) {
-            for (var i = 1; i <= this.myChildren_; i++) {
-                var optionBlock = workspace.newBlock('string_var_length_var');
-                optionBlock.initSvg();
-                connection.connect(optionBlock.previousConnection);
-                connection = optionBlock.nextConnection;
-            }
+        for (var i = 0; i < this.optionList_.length; i++) {
+            var optionBlock = workspace.newBlock(
+                    'string_var_length_' + this.optionList_[i]);
+            optionBlock.initSvg();
+            connection.connect(optionBlock.previousConnection);
+            connection = optionBlock.nextConnection;
         }
         return containerBlock;
-
     },
     compose: function (containerBlock) {
-        // Delete everything.
-        var i = 1;
-        if (this.getInput('VARZ')) {
-            this.removeInput('VARZ');
+        // Reconfigure this block based on the mutator dialog's components.
+        var optionBlock = containerBlock.getInputTargetBlock('STACK');
+        // Count number of inputs.
+        this.optionList_.length = 0;
+        var data = [];
+        while (optionBlock) {
+            var obt = optionBlock.type.split('_');
+            var obl = obt.length - 1;
+            this.optionList_.push(obt[obl]);
+            data.push([optionBlock.varName_, optionBlock.varLen_]);
+            optionBlock = optionBlock.nextConnection &&
+                    optionBlock.nextConnection.targetBlock();
         }
-        while (this.getInput('VAR' + i.toString(10))) {
-            this.removeInput('VAR' + i.toString(10));
-            i++;
+        this.updateConstMenu();
+        this.updateShape_();
+        // Restore any data.
+        for (var i = 0; i < this.optionList_.length; i++) {
+            if (data[i][0] !== undefined) {
+                this.setFieldValue(data[i][0], 'VAR_NAME' + i);
+            }
+            if (data[i][1] !== undefined) {
+                this.setFieldValue(data[i][1], 'VAR_LEN' + i);
+            }
         }
-
-        i = 1;
-        // Rebuild the block's optional inputs.
-        var clauseBlock = containerBlock.getInputTargetBlock('STACK');
-        while (clauseBlock) {
-            // Reconnect any child blocks.
-            this.appendDummyInput('VAR' + i.toString(10))
-                    .appendField('variable')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR_NAME' + i.toString(10))
-                    .appendField('to')
-                    .appendField(new Blockly.FieldTextInput("64", Blockly.FieldTextInput.numberValidator), "VAR_LEN" + i.toString(10));
-            i++;
-            clauseBlock = clauseBlock.nextConnection &&
-                    clauseBlock.nextConnection.targetBlock();
-        }
-        this.myChildren_ = i - 1;
     },
     saveConnections: function (containerBlock) {
-        // Store a pointer to any connected child blocks.
-        var clauseBlock = containerBlock.getInputTargetBlock('STACK');
-        var i = 1;
-        while (clauseBlock) {
-            clauseBlock = clauseBlock.nextConnection &&
-                    clauseBlock.nextConnection.targetBlock();
+        // Store all data for each option.
+        var optionBlock = containerBlock.getInputTargetBlock('STACK');
+        var i = 0;
+        while (optionBlock) {
+            optionBlock.varName_ = this.getFieldValue('VAR_NAME' + i) || Blockly.LANG_VARIABLES_GET_ITEM;
+            optionBlock.varLen_ = this.getFieldValue('VAR_LEN' + i) || '64';
+            optionBlock = optionBlock.nextConnection &&
+                    optionBlock.nextConnection.targetBlock();
             i++;
+        }
+    },
+    updateConstMenu: function (ov, nv) {
+        var v_check = true;
+        this.v_list = [];
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        for (var x = 0; x < allBlocks.length; x++) {
+            if (allBlocks[x].type === 'constant_define') {
+                var v_name = allBlocks[x].getFieldValue('CONSTANT_NAME');
+                if (v_name === ov && nv) {
+                    v_name = nv;
+                }
+                if (v_name) {
+                    this.v_list.push([v_name, v_name]);
+                }
+                v_check = false;
+            }
+        }
+        if (v_check) {
+            this.v_list.push(['MYVALUE', 'MYVALUE']);
+        }
+        for (var i = 0; i < this.optionList_.length; i++) {
+            if (this.optionList_[i] === 'con') {
+                var m = this.getFieldValue("VAR_LEN" + i);
+                var vv = this.getFieldValue("VAR_NAME" + i);
+                if (this.getInput('VAR' + i)) {
+                    this.removeInput('VAR' + i);
+                }
+                this.appendDummyInput('VAR' + i)
+                        .appendField('variable')
+                        .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR_NAME' + i)
+                        .appendField('to')
+                        .appendField(new Blockly.FieldDropdown(uniq_fast(this.v_list)), "VAR_LEN" + i)
+                        .appendField('characters'); 
+                this.setFieldValue(vv, "VAR_NAME" + i);
+                if (m && m === ov && nv) {
+                    this.setFieldValue(nv, "VAR_LEN" + i);
+                } else if (m) {
+                    this.setFieldValue(m, "VAR_LEN" + i);
+                }
+            }
+        }
+    },
+    updateShape_: function () {
+        // Delete everything.
+        var i = 0;
+        while (this.getInput('VAR' + i)) {
+            this.removeInput('VAR' + i);
+            i++;
+        }
+        // Rebuild block.
+        for (var i = 0; i < this.optionList_.length; i++) {
+            var type = this.optionList_[i];
+            if (type === 'con') {
+                this.appendDummyInput('VAR' + i)
+                        .appendField('variable')
+                        .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR_NAME' + i)
+                        .appendField('to')
+                        .appendField(new Blockly.FieldDropdown(uniq_fast(this.v_list)), "VAR_LEN" + i)
+                        .appendField('characters');                
+            } else {
+                this.appendDummyInput('VAR' + i)
+                        .appendField('variable')
+                        .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR_NAME' + i)
+                        .appendField('to')
+                        .appendField(new Blockly.FieldTextInput("64", Blockly.FieldTextInput.numberValidator), "VAR_LEN" + i)
+                        .appendField('characters');
+            }
         }
     },
     getVars: function () {
         var theVars = [];
-        for (var i = 1; i <= this.myChildren_; i++) {
+        for (var i = 0; i < this.myChildren_; i++) {
             theVars.push(this.getFieldValue('VAR_NAME' + i.toString(10)));
         }
         return theVars;
     },
     renameVar: function (oldName, newName) {
-        for (var i = 1; i <= this.myChildren_; i++) {
+        for (var i = 0; i < this.myChildren_; i++) {
             if (Blockly.Names.equals(oldName, this.getFieldValue('VAR_NAME' + i.toString(10)))) {
                 this.setFieldValue(newName, 'VAR_NAME' + i.toString(10));
             }
@@ -1087,7 +1149,7 @@ Blockly.Blocks.string_var_length_container = {
     init: function () {
         this.setColour(colorPalette.getColor('math'));
         this.appendDummyInput()
-                .appendField('String variables');
+                .appendField('String variable lengths');
         this.setInputsInline(false);
         this.appendStatementInput('STACK');
         this.contextMenu = false;
@@ -1098,7 +1160,18 @@ Blockly.Blocks.string_var_length_var = {
     init: function () {
         this.setColour(colorPalette.getColor('math'));
         this.appendDummyInput()
-                .appendField('variable');
+                .appendField('number');
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true);
+        this.contextMenu = false;
+    }
+};
+
+Blockly.Blocks.string_var_length_con = {
+    init: function () {
+        this.setColour(colorPalette.getColor('math'));
+        this.appendDummyInput()
+                .appendField('named constant');
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true);
         this.contextMenu = false;
@@ -1106,7 +1179,7 @@ Blockly.Blocks.string_var_length_var = {
 };
 
 Blockly.propc.string_var_length = function () {
-    var i = 1;
+    var i = 0;
     Blockly.propc.string_var_lengths = [];
     while (this.getInput('VAR' + i.toString(10))) {
         Blockly.propc.string_var_lengths.push([this.getFieldValue('VAR_NAME' + i.toString(10)),

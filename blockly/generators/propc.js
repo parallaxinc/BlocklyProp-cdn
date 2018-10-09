@@ -352,7 +352,7 @@ Blockly.propc.finish = function (code) {
         for (var vt = 0; vt < vl; vt++) {
             var varMatch = new RegExp('char\\s+' + Blockly.propc.string_var_lengths[vt][0] + '\\[');
             if (definitions[def].match(varMatch)) {
-                definitions[def] = 'char ' + Blockly.propc.string_var_lengths[vt][0] + '[' + Blockly.propc.string_var_lengths[vt][1] + '];';
+                definitions[def] = 'char ' + Blockly.propc.string_var_lengths[vt][0] + '[' + Blockly.propc.string_var_lengths[vt][1] + ' + 1];';
             }
         }
 
