@@ -352,7 +352,7 @@ Blockly.propc.finish = function (code) {
         for (var vt = 0; vt < vl; vt++) {
             var varMatch = new RegExp('char\\s+' + Blockly.propc.string_var_lengths[vt][0] + '\\[');
             if (definitions[def].match(varMatch)) {
-                definitions[def] = 'char ' + Blockly.propc.string_var_lengths[vt][0] + '[' + Blockly.propc.string_var_lengths[vt][1] + '];';
+                definitions[def] = 'char ' + Blockly.propc.string_var_lengths[vt][0] + '[' + Blockly.propc.string_var_lengths[vt][1] + ' + 1];';
             }
         }
 
@@ -552,22 +552,6 @@ if (!Object.keys) {
         };
     }());
 };
-
-/*
-// NOTE: Replaces core function!                   // USE WHEN CORE IS UPDATED
-Blockly.Field.prototype.render_ = function() {
-    if (!this.visible_) {
-      this.size_.width = 0;
-      return;
-    }
-  
-    // Replace the text.
-    if (this.textElement_) {
-        this.textElement_.textContent = this.getDisplayText_();
-        this.updateWidth();
-    } 
-};
-*/
 
   
 

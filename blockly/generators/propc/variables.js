@@ -45,41 +45,6 @@ Blockly.Blocks.variables_get = {
         this.setOutput(true);
         this.typeCheckRun = null;
     },
-    /*
-    onchange: function () {
-        var sBlock = this;
-        if(!this.typeCheckRun) {
-            this.typeCheckRun = setTimeout(function () {
-                var outType = "Number";
-                var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-                for (var x = 0; x < allBlocks.length; x++) {
-                    var func = allBlocks[x].getVarType;
-                    var fund = allBlocks[x].getVars;
-                    if (func) {
-                        var blockType = func.call(allBlocks[x]);
-                        var blockVars = fund.call(allBlocks[x]);
-                        var varMatch = false;
-                        for (var y = 0; y < blockVars.length; y++) {
-                            if (blockVars[y].toString() === sBlock.getFieldValue('VAR')) {
-                                varMatch = true;
-                                break;
-                            }
-                        }
-                        if (blockType === 'String' && varMatch) {
-                            var outType = "String";
-                            break;
-                        } else if (blockType === 'Number' && varMatch) {
-                            var outType = "Number";
-                            break;
-                        }
-                    }
-                }
-                sBlock.typeCheckRun = null;
-                sBlock.setOutput(true, outType);
-            }, 500);
-        }
-    },
-    */
     getVars: function () {
         return [this.getFieldValue('VAR')];
     },
@@ -89,33 +54,6 @@ Blockly.Blocks.variables_get = {
         }
     }
 };
-
-/*
-Blockly.Blocks.variables_declare = {
-    // Variable setter.
-    init: function () {
-        this.setColour(colorPalette.getColor('variables'));
-        this.appendValueInput('VALUE', null)
-                .appendField('Declare')
-                .appendField(new Blockly.FieldVariable(
-                        Blockly.LANG_VARIABLES_SET_ITEM), 'VAR')
-                .appendField("as")
-                .appendField(new Blockly.FieldDropdown([["int", "int"], ["float", "float"], ["char", "char"], ["unsigned int", "unsigned int"], ["signed char", "signed char"]]), "TYPE")
-                .appendField("value");
-
-        this.setPreviousStatement(true, "Block");
-        this.setNextStatement(true);
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
-    }
-};
-*/
 
 Blockly.Blocks.variables_set = {
     // Variable setter.
@@ -130,6 +68,7 @@ Blockly.Blocks.variables_set = {
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true);
     },
+    /*
     getVarType: function () {
         if (this.getInputTargetBlock('VALUE')) {
             return this.getInputTargetBlock('VALUE').outputConnection.check_.toString();
@@ -137,6 +76,7 @@ Blockly.Blocks.variables_set = {
             return null;
         }
     },
+    */
     getVars: function () {
         return [this.getFieldValue('VAR')];
     },
@@ -145,6 +85,7 @@ Blockly.Blocks.variables_set = {
             this.setFieldValue(newName, 'VAR');
         }
     }
+
 };
 
 Blockly.propc.variables_get = function () {
@@ -155,21 +96,6 @@ Blockly.propc.variables_get = function () {
     return [code, Blockly.propc.ORDER_ATOMIC];
 };
 
-/*
-Blockly.propc.variables_declare = function () {
-    // Variable setter.
-    var dropdown_type = this.getFieldValue('TYPE');
-    //TODO: settype to variable
-    var argument0 = Blockly.propc.valueToCode(this, 'VALUE',
-            Blockly.propc.ORDER_ASSIGNMENT) || '0';
-    var varName = Blockly.propc.variableDB_.getName(
-            this.getFieldValue('VAR'),
-            Blockly.Variables.NAME_TYPE);
-    Blockly.propc.setups_['setup_var' + varName] = varName + ' = ' + argument0 + ';';
-    Blockly.propc.vartype_[varName] = dropdown_type;
-    return '';
-};
-*/
 
 Blockly.propc.variables_set = function () {
     // Variable setter.
