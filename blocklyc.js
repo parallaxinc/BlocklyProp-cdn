@@ -181,7 +181,9 @@ function renderContent(pane) {
         codeXml.setValue(xmlText);
         codeXml.gotoLine(0);
     } else if (pane === 'propc' && projectData['board'] !== 'propcfile') {
-        prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
+        var raw_c = prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
+        codePropC.setValue(raw_c);
+        codePropC.gotoLine(0);
     } else if (pane === 'propc') {
         if (codePropC.getValue() === '') {
             codePropC.setValue(atob((projectData['code'].match(/<field name="CODE">(.*)<\/field>/) || ['', ''])[1] || ''));
@@ -193,7 +195,9 @@ function renderContent(pane) {
             blankProjectCode += '// ------ Global Variables and Objects ------\n\n\n';
             blankProjectCode += '// ------ Main Program ------\n';
             blankProjectCode += 'int main() {\n\n\nwhile (1) {\n\n\n}}';
-            prettyCode(blankProjectCode);
+            var raw_c = prettyCode(blankProjectCode);
+            codePropC.setValue(raw_c);
+            codePropC.gotoLine(0);
         }   
     }
 }
@@ -230,8 +234,7 @@ var prettyCode = function (raw_code) {
                 return "[" + m1 + "] = {" + m2 + "};";
             });
 
-    codePropC.setValue(raw_code);
-    codePropC.gotoLine(0);
+    return (raw_code);
 };
 
 var findReplaceCode = function () {
@@ -310,7 +313,7 @@ function cloudCompile(text, action, successHandler) {
     // if PropC is in edit mode, get it from the editor, otherwise render it from the blocks.
     var propcCode = '';
     if (codePropC.getReadOnly()) {
-        propcCode = Blockly.propc.workspaceToCode(Blockly.mainWorkspace);
+        propcCode = prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
     } else {
         propcCode = codePropC.getValue();
     }
@@ -322,12 +325,6 @@ function cloudCompile(text, action, successHandler) {
         $("#compile-dialog-title").text(text);
         $("#compile-console").val('Compile... ');
         $('#compile-dialog').modal('show');
-
-
-        propcCode = js_beautify(propcCode, {
-            'brace_style': 'expand',
-            'indent_size': 2
-        });
 
         var terminalNeeded = false;
         if (propcCode.indexOf("SERIAL_TERMINAL USED") > -1)
