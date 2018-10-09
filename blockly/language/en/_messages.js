@@ -67,6 +67,7 @@ Blockly.MSG_RENAME_VARIABLE_TITLE = 'Rename all "%1" variables to:';
 Blockly.LANG_VARIABLES_SET_ITEM = 'item';
 Blockly.LANG_VARIABLES_GET_ITEM = 'item';
 
+
 // Control Blocks.
 Blockly.LANG_CATEGORY_CONTROLS = 'Control';
 Blockly.LANG_CONTROLS_IF_MSG_IF = 'if';
@@ -176,6 +177,7 @@ Blockly.Msg.PROCEDURES_MUTATORCONTAINER_TITLE = "inputs";
 Blockly.Msg.REDO = "Redo";
 Blockly.Msg.REMOVE_COMMENT = "Remove Comment";
 Blockly.Msg.RENAME_VARIABLE = "Rename variable...";
+Blockly.Msg.DELETE_VARIABLE = "Delete variable %1";
 Blockly.Msg.RENAME_VARIABLE_TITLE = "Rename all '%1' variables to:";
 
 Blockly.Msg.TODAY = "Today";

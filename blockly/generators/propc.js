@@ -553,22 +553,6 @@ if (!Object.keys) {
     }());
 };
 
-/*
-// NOTE: Replaces core function!                   // USE WHEN CORE IS UPDATED
-Blockly.Field.prototype.render_ = function() {
-    if (!this.visible_) {
-      this.size_.width = 0;
-      return;
-    }
-  
-    // Replace the text.
-    if (this.textElement_) {
-        this.textElement_.textContent = this.getDisplayText_();
-        this.updateWidth();
-    } 
-};
-*/
-
   
 
 // NOTE: Replaces core function!

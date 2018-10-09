@@ -395,7 +395,7 @@ xmlToolbox += '            </block>';
 xmlToolbox += '            <block type="heb_ir_read_signal"></block>';
 xmlToolbox += '            <block type="heb_ir_clear_buffer"></block>';
 xmlToolbox += '        </category>';
-xmlToolbox += '        <category key="category_communicate_graphing" exclude="heb-wx,">';
+xmlToolbox += '        <category key="category_communicate_graphing" >';
 xmlToolbox += '            <block type="graph_settings">';
 xmlToolbox += '                <field name="XAXIS">40,S</field>';
 xmlToolbox += '            </block>';

@@ -27,8 +27,9 @@ html, body {
     position: absolute; /* Safari height clipping fix */
 }
 
-.blocklyWidgetDiv .goog-menuitem-content {
+.blocklyWidgetDiv .goog-menuitem-content, .blocklyContextMenu, .blocklydropdownmenu {
     font: normal 14px Arimo, sans-serif !important;
+    max-height: 110% !important;
 }
 
 .field_code {
