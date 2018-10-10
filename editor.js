@@ -734,7 +734,7 @@ function initToolbox(profileName) {
     });
 
     init(Blockly);
-    //Blockly.mainWorkspace.createVariable('item');      // USE AFTER CORE IS REPLACED
+    Blockly.mainWorkspace.createVariable('item');      // USE AFTER CORE IS REPLACED
 }
 
 function loadToolbox(xmlText) {
