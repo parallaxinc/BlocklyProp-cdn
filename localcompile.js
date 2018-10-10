@@ -70,41 +70,21 @@ var compile_actions = {
     "EEPROM": {"compile-options": [], "extension": ".elf", "return-binary": true}
 };
 
-
 function oswalk(dir, action) {
-    
-    // Assert that it's a function
-    if (typeof action !== "function") {
+    if (typeof action !== "function") {             // Assert that it's a function
         action = function (error, file) { };
     }
-
-    // Read the directory
-    fs.readdir(dir, function (err, list) {
-        
-        // Return the error if something went wrong
+    fs.readdir(dir, function (err, list) {          // Read the directory
         if (err) {
-            return action(err);
+            return action(err);                     // Return the error if something went wrong
         }
-
-        // For every file in the list
-        list.forEach(function (file) {
-            
-            // Full path of that file
-            var p = path.join(dir, file);
-            
-            // Get the file's stats
-            fs.stat(p, function (err, stat) {
-                
-                // If the file is a directory
-                if (stat && stat.isDirectory()) {
-                    
-                    // Dive into the directory
-                    oswalk(p, action);
-                    
+        list.forEach(function (file) {              // For every file in the list
+            var p = path.join(dir, file);           // Full path of that file
+            fs.stat(p, function (err, stat) {       // Get the file's stats
+                if (stat && stat.isDirectory()) {   // If the file is a directory
+                    oswalk(p, action);              // Dive into the directory
                 } else {
-                    
-                    // Call the action
-                    action(null, p);
+                    action(null, p);                // Call the action
                 }
             });
         });
@@ -351,8 +331,9 @@ function compile_binary(working_directory, action, source_file, binaries, librar
         exec(executing_data.join(' ').replace(/\/Simple Libraries\//g, "/'Simple Libraries'/"), { 'cwd' : working_directory }, function(err, stdout, stderr) {
 
             var data = {
-                error:      null,
-                'message':  "Compiler not found.",
+                error:      stderr,
+                details:    stdout,
+                message:    "Compiler not found.",
                 success:    false,
                 binary:     null,
                 extension:  null
@@ -363,15 +344,13 @@ function compile_binary(working_directory, action, source_file, binaries, librar
                 // node couldn't execute the command
                 cleanUpAll(source_directory);
 		        data.error = err;
-		        data['message'] = "Compiler not found.";
+		        data['message'] = "Compiler Error: " + stdout + "\n\n" + stderr;
    	            return callback(data);  
             }
 
             // the *entire* stdout and stderr (buffered)
-            console.log(stdout);
-            console.log(stderr);
-            
             data['message'] = "Compile successful!";
+            data.details = stdout;
 	        data.success = true;
 	        data.extension = compile_actions[action.toUpperCase()]["extension"];
             
@@ -383,7 +362,7 @@ function compile_binary(working_directory, action, source_file, binaries, librar
                     if (err) {
 		                cleanUpAll(source_directory);
 			            data.error = err;
-			            data['message'] = "Unable to read compiled file.";
+			            data['message'] = "Unable to read compiled file: " + stdout + "\n\n" + stderr;
    	                    return callback(data);  
                     }
 

@@ -1579,9 +1579,11 @@ Blockly.Blocks.serial_scan_multiple = {
         this.updateShape_();
         // Restore any data.
         for (var i = 0; i < this.optionList_.length; i++) {
-            var userData = data[i][0];
-            if (userData !== undefined) {
+            if (data[i][1]) {
                 this.setFieldValue(data[i][1], 'CPU' + i);
+            }
+            if (data[i][0]) {
+                this.setFieldValue(data[i][0], 'MULT' + i);
             }
         }
     },
@@ -1593,10 +1595,9 @@ Blockly.Blocks.serial_scan_multiple = {
         var i = 0;
         while (optionBlock) {
             optionBlock.cpuData_ = this.getFieldValue('CPU' + i) || Blockly.LANG_VARIABLES_GET_ITEM;
+            optionBlock.userData_ = this.getFieldValue('MULT' + i) || null;
+            optionBlock = optionBlock.nextConnection && optionBlock.nextConnection.targetBlock();
             i++;
-            optionBlock.userData_ = this.getFieldValue('CPU' + i);
-            optionBlock = optionBlock.nextConnection &&
-                    optionBlock.nextConnection.targetBlock();
         }
     },
     updateShape_: function () {
