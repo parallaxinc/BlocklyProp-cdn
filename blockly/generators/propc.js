@@ -554,7 +554,6 @@ if (!Object.keys) {
 };
 
 
-
 // NOTE: Replaces core function!                   // USE WHEN CORE IS UPDATED
 Blockly.Field.prototype.render_ = function() {
     if (!this.visible_) {
@@ -567,56 +566,6 @@ Blockly.Field.prototype.render_ = function() {
         this.textElement_.textContent = this.getDisplayText_();
         this.updateWidth();
     } 
-};
-
-// NOTE: Replaces core function!                   // USE WHEN CORE IS UPDATED
-/**
- * Return a sorted list of variable names for variable dropdown menus.
- * Include a special option at the end for creating a new variable name.
- * @return {!Array.<string>} Array of variable names.
- * @this {Blockly.FieldVariable}
- */
-Blockly.FieldVariable.dropdownCreate = function() {
-    if (!this.variable_) {
-      throw new Error('Tried to call dropdownCreate on a variable field with no' +
-          ' variable selected.');
-    }
-    var name = this.getText();
-    var workspace = null;
-    if (this.sourceBlock_) {
-      workspace = this.sourceBlock_.workspace;
-    }
-    var variableModelList = [];
-    if (workspace) {
-      var variableTypes = this.getVariableTypes_();
-      // Get a copy of the list, so that adding rename and new variable options
-      // doesn't modify the workspace's list.
-      for (var i = 0; i < variableTypes.length; i++) {
-        var variableType = variableTypes[i];
-        var variables = workspace.getVariablesOfType(variableType);
-        variableModelList = variableModelList.concat(variables);
-      }
-    }
-    variableModelList.sort(Blockly.VariableModel.compareByName);
-  
-    var options = [];
-    for (var i = 0; i < variableModelList.length; i++) {
-      // Set the UUID as the internal representation of the variable.
-      options[i] = [variableModelList[i].name, variableModelList[i].getId()];
-    }
-    if (name !== Blockly.LANG_VARIABLES_SET_ITEM) {
-        options.push([Blockly.Msg['RENAME_VARIABLE'], Blockly.RENAME_VARIABLE_ID]);
-    }
-    if (Blockly.Msg['DELETE_VARIABLE'] && name !== Blockly.LANG_VARIABLES_SET_ITEM) {   // Prevents user from deleting the default "item" variable.
-      options.push(
-          [
-            Blockly.Msg['DELETE_VARIABLE'].replace('%1', name),
-            Blockly.DELETE_VARIABLE_ID
-          ]
-      );
-    }
-  
-    return options;
 };
 
 

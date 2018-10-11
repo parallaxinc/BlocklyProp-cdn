@@ -660,14 +660,6 @@ Blockly.Blocks.eeprom_read = {
             return "Number";
         }
     },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
-    }
 };
 
 Blockly.propc.eeprom_read = function () {
@@ -1709,18 +1701,6 @@ Blockly.Blocks.sd_read = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        if(this.getField('VAR')) {
-            return [this.getFieldValue('VAR')];
-        } else {
-            return [];
-        }
-    },
-    renameVar: function (oldName, newName) {
-        if (this.getField('VAR') && Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     },
     mutationToDom: function () {
         var container = document.createElement('mutation');
