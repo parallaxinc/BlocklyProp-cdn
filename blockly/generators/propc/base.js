@@ -1182,11 +1182,14 @@ Blockly.propc.string_var_length = function () {
     var i = 0;
     Blockly.propc.string_var_lengths = [];
     while (this.getInput('VAR' + i.toString(10))) {
-        Blockly.propc.string_var_lengths.push([this.getFieldValue('VAR_NAME' + i.toString(10)),
-            this.getFieldValue('VAR_LEN' + i.toString(10))]);
+        var varLenValue = this.getFieldValue('VAR_LEN' + i.toString(10));
+        var varPref = '';
+        if (this.optionList_[i] === 'con') {
+            varPref = 'MY_';
+        }
+        Blockly.propc.string_var_lengths.push([this.getFieldValue('VAR_NAME' + i.toString(10)), varPref + varLenValue]);
         i++;
     }
-
     return '';
 };
 
@@ -1907,14 +1910,21 @@ Blockly.propc.get_substring = function () {
         code += ')?' + snd + ':(int)strlen(' + frStr + '))-1; __ssIdx++) {\n__scBfr[__stIdx] = ' + frStr + '[__ssIdx]; __stIdx++; }\n';
         code += '__scBfr[__stIdx] = 0;\n';
         code += 'strcpy(' + toStr + ', __scBfr);\n';
+
     } else {
         code += "substr (" + toStr + ", " + frStr + ", " + sst + ", " + snd + pt + ");\n";
 
         if (!this.disabled) {
-            var fn_code = "void substr(char *__outStr, char *__inStr, int __startPos, int __toPos) {";
-            fn_code += "int j = 0;\nfor (int i = (__startPos < 0 ? 0 : __startPos); i <= (__toPos > ";
-            fn_code += "(int) strlen(__inStr) ? (int) strlen(__inStr) : __toPos); i++) {__outStr[j] = ";
-            fn_code += "__inStr[i];\nj++;}__outStr[j] = 0;}";
+            //var fn_code = "void substr(char *__outStr, char *__inStr, int __startPos, int __toPos) {";
+            //fn_code += "int j = 0;\nfor (int i = (__startPos < 0 ? 0 : __startPos); i <= (__toPos > ";
+            //fn_code += "(int) strlen(__inStr) ? (int) strlen(__inStr) : __toPos); i++) {__outStr[j] = ";
+            //fn_code += "__inStr[i];\nj++;}__outStr[j] = 0;}";
+
+            var fn_code = 'void substr(char *__outStr, char *__inStr, int __startPos, int __toPos) {__startPos';
+            fn_code += ' = (__startPos < 0 ? 0 : (__startPos > strlen(__inStr) ? strlen(__inStr) : __startPos));\n';
+            fn_code += '__toPos = (__toPos < 0 ? 0 : (__toPos > strlen(__inStr) ? strlen(__inStr) : __toPos';
+            fn_code += '));\nint __idx = ((__toPos < __startPos) ? __startPos : __toPos) - __startPos;\n';
+            fn_code += 'memcpy(__outStr, __inStr + __startPos, __idx);\n__outStr[__idx] = 0;}';
 
             Blockly.propc.methods_['substr'] = fn_code;
             Blockly.propc.method_declarations_['substr'] = 'void substr (char *, char *, int, int);\n';
