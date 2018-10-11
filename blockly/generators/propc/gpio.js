@@ -652,14 +652,7 @@ Blockly.Blocks.eeprom_read = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVarType: function () {
-        if (this.getFieldValue('TYPE') === 'TEXT') {
-            return "String";
-        } else {
-            return "Number";
-        }
-    },
+    }
 };
 
 Blockly.propc.eeprom_read = function () {

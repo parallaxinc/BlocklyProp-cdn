@@ -494,7 +494,7 @@ Blockly.Blocks.colorpal_get_colors = {
     domToMutation: Blockly.Blocks['colorpal_get_colors_raw'].domToMutation,
     colorpalPins: Blockly.Blocks['colorpal_get_colors_raw'].colorpalPins,
     updateCpin: Blockly.Blocks['colorpal_get_colors_raw'].updateCpin,
-    onchange: Blockly.Blocks['colorpal_get_colors_raw'].onchange,
+    onchange: Blockly.Blocks['colorpal_get_colors_raw'].onchange
 };
 
 Blockly.propc.colorpal_get_colors = function () {

@@ -1616,7 +1616,7 @@ Blockly.Blocks.combine_strings = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
+    }
 };
 
 Blockly.propc.combine_strings = function () {

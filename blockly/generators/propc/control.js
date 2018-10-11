@@ -385,7 +385,7 @@ Blockly.Blocks.control_repeat_for_loop = {
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.setInputsInline(true);
-    },
+    }
 };
 
 Blockly.propc.control_repeat_for_loop = function () {
