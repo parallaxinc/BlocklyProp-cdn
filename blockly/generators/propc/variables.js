@@ -44,14 +44,6 @@ Blockly.Blocks.variables_get = {
                         Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
         this.setOutput(true);
         this.typeCheckRun = null;
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     }
 };
 
@@ -67,25 +59,7 @@ Blockly.Blocks.variables_set = {
                 .appendField('=');
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true);
-    },
-    /*
-    getVarType: function () {
-        if (this.getInputTargetBlock('VALUE')) {
-            return this.getInputTargetBlock('VALUE').outputConnection.check_.toString();
-        } else {
-            return null;
-        }
-    },
-    */
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     }
-
 };
 
 Blockly.propc.variables_get = function () {

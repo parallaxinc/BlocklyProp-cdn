@@ -1115,20 +1115,6 @@ Blockly.Blocks.string_var_length = {
             }
         }
     },
-    getVars: function () {
-        var theVars = [];
-        for (var i = 0; i < this.myChildren_; i++) {
-            theVars.push(this.getFieldValue('VAR_NAME' + i.toString(10)));
-        }
-        return theVars;
-    },
-    renameVar: function (oldName, newName) {
-        for (var i = 0; i < this.myChildren_; i++) {
-            if (Blockly.Names.equals(oldName, this.getFieldValue('VAR_NAME' + i.toString(10)))) {
-                this.setFieldValue(newName, 'VAR_NAME' + i.toString(10));
-            }
-        }
-    },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
         var strVarBlocksCount = 0;
@@ -1630,17 +1616,6 @@ Blockly.Blocks.combine_strings = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVarType: function () {
-        return "String";
-    },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
     }
 };
 
@@ -1750,14 +1725,6 @@ Blockly.Blocks.get_char_at_position = {
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VALUE');
         this.setInputsInline(true);
         this.setOutput(true, "Number");
-    },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
     }
 };
 
@@ -1802,17 +1769,6 @@ Blockly.Blocks.set_char_at_position = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVarType: function () {
-        return "String";
-    },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
     }
 };
 
@@ -1866,18 +1822,6 @@ Blockly.Blocks.get_substring = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVarType: function () {
-        return "String";
-    },
-    getVars: function () {
-        return [this.getFieldValue('FROM_STR'), this.getFieldValue('TO_STR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('FROM_STR')))
-            this.setFieldValue(newName, 'FROM_STR');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('TO_STR')))
-            this.setFieldValue(newName, 'TO_STR');
     }
 };
 
@@ -1970,14 +1914,6 @@ Blockly.Blocks.string_to_number = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     }
 };
 
@@ -2012,17 +1948,6 @@ Blockly.Blocks.number_to_string = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVarType: function () {
-        return "String";
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     }
 };
 
@@ -2064,16 +1989,6 @@ Blockly.Blocks.string_split = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVarType: function () {
-        return "String";
-    },
-    getVars: function () {
-        return [this.getFieldValue('TO_STR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('TO_STR')))
-            this.setFieldValue(newName, 'TO_STR');
     }
 };
 
@@ -2137,18 +2052,6 @@ Blockly.Blocks.string_trim = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVarType: function () {
-        return "String";
-    },
-    getVars: function () {
-        return [this.getFieldValue('FROM_STR'), this.getFieldValue('TO_STR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('FROM_STR')))
-            this.setFieldValue(newName, 'FROM_STR');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('TO_STR')))
-            this.setFieldValue(newName, 'TO_STR');
     }
 };
 
@@ -2304,14 +2207,6 @@ Blockly.Blocks.math_advanced = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('STORE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('STORE'))) {
-            this.setFieldValue(newName, 'STORE');
-        }
     }
 };
 
@@ -2354,14 +2249,6 @@ Blockly.Blocks.math_inv_trig = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('STORE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('STORE'))) {
-            this.setFieldValue(newName, 'STORE');
-        }
     }
 };
 
