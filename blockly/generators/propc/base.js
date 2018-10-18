@@ -1915,11 +1915,6 @@ Blockly.propc.get_substring = function () {
         code += "substr (" + toStr + ", " + frStr + ", " + sst + ", " + snd + pt + ");\n";
 
         if (!this.disabled) {
-            //var fn_code = "void substr(char *__outStr, char *__inStr, int __startPos, int __toPos) {";
-            //fn_code += "int j = 0;\nfor (int i = (__startPos < 0 ? 0 : __startPos); i <= (__toPos > ";
-            //fn_code += "(int) strlen(__inStr) ? (int) strlen(__inStr) : __toPos); i++) {__outStr[j] = ";
-            //fn_code += "__inStr[i];\nj++;}__outStr[j] = 0;}";
-
             var fn_code = 'void substr(char *__outStr, char *__inStr, int __startPos, int __toPos) {__startPos';
             fn_code += ' = (__startPos < 0 ? 0 : (__startPos > strlen(__inStr) ? strlen(__inStr) : __startPos));\n';
             fn_code += '__toPos = (__toPos < 0 ? 0 : (__toPos > strlen(__inStr) ? strlen(__inStr) : __toPos';
@@ -1993,16 +1988,9 @@ Blockly.Blocks.string_to_number = {
 
 Blockly.propc.string_to_number = function () {
     var str = Blockly.propc.valueToCode(this, 'STRING', Blockly.propc.ORDER_ATOMIC) || '0';
-    var type = this.getFieldValue('TYPE');
     var store = Blockly.propc.variableDB_.getName(this.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE);
 
-    //Blockly.propc.definitions_['s2i_Buffer'] = 'char __s2iBfr[64];';
-
-    var code = '';
-    //code += 'strcpy(__s2iBfr, ' + str + ');\n';
-    code += 'sscan(' + str + ', "' + type + '", &' + store + ');\n';
-
-    return code;
+    return 'sscan(' + str + ', "' + this.getFieldValue('TYPE') + '", &' + store + ');\n';
 };
 
 Blockly.Blocks.number_to_string = {
@@ -2038,12 +2026,11 @@ Blockly.Blocks.number_to_string = {
 
 Blockly.propc.number_to_string = function () {
     var str = Blockly.propc.valueToCode(this, 'NUMBER', Blockly.propc.ORDER_ATOMIC) || '0';
-    var type = this.getFieldValue('TYPE');
     var store = Blockly.propc.variableDB_.getName(this.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE);
 
     Blockly.propc.vartype_[store] = 'char *';
 
-    return 'sprint(' + store + ', "' + type + '", ' + str + ');\n';
+    return 'sprint(' + store + ', "' + this.getFieldValue('TYPE') + '", ' + str + ');\n';
 };
 
 Blockly.Blocks.string_split = {
