@@ -185,7 +185,7 @@ function renderContent(pane) {
         codePropC.setValue(raw_c);
         codePropC.gotoLine(0);
     } else if (pane === 'propc') {
-        if (codePropC.getValue() === '') {
+        if (!codePropC || codePropC.getValue() === '') {
             codePropC.setValue(atob((projectData['code'].match(/<field name="CODE">(.*)<\/field>/) || ['', ''])[1] || ''));
             codePropC.gotoLine(0);
         }
