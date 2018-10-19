@@ -53,9 +53,7 @@ $(document).ready(function () {
         //Decode and parse project data coming from a sharelink
         var projectRaw = atob($("meta[name=projectlink]").attr("content"));
         projectlink = JSON.parse(projectRaw);
-        //console.log(projectlink);
         setupWorkspace(projectlink);
-        //loadProjectData(projectlink);
     } else if (!idProject && !isOffline) {
         window.location = baseUrl;
 
@@ -126,9 +124,12 @@ var setupWorkspace = function (data) {
     showInfo(data);
     projectLoaded = true;
     if (ready) {
-        setProfile(data['board']);
-        if (data['board'] !== 'propcfile') {
-            initToolbox(data['board'], []);
+        setProfile(projectData['board']);
+        if (projectData['board'] !== 'propcfile') {
+            initToolbox(projectData['board'], []);
+        } else {
+            // set for propc
+            renderContent('propc');
         }
     }
     if (projectData['board'] === 's3') {
@@ -141,7 +142,7 @@ var setupWorkspace = function (data) {
         document.getElementById('client-available').innerHTML = document.getElementById('client-available-long').innerHTML;
     }
 
-    if (data && data['yours'] === false) {
+    if (projectData && projectData['yours'] === false) {
         $('#edit-project-details').html(page_text_label['editor_view-details'])
     } else {
         $('#edit-project-details').html(page_text_label['editor_edit-details']);
