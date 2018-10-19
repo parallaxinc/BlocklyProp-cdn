@@ -204,28 +204,6 @@ var showInfo = function (data) {
     $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
 };
 
-function generateBlockId(nonce) {
-    var blockId = btoa(nonce).replace(/=/g, '');
-    var l = blockId.length;
-    if (l < 20) {
-        blockId = 'zzzzzzzzzzzzzzzzzzzz'.substr(l - 20) + blockId;
-    } else {
-        blockId = blockId.substr(l - 20);
-    }
-
-    return blockId;
-}
-
-var propcAsBlocksXml = function () {
-    var code = '<xml xmlns="http://www.w3.org/1999/xhtml">';
-    code += '<block type="propc_file" id="' + generateBlockId(codePropC.getValue()) + '" x="100" y="100">';
-    code += '<field name="FILENAME">single.c</field>';
-    code += '<field name="CODE">';
-    code += btoa(codePropC.getValue().replace('/* EMPTY_PROJECT */\n', ''));
-    code += '</field></block></xml>';
-    return code;
-};
-
 var saveProject = function () {
     if (projectData['yours']) {
         var code = '';
