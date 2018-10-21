@@ -274,17 +274,51 @@ var propcAsBlocksXml = function () {
  * @param {!Blockly} blockly Instance of Blockly from iframe.
  */
 function init(blockly) {
-    codePropC = ace.edit("code-propc");
-    codePropC.setTheme("ace/theme/chrome");
-    codePropC.getSession().setMode("ace/mode/c_cpp");
-    codePropC.getSession().setTabSize(2);
-    codePropC.$blockScrolling = Infinity;
-    codePropC.setReadOnly(true);
+    if(!codePropC) {
+        codePropC = ace.edit("code-propc");
+        codePropC.setTheme("ace/theme/chrome");
+        codePropC.getSession().setMode("ace/mode/c_cpp");
+        codePropC.getSession().setTabSize(2);
+        codePropC.$blockScrolling = Infinity;
+        codePropC.setReadOnly(true);
 
-    codeXml = ace.edit("code-xml");
-    codeXml.setTheme("ace/theme/chrome");
-    codeXml.getSession().setMode("ace/mode/xml");
-    codeXml.setReadOnly(true);
+        // if the project is a propc code-only project, enable code editing.
+        if (projectData['board'] === 'propcfile') {
+            codePropC.setReadOnly(false);
+            codePropC.commands.addCommand({
+                name: "undo",
+                bindKey: {win: "Ctrl-z", mac: "Command-z"},
+                exec: function (codePropC) {
+                    codePropC.undo();
+                },
+                readOnly: true
+            });
+            codePropC.commands.addCommand({
+                name: "redo",
+                bindKey: {win: "Ctrl-y", mac: "Command-y"},
+                exec: function (codePropC) {
+                    codePropC.redo();
+                },
+                readOnly: true
+            });
+            codePropC.commands.addCommand({
+                name: "find_replace",
+                bindKey: {win: "Ctrl-f", mac: "Command-f"},
+                exec: function () {
+                    findReplaceCode();
+                },
+                readOnly: true
+            });
+            tabClick('tab_propc');
+        }
+    }
+
+    if (!codeXml) {
+        codeXml = ace.edit("code-xml");
+        codeXml.setTheme("ace/theme/chrome");
+        codeXml.getSession().setMode("ace/mode/xml");
+        codeXml.setReadOnly(true);
+    }
 
     window.Blockly = blockly;
 
@@ -295,36 +329,6 @@ function init(blockly) {
         if (projectData['board'] !== 'propcfile') {
             loadToolbox(projectData['code']);
         }
-    }
-
-    // if the project is a propc code-only project, enable code editing.
-    if (projectData['board'] === 'propcfile') {
-        codePropC.setReadOnly(false);
-        codePropC.commands.addCommand({
-            name: "undo",
-            bindKey: {win: "Ctrl-z", mac: "Command-z"},
-            exec: function (codePropC) {
-                codePropC.undo();
-            },
-            readOnly: true
-        });
-        codePropC.commands.addCommand({
-            name: "redo",
-            bindKey: {win: "Ctrl-y", mac: "Command-y"},
-            exec: function (codePropC) {
-                codePropC.redo();
-            },
-            readOnly: true
-        });
-        codePropC.commands.addCommand({
-            name: "find_replace",
-            bindKey: {win: "Ctrl-f", mac: "Command-f"},
-            exec: function () {
-                findReplaceCode();
-            },
-            readOnly: true
-        });
-        tabClick('tab_propc');
     }
 }
 
