@@ -128,6 +128,7 @@ var setupWorkspace = function (data) {
         if (projectData['board'] !== 'propcfile') {
             initToolbox(projectData['board'], []);
         } else {
+            init(Blockly);
             // set for propc
             renderContent('propc');
         }
