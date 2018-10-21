@@ -5870,7 +5870,7 @@ Blockly.Blocks.i2c_send = {
         this.setTooltip(Blockly.MSG_I2C_SEND_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendValueInput("DATA")
-                .appendField("i2c send")
+                .appendField("i\u00B2c controller send")
                 .appendField(new Blockly.FieldTextInput('2',
                         Blockly.FieldTextInput.numberValidator), "COUNT")
                 .appendField("bytes of data");
@@ -5941,8 +5941,8 @@ Blockly.Blocks.i2c_send = {
         var sda = zda || this.getFieldValue('SDA');
         var scl = zcl || this.getFieldValue('SCL');
         var warnTxt = 'WARNING: Both SDA and SCL must be equal to \nSDA and SCL on ';
-        warnTxt += 'other blocks if sharing \nan i2c bus, or both must be different ';
-        warnTxt += '\nif on seperate i2c busses, and SDA and SCL \nmust be different ';
+        warnTxt += 'other blocks if sharing \nan i\u00B2c bus, or both must be different ';
+        warnTxt += '\nif on seperate i\u00B2c busses, and SDA and SCL \nmust be different ';
         warnTxt += 'from each other!';
         this.pinWarn = null;
 
@@ -6061,7 +6061,7 @@ Blockly.Blocks.i2c_receive = {
         this.setColour(colorPalette.getColor('protocols'));
         this.appendValueInput("ADDR")
                 .setCheck(null)
-                .appendField("i2c receive")
+                .appendField("i\u00B2c controller receive")
                 .appendField(new Blockly.FieldTextInput('2',
                         Blockly.FieldTextInput.numberValidator), "COUNT")
                 .appendField("bytes")
@@ -6218,7 +6218,7 @@ Blockly.Blocks.i2c_mode = {
             this.removeInput('PINS');
         }
         this.appendDummyInput('PINS')
-                .appendField("i2c set mode")
+                .appendField("i\u00B2c controller set mode")
                 .appendField(new Blockly.FieldDropdown([
                     ["normal (open-collector)", "0"],
                     ["push-pull", "1"]
@@ -6240,13 +6240,13 @@ Blockly.Blocks.i2c_mode = {
             var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
             this.warnFlag--;
             var sda = null;
-            this.pinWarn = 'WARNING: SCL on this block must match SCL on at least one i2c receieve or i2c send block!';
+            this.pinWarn = 'WARNING: SCL on this block must match SCL on at least one i\u00B2c receieve or i\u00B2c send block!';
             for (var x = 0; x < allBlocks.length; x++) {
                 if (allBlocks[x].type === 'i2c_send' || allBlocks[x].type === 'i2c_receive') {
                     if (allBlocks[x].getFieldValue('SCL') === this.getFieldValue('SCL')) {
                         if (sda && sda !== allBlocks[x].getFieldValue('SDA')) {
-                            this.pinWarn = 'WARNING: Both SDA and SCL must match SDA and SCL on other i2c blocks if sharing ';
-                            this.pinWarn += 'an i2c bus, or both must be different if on seperate i2c busses!';
+                            this.pinWarn = 'WARNING: Both SDA and SCL must match SDA and SCL on other i\u00B2c blocks if sharing ';
+                            this.pinWarn += 'an i\u00B2c bus, or both must be different if on seperate i\u00B2c busses!';
                             sda = '-1';
                         } else {
                             sda = allBlocks[x].getFieldValue('SDA');
@@ -6275,7 +6275,7 @@ Blockly.Blocks.i2c_busy = {
         this.setColour(colorPalette.getColor('protocols'));
         this.appendValueInput("DEVICE")
                 .setCheck('Number')
-                .appendField("i2c device address");
+                .appendField("i\u00B2c controller is device at address");
         this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setOutput(true, 'Number');
