@@ -179,6 +179,7 @@ function renderContent(pane) {
             xmlText = Blockly.Xml.domToPrettyText(xmlDom);
         }
         codeXml.setValue(xmlText);
+        codeXml.getSession().setUseWrapMode(true);
         codeXml.gotoLine(0);
     } else if (pane === 'propc' && projectData['board'] !== 'propcfile') {
         var raw_c = prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));

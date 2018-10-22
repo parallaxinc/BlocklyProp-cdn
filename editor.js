@@ -10,8 +10,6 @@ var user_authenticated = ($("meta[name=user-auth]").attr("content") === 'true') 
 var isOffline = ($("meta[name=isOffline]").attr("content") === 'true') ? true : false;
 
 var projectData = null;
-var ready = false;
-var projectLoaded = false;
 var ignoreSaveCheck = false;
 
 var last_saved_timestamp = 0;
@@ -39,6 +37,13 @@ $(document).ready(function () {
     var imgs = document.getElementsByTagName('img');
     for (var l = 0; l < imgs.length; l++) {
         imgs[l].src = cdnUrl + imgs[l].getAttribute('data-src');
+    }
+
+    // if blockXML debugging is requested, display the XML button
+    if (getURLParameter('debug')) {
+        document.getElementById('btn-view-xml').style.display = 'inline-block';
+    } else {
+        document.getElementById('btn-view-xml').style.display = 'none';
     }
 
     // Set the client download links
@@ -122,17 +127,15 @@ var setupWorkspace = function (data) {
     console.log(data);
     projectData = data;
     showInfo(data);
-    projectLoaded = true;
-    if (ready) {
-        setProfile(projectData['board']);
-        if (projectData['board'] !== 'propcfile') {
-            initToolbox(projectData['board'], []);
-        } else {
-            init(Blockly);
-            // set for propc
-            renderContent('propc');
-        }
+
+    setProfile(projectData['board']);
+    if (projectData['board'] !== 'propcfile') {
+        initToolbox(projectData['board'], []);
+    } else {
+        init(Blockly);
+        renderContent('propc');
     }
+
     if (projectData['board'] === 's3') {
         $('#prop-btn-ram').addClass('hidden');
         $('#prop-btn-graph').addClass('hidden');
@@ -397,26 +400,6 @@ var editProjectDetails = function () {
         window.location = 'projectcreate.html?edit=true';
     } else {
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
-    }
-};
-
-var blocklyReady = function () {
-    // if debug mode is active, show the XML button
-    if (getURLParameter('debug')) {
-        document.getElementById('btn-view-xml').style.display = 'inline-block';
-    } else {
-        document.getElementById('btn-view-xml').style.display = 'none';
-    }
-
-    if (projectLoaded) {
-        setProfile(projectData['board']);
-        if (projectData['board'] !== 'propcfile') {
-            initToolbox(projectData['board']);
-        } else {
-            init(Blockly);
-        }
-    } else {
-        ready = true;
     }
 };
 
