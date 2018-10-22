@@ -400,6 +400,7 @@ var editProjectDetails = function () {
     }
 };
 
+/*
 var blocklyReady = function () {
     // if debug mode is active, show the XML button
     if (getURLParameter('debug')) {
@@ -419,6 +420,7 @@ var blocklyReady = function () {
         ready = true;
     }
 };
+*/
 
 window.onbeforeunload = function () {
     if (checkLeave() && !isOffline) {
