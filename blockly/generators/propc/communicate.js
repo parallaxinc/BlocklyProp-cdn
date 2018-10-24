@@ -1513,14 +1513,8 @@ Blockly.Blocks.serial_scan_multiple = {
     },
     domToMutation: function (container) {
         // Parse XML to restore the menu options.
-        var value = JSON.parse(container.getAttribute('options'));
-        var sa = container.getAttribute('scanafter');
-        if (sa && sa.indexOf('After')) {
-            this.scanAfter = sa;
-        } else {
-            this.scanAfter = '';
-        }
-        this.optionList_ = value;
+        this.scanAfter = container.getAttribute('scanafter') || '';
+        this.optionList_ = JSON.parse(container.getAttribute('options'));;
         this.updateShape_();
         this.ser_pins = JSON.parse(container.getAttribute('pinmenu')) || [['0,0', '0,0']];
         var serpin = container.getAttribute('serpin');
