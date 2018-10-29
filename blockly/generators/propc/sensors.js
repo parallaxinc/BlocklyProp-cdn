@@ -941,7 +941,6 @@ Blockly.Blocks.HMC5883L_init = {
         this.appendDummyInput()
                 .appendField("SDA")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital), "SDA");
-
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -967,7 +966,6 @@ Blockly.Blocks.HMC5883L_read = {
         this.appendDummyInput()
                 .appendField("Compass heading store in")
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'HEADING');
-
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
