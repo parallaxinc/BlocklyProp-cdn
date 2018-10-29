@@ -5226,7 +5226,7 @@ Blockly.Blocks.wx_buffer = {
                 .appendField("set size to")
                 .appendField(new Blockly.FieldTextInput('64',
                         Blockly.FieldTextInput.numberValidator), "SIZE")
-                .appendField("bytes");
+                .appendField("characters");
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -5254,9 +5254,9 @@ Blockly.propc.wx_buffer = function () {
         var size = this.getFieldValue('SIZE') || '64';
         var code = '';
         var buffer = Blockly.propc.variableDB_.getName(this.getFieldValue('BUFFER'), Blockly.Variables.NAME_TYPE);
-        code += 'wifi_setBuffer(' + buffer + ',' + size + ');\n';
+        code += 'wifi_setBuffer(' + buffer + ', (' + size + ' + 1));\n';
         Blockly.propc.vartype_[buffer] = 'char';
-        Blockly.propc.varlength_[buffer] = size;
+        Blockly.propc.varlength_[buffer] = size + ' + 1';
         return code;
     } else {
         return '// ERROR: WX is not initialized!\n';
