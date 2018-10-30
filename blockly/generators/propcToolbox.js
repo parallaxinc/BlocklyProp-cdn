@@ -1487,7 +1487,7 @@ xmlToolbox += '                    </value>';
 xmlToolbox += '                </block>';
 xmlToolbox += '            </value>';
 xmlToolbox += '        </block>';
-xmlToolbox += '        <block type="wait_pin">';
+xmlToolbox += '        <block type="wait_pin" experimental="true">';
 xmlToolbox += '            <value name="PIN">';
 xmlToolbox += '                <block type="math_number">';
 xmlToolbox += '                    <field name="NUM">0</field>';
