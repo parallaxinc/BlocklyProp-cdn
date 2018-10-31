@@ -916,8 +916,6 @@ Blockly.propc.wait_pin = function () {
 };
 
 
-var cCode;
-
 Blockly.Blocks.custom_code = {
     helpUrl: Blockly.MSG_SYSTEM_HELPURL,
     init: function () {
@@ -2705,7 +2703,13 @@ Blockly.propc.custom_code_multiple = function () {
     for (var tk = 1; tk < 10; tk++) {
         in_arg.push(Blockly.propc.valueToCode(this, 'ARG' + tk.toString(10), Blockly.propc.ORDER_ATOMIC) || '');
     }
-    console.log(in_arg);
+    // Create a key for this blocks includes/defs/globals/funcs so when multiple blocks are used, it only generates one copy in the propc code 
+    var ccCode = this.getFieldValue("LABEL");
+    ccCode = encodeURI(ccCode.replace(/ /g, '_')).replace(/[^\w]/g, '_');
+    if ('0123456789'.indexOf(ccCode[0]) !== -1 || (ccCode[0] === '_' && ccCode[1] === '_')) {  // addition here: prevents collision with names with a leading double undescore.
+        ccCode = 'my_' + ccCode;
+    }
+    //console.log(in_arg);
     var incl = (this.getFieldValue("INCLUDES") || '').replace(/\@([0-9])/g, function(m, p) {return in_arg[parseInt(p)-1]});
     var glob = (this.getFieldValue("GLOBALS") || '').replace(/\@([0-9])/g, function(m, p) {return in_arg[parseInt(p)-1]});
     var sets = (this.getFieldValue("SETUPS") || '').replace(/\@([0-9])/g, function(m, p) {return in_arg[parseInt(p)-1]});
@@ -2715,19 +2719,17 @@ Blockly.propc.custom_code_multiple = function () {
     var code = '';
 
     if (incl !== '')
-        Blockly.propc.definitions_["cCode" + cCode] = incl + '\n';
+        Blockly.propc.definitions_["cCode" + ccCode] = incl + '\n';
     if (glob !== '')
-        Blockly.propc.global_vars_["cCode" + cCode] = glob + '\n';
+        Blockly.propc.global_vars_["cCode" + ccCode] = glob + '\n';
     if (sets !== '')
-        Blockly.propc.setups_["cCode" + cCode] = sets + '\n';
+        Blockly.propc.setups_["cCode" + ccCode] = sets + '\n';
     if (main !== '')
         code += main;
     if (this.getFieldValue('TYPE') === 'INL')
         code += '\n';
     if (func !== '')
-        Blockly.propc.methods_["cCode" + cCode] = func + '\n';
-
-    cCode++;
+        Blockly.propc.methods_["cCode" + ccCode] = func + '\n';
 
     if (this.getFieldValue('TYPE') === 'INL')
         return code;
