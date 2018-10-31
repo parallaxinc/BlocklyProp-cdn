@@ -912,7 +912,7 @@ Blockly.propc.wait_pin = function () {
     var pin_state = Blockly.propc.valueToCode(this, 'STATE', Blockly.propc.ORDER_NONE) || '0';
     var pin_type = this.getFieldValue('PINTYPE');
     var pin_func = this.getFieldValue('FUNC');
-    return pin_func + '(' + pin_state + ', ' + pin_type.replace('x', pin_value) + ');\n';
+    return pin_func + '(' + pin_type.replace('x', pin_state) + ', ' + pin_type.replace('x', pin_value) + ');\n';
 };
 
 
