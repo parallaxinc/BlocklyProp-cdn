@@ -128,6 +128,10 @@ var setupWorkspace = function (data) {
     projectData = data;
     showInfo(data);
 
+    if (!idProject) {
+        idProject = projectData['id'];
+    }
+    
     setProfile(projectData['board']);
     if (projectData['board'] !== 'propcfile') {
         initToolbox(projectData['board'], []);
@@ -304,7 +308,11 @@ var saveAsDialog = function () {
         if (checkLeave() && projectData['yours']) {
             utils.confirm(Blockly.Msg.DIALOG_SAVE_TITLE, Blockly.Msg.DIALOG_SAVE_FIRST, function (value) {
                 if (value) {
-                    saveProject();
+                    if (isOffline) {
+                        downloadCode();
+                    } else {
+                        saveProject();  
+                    }
                 }
             }, 'Yes', 'No');
         }
