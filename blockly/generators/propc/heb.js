@@ -941,7 +941,7 @@ Blockly.propc.heb_text_to_speech_spell = function () {
 Blockly.Blocks.heb_text_to_speech_pins = {
     helpUrl: Blockly.MSG_AUDIO_HELPURL,
     init: function () {
-        var pins = profile.default.earphone_jack.split(',')
+        var pins = (profile.default.earphone_jack_inverted || '0,1').split(',')
         pins[0] = pins[0].trim();
         pins[1] = pins[1].trim();
         this.setTooltip(Blockly.MSG_HEB_TEXT_TO_SPEECH_PINS_TOOLTIP);
