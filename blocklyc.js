@@ -12,7 +12,10 @@ var baudrate = 115200;
 
 var graph_temp_data = new Array;
 var graph_data_ready = false;
+
+// The IDE reports this as an unused variable
 var graph_connection_string = '';
+
 var graph_timestamp_start = null;
 var graph_timestamp_restart = 0;
 var graph_paused = false;
@@ -24,8 +27,13 @@ var fullCycleTime = 4294967296 / 80000000;
 var graph_labels = null;
 var graph_csv_data = new Array;
 
+
+// The IDE sees this as an unused variable
 var console_header_arrived = false;
+
+// The IDE sees this as an unused variable
 var console_header = null;
+
 
 var active_connection = null;
 
@@ -61,13 +69,16 @@ var graph_data = {
 
 // Minimum client/launcher version supporting base64-encoding
 var minEnc64Ver = version_as_number('0.7.0');
+
 // Minimum client/launcher version supporting coded/verbose responses
 var minCodedVer = version_as_number('0.7.5');
+
 // Minimum client/launcher allowed for use with this system
 var minVer = version_as_number(client_min_version);
 
 /**
  * Switch the visible pane when a tab is clicked.
+ * 
  * @param {string} id ID of tab clicked.
  */
 function tabClick(id) {
@@ -97,6 +108,7 @@ function tabClick(id) {
 
     // Deselect all tabs and hide all panes.
     // document.getElementById('menu-save-as-propc').style.display = 'none';
+
     for (var x in TABS_) {
         document.getElementById('content_' + TABS_[x]).style.display = 'none';
     }
@@ -106,11 +118,15 @@ function tabClick(id) {
     var tbxs = document.getElementsByClassName('blocklyToolboxDiv');
     var btns = document.getElementsByClassName("btn-view-code");
     document.getElementById('btn-view-blocks').style.display = 'none';
+
     if (document.getElementById('menu-save-as-propc'))
         document.getElementById('menu-save-as-propc').style.display = 'none';
-    for (var i = 0; i < btns.length; i++) {
+
+    // var i was a duplicate definition.
+    for (let i = 0; i < btns.length; i++) {
         btns[i].style.display = 'none';
     }
+
     if (projectData['board'] !== 'propcfile') {
 
         // Reinstate keybindings from block workspace if this is not a code-only project.
