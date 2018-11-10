@@ -1,3 +1,6 @@
+/**
+ *  Submit a login form and process the result
+ */
 $(document).ready(function () {
     var loginForm = $('#loginform');
 
@@ -14,6 +17,15 @@ $(document).ready(function () {
     });
 });
 
+
+/**
+ * Login callback function to handle login results
+ *
+ * @param response
+ * @param statusText
+ * @param xhr
+ * @param $form
+ */
 function onLoginSuccess(response, statusText, xhr, $form) {
     if (response.success === true) {
         if (typeof window['post-authenticate'] === 'function') {
