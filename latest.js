@@ -1,3 +1,8 @@
+/**
+ * Project language types
+ *
+ * @type {{PROPC: {editor: string, class: string}, SPIN: {editor: string, class: string}}}
+ */
 var projectTypes = {
     "PROPC": {
         "editor": "blocklyc.jsp",
@@ -9,6 +14,12 @@ var projectTypes = {
     }
 };
 
+
+/**
+ * Suppoted project board types
+ *
+ * @type {{"activity-board": string, s3: string, heb: string, "heb-wx": string, flip: string, other: string, propcfile: string}}
+ */
 var projectBoard = {
     "activity-board": "icon-board-ab",
     "s3": "icon-board-s3",
@@ -19,6 +30,11 @@ var projectBoard = {
     "propcfile": "icon-board-propc"
 };
 
+
+/**
+ * Get a list of projects and create an ordered list, expressed in HTML
+ *
+ */
 $.get("rest/shared/project/list?sort=modified&order=desc&limit=5&offset=0", function (data) {
     $.each(data['rows'], function (index, project) {
         console.log(project);
