@@ -31,59 +31,6 @@
 if (!Blockly.Blocks)
     Blockly.Blocks = {};
 
-// ---------------- 2-axis Joystick Blocks -------------------------------------
-Blockly.Blocks.joystick_input_yaxis = {
-    helpUrl: Blockly.MSG_JOYSTICK_HELPURL,
-    init: function () {
-        this.setTooltip(Blockly.MSG_JOYSTICK_INPUT_YAXIS_TOOLTIP);
-        this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Joystick y-axis A/D")
-                .appendField(new Blockly.FieldDropdown([["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"]]), "PINY");
-
-        this.setOutput(true, 'Number');
-        this.setPreviousStatement(false, null);
-        this.setNextStatement(false, null);
-    }
-};
-
-Blockly.propc.joystick_input_yaxis = function () {
-    var pin_number_yaxis = this.getFieldValue('PINY');
-
-    if (!this.disabled) {
-        Blockly.propc.definitions_["include abvolts"] = '#include "abvolts.h"';
-    }
-
-    var code = 'ad_in(' + pin_number_yaxis + ') * 100 / 4096';
-    return [code, Blockly.propc.ORDER_ATOMIC];
-};
-
-Blockly.Blocks.joystick_input_xaxis = {
-    helpUrl: Blockly.MSG_JOYSTICK_HELPURL,
-    init: function () {
-        this.setTooltip(Blockly.MSG_JOYSTICK_INPUT_XAXIS_TOOLTIP);
-        this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Joystick x-axis A/D")
-                .appendField(new Blockly.FieldDropdown([["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"]]), "PINX");
-
-        this.setOutput(true, 'Number');
-        this.setPreviousStatement(false, null);
-        this.setNextStatement(false, null);
-    }
-};
-
-Blockly.propc.joystick_input_xaxis = function () {
-    var pin_number_xaxis = this.getFieldValue('PINX');
-
-    if (!this.disabled) {
-        Blockly.propc.definitions_["include abvolts"] = '#include "abvolts.h"';
-    }
-
-    var code = 'ad_in(' + pin_number_xaxis + ') * 100 / 4096';
-    return [code, Blockly.propc.ORDER_ATOMIC];
-};
-
 // ---------------- Ping))) Sensor Blocks --------------------------------------
 Blockly.Blocks.sensor_ping = {
     helpUrl: Blockly.MSG_PING_HELPURL,
@@ -92,27 +39,109 @@ Blockly.Blocks.sensor_ping = {
         this.setColour(colorPalette.getColor('input'));
         this.appendDummyInput()
                 .appendField("Ping))) distance in")
-                .appendField(new Blockly.FieldDropdown([["inches", "_inches"], ["cm", "_cm"], ["\u00B5s", ""]]), "UNIT")
-                .appendField("PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
-
+                .appendField(new Blockly.FieldDropdown([["inches", "_inches"], ["cm", "_cm"], ["\u00B5s", ""]]), "UNIT");
+        this.pinChoices = ['PIN'];
+        this.otherPin = [false];
+        this.addPinMenu("PIN", null, 0);
         this.setOutput(true, 'Number');
+        this.setInputsInline(true);
         this.setPreviousStatement(false, null);
         this.setNextStatement(false, null);
+    },
+    addPinMenu: function (label, moveBefore, pinOpt) {
+        this.appendDummyInput('SET_PIN')
+                .appendField(label, 'LABEL')
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat([['other', 'other']]), function (op) {
+                    this.sourceBlock_.setToOther(op, moveBefore, pinOpt);
+                }), this.pinChoices[pinOpt]);
+        this.moveBefore = moveBefore;
+        this.otherPin[pinOpt] = false;
+    },
+    setToOther: function (op, moveBefore, pinOpt) {
+        if (op === 'other') {
+            this.otherPin[pinOpt] = true;
+            var label = this.getFieldValue('LABEL');
+            if(this.getInput('SET_PIN')) {
+                this.removeInput('SET_PIN');
+            }
+            this.appendValueInput(this.pinChoices[pinOpt])
+                    .appendField(label)
+                    .setCheck('Number')
+                    .appendField('A,' + profile.default.digital.toString(), 'RANGEVALS' + pinOpt);
+            this.getField('RANGEVALS' + pinOpt).setVisible(false);
+            if (moveBefore) {
+                this.moveInputBefore(this.pinChoices[pinOpt], moveBefore);
+            } else {
+                this.render();
+            }
+        }
+    },
+    mutationToDom: function () {
+        var container = document.createElement('mutation');
+        for (var pinOpt = 0; pinOpt < this.pinChoices.length; pinOpt++) {
+            container.setAttribute('otherpin' + pinOpt, this.otherPin[pinOpt]);
+        }
+        return container;
+    },
+    domToMutation: function (xmlElement) {
+        for (var pinOpt = 0; pinOpt < this.pinChoices.length; pinOpt++) {
+            var op = xmlElement.getAttribute('otherpin' + pinOpt);
+            if (op === 'true') {
+                this.setToOther('other', this.moveBefore, pinOpt);
+            }
+        }
     }
 };
 
 Blockly.propc.sensor_ping = function () {
-    var dropdown_pin = this.getFieldValue('PIN');
+    var pin = '0';
+    if (this.otherPin[0]) {
+        pin = Blockly.propc.valueToCode(this, this.pinChoices[0], Blockly.propc.ORDER_ATOMIC) || '0';
+    } else {
+        pin = this.getFieldValue(this.pinChoices[0]);
+    }
     var unit = this.getFieldValue('UNIT');
 
     if (!this.disabled) {
         Blockly.propc.definitions_["include ping"] = '#include "ping.h"';
     }
 
-    var code = 'ping' + unit + '(' + dropdown_pin + ')';
+    var code = 'ping' + unit + '(' + pin + ')';
     return [code, Blockly.propc.ORDER_ATOMIC];
 };
+
+// ---------------- 2-axis Joystick Blocks -------------------------------------
+Blockly.Blocks.joystick_input_yaxis = {
+    helpUrl: Blockly.MSG_JOYSTICK_HELPURL,
+    init: function () {
+        this.chan = ['x', 'X'];
+        if (this.type === 'joystick_input_yaxis') {
+            this.chan = ['y', 'Y'];
+        }
+        this.setTooltip(Blockly.MSG_JOYSTICK_INPUT_TOOLTIP);
+        this.setColour(colorPalette.getColor('input'));
+        this.appendDummyInput()
+                .appendField("Joystick " + this.chan[0] + "-axis A/D")
+                .appendField(new Blockly.FieldDropdown(profile.default.analog), "PIN" + this.chan[1]);
+        this.setOutput(true, 'Number');
+        this.setPreviousStatement(false, null);
+        this.setNextStatement(false, null);
+    }
+};
+
+Blockly.propc.joystick_input_yaxis = function () {
+    var pin_number = this.getFieldValue("PIN" + this.chan[1]);
+
+    if (!this.disabled) {
+        Blockly.propc.definitions_["include abvolts"] = '#include "abvolts.h"';
+    }
+
+    var code = 'ad_in(' + pin_number + ') * 100 / 4096';
+    return [code, Blockly.propc.ORDER_ATOMIC];
+};
+
+Blockly.Blocks.joystick_input_xaxis = Blockly.Blocks.joystick_input_yaxis;
+Blockly.propc.joystick_input_xaxis = Blockly.propc.joystick_input_yaxis;
 
 // ---------------- PIR Sensor Blocks ------------------------------------------
 Blockly.Blocks.PIR_Sensor = {
@@ -120,18 +149,28 @@ Blockly.Blocks.PIR_Sensor = {
     init: function () {
         this.setTooltip(Blockly.MSG_PIR_SENSOR_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("PIR Sensor PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
-
+        this.pinChoices = ['PIN'];
+        this.otherPin = [false];
+        this.addPinMenu("PIR sensor PIN", null, 0);
+        this.setInputsInline(true);
         this.setNextStatement(false, null);
         this.setPreviousStatement(false, null);
         this.setOutput(true, 'Number');
-    }
+    },
+    mutationToDom: Blockly.Blocks['sensor_ping'].mutationToDom,
+    domToMutation: Blockly.Blocks['sensor_ping'].domToMutation,
+    addPinMenu: Blockly.Blocks['sensor_ping'].addPinMenu,
+    setToOther: Blockly.Blocks['sensor_ping'].setToOther
 };
 
 Blockly.propc.PIR_Sensor = function () {
-    return ['input(' + this.getFieldValue('PIN') + ')', Blockly.propc.ORDER_ATOMIC];
+    var pin = '0';
+    if (this.otherPin[0]) {
+        pin = Blockly.propc.valueToCode(this, this.pinChoices[0], Blockly.propc.ORDER_ATOMIC) || '0';
+    } else {
+        pin = this.getFieldValue(this.pinChoices[0]);
+    }
+    return ['input(' + pin + ')', Blockly.propc.ORDER_ATOMIC];
 };
 
 
@@ -141,19 +180,51 @@ Blockly.Blocks.sound_impact_run = {
     init: function () {
         this.setTooltip(Blockly.MSG_SOUND_IMPACT_RUN_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Sound Impact initialize PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
+        this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
+        this.updateConstMenu();
+    },
+    updateConstMenu: function (ov, nv) {
+        this.v_list = [];
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        for (var x = 0; x < allBlocks.length; x++) {
+            if (allBlocks[x].type === 'constant_define') {
+                var v_name = allBlocks[x].getFieldValue('CONSTANT_NAME');
+                if (v_name === ov && nv) {
+                    v_name = nv;
+                }
+                if (v_name) {
+                    this.v_list.push([v_name, v_name]);
+                }
+            }
+        }
+        this.v_list = uniq_fast(this.v_list);
+        this.setPinMenus(ov, nv);
+    },
+    setPinMenus: function (ov, nv) {
+        var m1 = this.getFieldValue('PIN');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
+        this.appendDummyInput('PINS')
+                .appendField("Sound Impact initialize PIN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN");
+        if (m1 && m1 === ov && nv) {
+            this.setFieldValue(nv, 'PIN');
+        } else if (m1) {
+            this.setFieldValue(m1, 'PIN');
+        }
     }
 };
 
 Blockly.propc.sound_impact_run = function () {
-    var pin = this.getTitleValue('PIN');
-
     if (!this.disabled) {
+        var pin = this.getFieldValue('PIN');
+        if (profile.default.digital.toString().indexOf(pin + ',' + pin) === -1) {
+            pin = 'MY_' + pin;
+        }
         Blockly.propc.definitions_["sound_impact"] = '#include "soundimpact.h"';
         Blockly.propc.setups_["sound_impact"] = 'int *__soundimpactcog = soundImpact_run(' + pin + ');';
     }
@@ -168,15 +239,13 @@ Blockly.Blocks.sound_impact_get = {
         this.setColour(colorPalette.getColor('input'));
         this.appendDummyInput()
                 .appendField("Sound Impact get count");
-
         this.setNextStatement(false, null);
         this.setPreviousStatement(false, null);
         this.setOutput(true, 'Number');
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('Sound Impact initialize') === -1)
-        {
+        if (allBlocks.indexOf('Sound Impact initialize') === -1) {
             this.setWarningText('WARNING: You must use a sound impact sensor\ninitialize block at the beginning of your program!');
         } else {
             this.setWarningText(null);
@@ -186,8 +255,7 @@ Blockly.Blocks.sound_impact_get = {
 
 Blockly.propc.sound_impact_get = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('Sound Impact initialize') === -1)
-    {
+    if (allBlocks.indexOf('Sound Impact initialize') === -1) {
         return '// ERROR: Missing sound impact sensor initialize block!';
     } else {
         return ['soundImpact_getCount()', Blockly.propc.ORDER_ATOMIC];
@@ -201,14 +269,12 @@ Blockly.Blocks.sound_impact_end = {
         this.setColour(colorPalette.getColor('input'));
         this.appendDummyInput()
                 .appendField("Sound Impact close");
-
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('Sound Impact initialize') === -1)
-        {
+        if (allBlocks.indexOf('Sound Impact initialize') === -1) {
             this.setWarningText('WARNING: You must use a sound impact sensor\ninitialize block at the beginning of your program!');
         } else {
             this.setWarningText(null);
@@ -218,8 +284,7 @@ Blockly.Blocks.sound_impact_end = {
 
 Blockly.propc.sound_impact_end = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('Sound Impact initialize') === -1)
-    {
+    if (allBlocks.indexOf('Sound Impact initialize') === -1) {
         return '// ERROR: Missing sound impact sensor initialize block!';
     } else {
         return 'soundImpact_end(__soundimpactcog);\n';
@@ -308,7 +373,6 @@ Blockly.Blocks.colorpal_get_colors_raw = {
     },
     domToMutation: function (xmlElement) {
         var cpin = xmlElement.getAttribute('cpin');
-        //this.updateCpin();
         this.cp_pins = JSON.parse(xmlElement.getAttribute('pinmenu'));
         if (cpin === 'null') {
             cpin = null;
@@ -486,22 +550,48 @@ Blockly.Blocks.fp_scanner_init = {
     init: function () {
         this.setTooltip(Blockly.MSG_FPS_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Fingerprint Scanner initialize RX")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "RXPIN")
-                .appendField("TX")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "TXPIN");
+        this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var m1 = this.getFieldValue('RXPIN');
+        var m2 = this.getFieldValue('TXPIN');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
+        this.appendDummyInput()
+                .appendField("Fingerprint Scanner initialize RX")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "RXPIN")
+                .appendField("TX")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "TXPIN");
+        if (m1 && m1 === ov && nv) {
+            this.setFieldValue(nv, 'RXPIN');
+        } else if (m1) {
+            this.setFieldValue(m1, 'RXPIN');
+        }
+
+        if (m2 && m2 === ov && nv) {
+            this.setFieldValue(nv, 'TXPIN');
+        } else if (m2) {
+            this.setFieldValue(m2, 'TXPIN');
+        }
     }
 };
 
 Blockly.propc.fp_scanner_init = function () {
-    var rxpin = this.getFieldValue('RXPIN');
-    var txpin = this.getFieldValue('TXPIN');
-
     if (!this.disabled) {
+        var rxpin = this.getFieldValue('RXPIN');
+        var txpin = this.getFieldValue('TXPIN');
+        if (profile.default.digital.toString().indexOf(rxpin + ',' + rxpin) === -1) {
+            rxpin = 'MY_' + rxpin;
+        }
+        if (profile.default.digital.toString().indexOf(pin_out + ',' + pin_out) === -1) {
+            txpin = 'MY_' + txpin;
+        }
         Blockly.propc.global_vars_["fpScannerObj"] = 'fpScanner *fpScan;';
         Blockly.propc.definitions_["fpScannerDef"] = '#include "fingerprint.h"';
         Blockly.propc.setups_["fpScanner"] = 'fpScan = fingerprint_open(' + txpin + ', ' + rxpin + ');';
@@ -671,114 +761,82 @@ Blockly.Blocks.MX2125_acceleration_xaxis = {
     init: function () {
         this.setTooltip(Blockly.MSG_MX2125_ACCELERATION_XAXIS_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Memsic acceleration x-axis PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PINX");
-
+        this.chan = ['x', 'X'];
+        this.pinChoices = ['PIN'];
+        this.otherPin = [false];
+        if (this.type.indexOf('yaxis') > -1) {
+            this.chan = ['y', 'Y'];
+        }
+        this.pinChoices = ['PIN' + this.chan[1]];
+        this.res = ['acceleration', 'accel'];
+        if (this.type.indexOf('tilt') > -1) {
+            this.res = ['tilt', 'tilt']
+        }
+        this.addPinMenu("Memsic " + this.res[0] + " " + this.chan[0] + "-axis PIN", null, 0);
+        this.setInputsInline(true);
         this.setNextStatement(false, null);
         this.setPreviousStatement(false, null);
         this.setOutput(true, 'Number');
-    }
+    },
+    mutationToDom: Blockly.Blocks['sensor_ping'].mutationToDom,
+    domToMutation: Blockly.Blocks['sensor_ping'].domToMutation,
+    addPinMenu: Blockly.Blocks['sensor_ping'].addPinMenu,
+    setToOther: Blockly.Blocks['sensor_ping'].setToOther
 };
 
 Blockly.propc.MX2125_acceleration_xaxis = function () {
     if (!this.disabled) {
         Blockly.propc.definitions_["include_mx2125"] = '#include "mx2125.h"';
     }
-    return ['mx_accel(' + this.getFieldValue('PINX') + ')', Blockly.propc.ORDER_NONE];
-};
-
-Blockly.Blocks.MX2125_acceleration_yaxis = {
-    helpUrl: Blockly.MSG_MEMSIC_HELPURL,
-    init: function () {
-        this.setTooltip(Blockly.MSG_MX2125_ACCELERATION_YAXIS_TOOLTIP);
-        this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Memsic acceleration y-axis PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PINY");
-
-        this.setNextStatement(false, null);
-        this.setPreviousStatement(false, null);
-        this.setOutput(true, 'Number');
+    var pin = '0';
+    if (this.otherPin[0]) {
+        pin = Blockly.propc.valueToCode(this, 'PIN' + this.chan[1], Blockly.propc.ORDER_ATOMIC) || '0';
+    } else {
+        pin = this.getFieldValue("PIN" + this.chan[1]);
     }
+    return ['mx_' + this.res[1] + '(' + pin + ')', Blockly.propc.ORDER_NONE];
 };
 
-Blockly.propc.MX2125_acceleration_yaxis = function () {
-    if (!this.disabled) {
-        Blockly.propc.definitions_["include_mx2125"] = '#include "mx2125.h"';
-    }
-    return ['mx_accel(' + this.getFieldValue('PINY') + ')', Blockly.propc.ORDER_NONE];
-};
+Blockly.Blocks.MX2125_acceleration_yaxis = Blockly.Blocks.MX2125_acceleration_xaxis;
+Blockly.propc.MX2125_acceleration_yaxis = Blockly.propc.MX2125_acceleration_xaxis;
+Blockly.Blocks.MX2125_tilt_xaxis = Blockly.Blocks.MX2125_acceleration_xaxis;
+Blockly.propc.MX2125_tilt_xaxis = Blockly.propc.MX2125_acceleration_xaxis;
+Blockly.Blocks.MX2125_tilt_yaxis = Blockly.Blocks.MX2125_acceleration_xaxis;
+Blockly.propc.MX2125_tilt_yaxis = Blockly.propc.MX2125_acceleration_xaxis;
 
 Blockly.Blocks.MX2125_rotation = {
     helpUrl: Blockly.MSG_MEMSIC_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_MX2125_ROTATION_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Memsic rotation x-axis PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PINX")
-                .appendField("y-axis PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PINY");
-
+        this.pinChoices = ['PINX', 'PINY'];
+        this.otherPin = [false, false];
+        this.addPinMenu("Memsic rotation x-axis PIN", 'YAXIS', 0);
+        this.addPinMenu("y-axis PIN", 'XAXIS', 1);
         this.setInputsInline(true);
         this.setNextStatement(false, null);
         this.setPreviousStatement(false, null);
         this.setOutput(true, 'Number');
-    }
+    },
+    mutationToDom: Blockly.Blocks['sensor_ping'].mutationToDom,
+    domToMutation: Blockly.Blocks['sensor_ping'].domToMutation,
+    addPinMenu: Blockly.Blocks['sensor_ping'].addPinMenu,
+    setToOther: Blockly.Blocks['sensor_ping'].setToOther
 };
 
 Blockly.propc.MX2125_rotation = function () {
     if (!this.disabled) {
         Blockly.propc.definitions_["include_mx2125"] = '#include "mx2125.h"';
     }
-    var code = 'mx_rotate(' + this.getFieldValue('PINX') + ', ' + this.getFieldValue('PINY') + ')';
-    return [code, Blockly.propc.ORDER_NONE];
-};
-
-Blockly.Blocks.MX2125_tilt_xaxis = {
-    helpUrl: Blockly.MSG_MEMSIC_HELPURL,
-    init: function () {
-        this.setTooltip(Blockly.MSG_MX2125_TILT_XAXIS_TOOLTIP);
-        this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Memsic tilt x-axis PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PINX");
-
-        this.setNextStatement(false, null);
-        this.setPreviousStatement(false, null);
-        this.setOutput(true, 'Number');
+    var pinVal = ['0', '0'];
+    for (var i = 0; i < this.pinChoices.length; i++) {
+        if (this.otherPin[i]) {
+            pinVal[i] = Blockly.propc.valueToCode(this, this.pinChoices[i], Blockly.propc.ORDER_ATOMIC) || '0';
+        } else {
+            pinVal[i] = this.getFieldValue(this.pinChoices[i]);
+        }
     }
-};
-
-Blockly.propc.MX2125_tilt_xaxis = function () {
-    if (!this.disabled) {
-        Blockly.propc.definitions_["include_mx2125"] = '#include "mx2125.h"';
-    }
-    var code = 'mx_tilt(' + this.getFieldValue('PINX') + ')';
-    return [code, Blockly.propc.ORDER_NONE];
-};
-
-Blockly.Blocks.MX2125_tilt_yaxis = {
-    helpUrl: Blockly.MSG_MEMSIC_HELPURL,
-    init: function () {
-        this.setTooltip(Blockly.MSG_MX2125_TILT_YAXIS_TOOLTIP);
-        this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("Memsic tilt y-axis PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PINY");
-
-        this.setNextStatement(false, null);
-        this.setPreviousStatement(false, null);
-        this.setOutput(true, 'Number');
-    }
-};
-
-Blockly.propc.MX2125_tilt_yaxis = function () {
-    if (!this.disabled) {
-        Blockly.propc.definitions_["include_mx2125"] = '#include "mx2125.h"';
-    }
-    var code = 'mx_tilt(' + this.getFieldValue('PINY') + ')';
+    var code = 'mx_rotate(' + pinVal[0] + ', ' + pinVal[1] + ')';
     return [code, Blockly.propc.ORDER_NONE];
 };
 
@@ -883,7 +941,6 @@ Blockly.Blocks.HMC5883L_init = {
         this.appendDummyInput()
                 .appendField("SDA")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital), "SDA");
-
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -909,7 +966,6 @@ Blockly.Blocks.HMC5883L_read = {
         this.appendDummyInput()
                 .appendField("Compass heading store in")
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'HEADING');
-
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -957,31 +1013,48 @@ Blockly.Blocks.lsm9ds1_init = {
     init: function () {
         this.setTooltip(Blockly.MSG_LSM9DS1_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("IMU initialize SCL")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_SCL")
-                .appendField("SDIO")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_SDIO")
-                .appendField("CS_AG")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_CSAG")
-                .appendField("CS_M")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_CSM");
-
+        this.appendDummyInput('PINS');
         this.setInputsInline(false);
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var mv = ['PIN_SCL', 'PIN_SCL', 'PIN_CSAG', 'PIN_CSM'];
+        var m = [this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_CSAG'), this.getFieldValue('PIN_CSM')];
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
+        this.appendDummyInput('PINS')
+                .appendField("IMU initialize SCL")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SCL")
+                .appendField("SDIO")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SDIO")
+                .appendField("CS_AG")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CSAG")
+                .appendField("CS_M")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CSM");
+        for (var i = 0; i < 4; i++) {
+            if (m[i] && m[i] === ov && nv) {
+                this.setFieldValue(nv, mv[i]);
+            } else if (m[i]) {
+                this.setFieldValue(m[i], mv[i]);
+            }
+        }
     }
 };
 
 Blockly.propc.lsm9ds1_init = function () {
-    var pin_scl = this.getFieldValue('PIN_SCL');
-    var pin_sio = this.getFieldValue('PIN_SDIO');
-    var pin_csa = this.getFieldValue('PIN_CSAG');
-    var pin_csm = this.getFieldValue('PIN_CSM');
-
+    var pin = [this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_SDIO'), this.getFieldValue('PIN_CSAG'), this.getFieldValue('PIN_CSM')];
+    for (var i = 0; i < 3; i++) {
+        if (profile.default.digital.toString().indexOf(pin[i] + ',' + pin[i]) === -1) {
+            pin[i] = 'MY_' + pin[i];
+        }
+    }
     if (!this.disabled) {
         Blockly.propc.definitions_["include_lsm9ds1"] = '#include "lsm9ds1.h"';
-        Blockly.propc.setups_["lsm9ds1_init"] = 'imu_init(' + pin_scl + ', ' + pin_sio + ', ' + pin_csa + ', ' + pin_csm + ');';
+        Blockly.propc.setups_["lsm9ds1_init"] = 'imu_init(' + pin[0] + ', ' + pin[1] + ', ' + pin[2] + ', ' + pin[3] + ');';
         Blockly.propc.global_vars_["lsm9ds1_vars"] = 'float __imuX, __imuY, __imuZ, __compI;\n';
     }
     return '';
@@ -1114,8 +1187,12 @@ Blockly.Blocks.lsm9ds1_tilt = {
     setAxes_: function (details) {
         var theVar1 = this.getFieldValue('VAR1');
         var theVar2 = this.getFieldValue('VAR2');
-        this.removeInput('TILT1');
-        this.removeInput('TILT2');
+        if(this.getInput('TILT1')) {
+            this.removeInput('TILT1');
+        }
+        if(this.getInput('TILT2')) {
+            this.removeInput('TILT2');
+        }
         if (details['ACTION'] === 'X') {
             this.appendDummyInput('TILT1')
                     .appendField("store y-tilt in", 'A1')
@@ -1223,7 +1300,9 @@ Blockly.Blocks.lsm9ds1_heading = {
     },
     setAxes_: function (details) {
         var theVar = this.getFieldValue('VAR');
-        this.removeInput('MENU2');
+        if(this.getInput('MENU2')) {
+            this.removeInput('MENU2');
+        }
         var wh = details['ACTION'][details['ACTION'].length - 1];
         if (wh === ')')
             wh = details['ACTION'][details['ACTION'].length - 2];
@@ -1303,19 +1382,42 @@ Blockly.Blocks.GPS_init = {
     init: function () {
         this.setTooltip(Blockly.MSG_GPS_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("GPS module initialize TX")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "TXPIN")
-                .appendField("baud")
-                .appendField(new Blockly.FieldDropdown([["9600", "9600"], ["2400", "2400"], ["4800", "4800"], ["19200", "19200"]]), "BAUD");
-
+        this.appendDummyInput('PINS');
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var m = this.getFieldValue('TXPIN');
+        var b = this.getFieldValue('BAUD')
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
+        this.appendDummyInput('PINS')
+                .appendField("GPS module initialize TX")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "TXPIN")
+                .appendField("baud")
+                .appendField(new Blockly.FieldDropdown([
+                    ["9600", "9600"], 
+                    ["2400", "2400"], 
+                    ["4800", "4800"], 
+                    ["19200", "19200"]
+                ]), "BAUD");
+        this.setFieldValue(b ,'BAUD')
+        if (m && m === ov && nv) {
+            this.setFieldValue(nv, 'TXPIN');
+        } else if (m) {
+            this.setFieldValue(m, 'TXPIN');
+        }
     }
 };
 
 Blockly.propc.GPS_init = function () {
     var tx_pin = this.getFieldValue('TXPIN');
+    if (profile.default.digital.toString().indexOf(tx_pin + ',' + tx_pin) === -1) {
+        tx_pin = 'MY_' + tx_pin;
+    }
     var baud = this.getFieldValue('BAUD');
 
     if (!this.disabled) {
@@ -1782,16 +1884,35 @@ Blockly.Blocks.rfid_enable = {
     init: function () {
         this.setTooltip(Blockly.MSG_RFID_ENABLE_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("RFID initialize EN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_IN");
-        this.appendDummyInput()
-                .appendField("SOUT")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN_OUT");
-
+        this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var m1 = this.getFieldValue('PIN_IN');
+        var m2 = this.getFieldValue('PIN_OUT');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
+        this.appendDummyInput('PINS')
+                .appendField("RFID initialize EN")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_IN")
+                .appendField("SOUT")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_OUT");
+        if (m1 && m1 === ov && nv) {
+            this.setFieldValue(nv, 'PIN_IN');
+        } else if (m1) {
+            this.setFieldValue(m1, 'PIN_IN');
+        }
+
+        if (m2 && m2 === ov && nv) {
+            this.setFieldValue(nv, 'PIN_OUT');
+        } else if (m2) {
+            this.setFieldValue(m2, 'PIN_OUT');
+        }
     }
 };
 
@@ -1799,6 +1920,14 @@ Blockly.propc.rfid_enable = function () {
     if (!this.disbaled) {
         var pin_in = this.getFieldValue('PIN_IN');
         var pin_out = this.getFieldValue('PIN_OUT');
+
+        if (profile.default.digital.toString().indexOf(pin_in + ',' + pin_in) === -1) {
+            pin_in = 'MY_' + pin_in;
+        }
+        if (profile.default.digital.toString().indexOf(pin_out + ',' + pin_out) === -1) {
+            pin_out = 'MY_' + pin_out;
+        }
+    
         Blockly.propc.definitions_["rfidser"] = '#include "rfidser.h"';
         Blockly.propc.global_vars_["rfidser"] = 'rfidser *rfid;';
         Blockly.propc.setups_["rfidser_setup"] = 'rfid = rfid_open(' + pin_out + ',' + pin_in + ');';
@@ -1847,27 +1976,33 @@ Blockly.Blocks.sirc_get = {
     init: function () {
         this.setTooltip(Blockly.MSG_SIRC_GET_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
+        this.pinChoices = ['PIN'];
+        this.otherPin = [false];
         if (projectData['board'] && projectData['board'] === "heb-wx") {
             this.appendDummyInput()
                 .appendField("Sony Remote value received");
         } else {
-            this.appendDummyInput()
-                .appendField("Sony Remote value received from PIN")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
+            this.addPinMenu("Sony Remote value received from PIN", null, 0);
         }
         this.setInputsInline(true);
         this.setPreviousStatement(false, null);
         this.setNextStatement(false, null);
         this.setOutput(true, 'Number');
-    }
+    },
+    mutationToDom: Blockly.Blocks['sensor_ping'].mutationToDom,
+    domToMutation: Blockly.Blocks['sensor_ping'].domToMutation,
+    addPinMenu: Blockly.Blocks['sensor_ping'].addPinMenu,
+    setToOther: Blockly.Blocks['sensor_ping'].setToOther
 };
 
 Blockly.propc.sirc_get = function () {
-    var pin = '';
+    var pin = '0';
     if (projectData['board'] && projectData['board'] === "heb-wx") {
         pin = '23';
+    } else if (this.otherPin[0]) {
+        pin = Blockly.propc.valueToCode(this, 'PIN', Blockly.propc.ORDER_ATOMIC) || '0';
     } else {
-        pin = this.getFieldValue('PIN');
+        pin = this.getFieldValue("PIN");
     }
     if (!this.disabled) {
         Blockly.propc.definitions_["sirc"] = '#include "sirc.h"';
@@ -1883,21 +2018,40 @@ Blockly.Blocks.keypad_initialize = {
     init: function () {
         this.setTooltip(Blockly.MSG_KEYPAD_INIT_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-                .appendField("4x4 Keypad initialize PINS left")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P0")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P1")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P2")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P3")
-                .appendField('|')
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P4")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P5")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P6")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital), "P7")
-                .appendField("right");
+        this.appendDummyInput('PINS');
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var m = [];
+        for (var i = 0; i < 8; i++) {
+            m[i] = this.getFieldValue('P' + i.toString(10));
+        }
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
+        this.appendDummyInput('PINS')
+                .appendField("4x4 Keypad initialize PINS left")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P0")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P1")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P2")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P3")
+                .appendField('|')
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P4")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P5")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P6")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "P7")
+                .appendField("right");
+        for (i = 0; i < 8; i++) {
+            if (m[i] && m[i] === ov && nv) {
+                this.setFieldValue(nv, 'P' + i.toString(10));
+            } else if (m[i]) {
+                this.setFieldValue(m[i], 'P' + i.toString(10));
+            }
+        }
     }
 };
 
@@ -1906,6 +2060,9 @@ Blockly.propc.keypad_initialize = function () {
         var kp = [];
         for (var k = 0; k < 8; k++) {
             kp[k] = this.getFieldValue('P' + k);
+            if (profile.default.digital.toString().indexOf(kp[k] + ',' + kp[k]) === -1) {
+                kp[k] = 'MY_' + kp[k];
+            }
         }
         var keypad_vars = 'int __rowPins[] = {' + kp[0] + ', ' + kp[1] + ', ' + kp[2] + ', ' + kp[3] + '};\n';
         keypad_vars += 'int __colPins[] = {' + kp[4] + ', ' + kp[5] + ', ' + kp[6] + ', ' + kp[7] + '};\n';
@@ -1946,19 +2103,31 @@ Blockly.Blocks.dht22_read = {
     init: function () {
         this.setTooltip(Blockly.MSG_DHT22_READ_TOOLTIP);
         this.setColour(colorPalette.getColor('input'));
-        this.appendDummyInput()
-            .appendField("Temp & Humidity read PIN")
-            .appendField(new Blockly.FieldDropdown(profile.default.digital), "PIN");
+        this.pinChoices = ['PIN'];
+        this.otherPin = [false];
+        this.addPinMenu("Temp & Humidity read PIN", null, 0);
         this.setPreviousStatement(true, "Block");
+        this.setInputsInline(true);
         this.setNextStatement(true, null);
-      }
+      },
+      mutationToDom: Blockly.Blocks['sensor_ping'].mutationToDom,
+      domToMutation: Blockly.Blocks['sensor_ping'].domToMutation,
+      addPinMenu: Blockly.Blocks['sensor_ping'].addPinMenu,
+      setToOther: Blockly.Blocks['sensor_ping'].setToOther
 };
 
 Blockly.propc.dht22_read = function () {
     if (!this.disabled) {
         Blockly.propc.definitions_["dht22"] = '#include "dht22.h"';
     }
-    var pin = this.getFieldValue('PIN');
+
+    var pin = '0';
+    if (this.otherPin[0]) {
+        pin = Blockly.propc.valueToCode(this, this.pinChoices[0], Blockly.propc.ORDER_ATOMIC) || '0';
+    } else {
+        pin = this.getFieldValue(this.pinChoices[0]);
+    }
+
     return 'dht22_read(' + pin + ');';
 };
 

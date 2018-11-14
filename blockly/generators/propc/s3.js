@@ -1157,7 +1157,9 @@ Blockly.Blocks.scribbler_stop_servo = {
         if (op === 'other') {
             this.otherPin = true;
             var label = this.getFieldValue('LABEL');
-            this.removeInput('SET_PIN');
+            if(this.getInput('SET_PIN')) {
+                this.removeInput('SET_PIN');
+            }
             this.appendValueInput('SERVO_PIN')
                     .appendField(label)
                     .setCheck('Number')

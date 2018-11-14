@@ -10,8 +10,6 @@ var user_authenticated = ($("meta[name=user-auth]").attr("content") === 'true') 
 var isOffline = ($("meta[name=isOffline]").attr("content") === 'true') ? true : false;
 
 var projectData = null;
-var ready = false;
-var projectLoaded = false;
 var ignoreSaveCheck = false;
 
 var last_saved_timestamp = 0;
@@ -41,6 +39,13 @@ $(document).ready(function () {
         imgs[l].src = cdnUrl + imgs[l].getAttribute('data-src');
     }
 
+    // if blockXML debugging is requested, display the XML button
+    if (getURLParameter('debug')) {
+        document.getElementById('btn-view-xml').style.display = 'inline-block';
+    } else {
+        document.getElementById('btn-view-xml').style.display = 'none';
+    }
+
     // Set the client download links
     $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
     $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
@@ -53,8 +58,7 @@ $(document).ready(function () {
         //Decode and parse project data coming from a sharelink
         var projectRaw = atob($("meta[name=projectlink]").attr("content"));
         projectlink = JSON.parse(projectRaw);
-        console.log(projectlink);
-        loadProjectData(projectlink);
+        setupWorkspace(projectlink);
     } else if (!idProject && !isOffline) {
         window.location = baseUrl;
 
@@ -123,13 +127,19 @@ var setupWorkspace = function (data) {
     console.log(data);
     projectData = data;
     showInfo(data);
-    projectLoaded = true;
-    if (ready) {
-        setProfile(data['board']);
-        if (data['board'] !== 'propcfile') {
-            initToolbox(data['board'], []);
-        }
+
+    if (!idProject) {
+        idProject = projectData['id'];
     }
+    
+    setProfile(projectData['board']);
+    if (projectData['board'] !== 'propcfile') {
+        initToolbox(projectData['board'], []);
+    } else {
+        init(Blockly);
+        renderContent('propc');
+    }
+
     if (projectData['board'] === 's3') {
         $('#prop-btn-ram').addClass('hidden');
         $('#prop-btn-graph').addClass('hidden');
@@ -140,7 +150,7 @@ var setupWorkspace = function (data) {
         document.getElementById('client-available').innerHTML = document.getElementById('client-available-long').innerHTML;
     }
 
-    if (data && data['yours'] === false) {
+    if (projectData && projectData['yours'] === false) {
         $('#edit-project-details').html(page_text_label['editor_view-details'])
     } else {
         $('#edit-project-details').html(page_text_label['editor_edit-details']);
@@ -201,28 +211,6 @@ var showInfo = function (data) {
     };
 
     $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
-};
-
-function generateBlockId(nonce) {
-    var blockId = btoa(nonce).replace(/=/g, '');
-    var l = blockId.length;
-    if (l < 20) {
-        blockId = 'zzzzzzzzzzzzzzzzzzzz'.substr(l - 20) + blockId;
-    } else {
-        blockId = blockId.substr(l - 20);
-    }
-
-    return blockId;
-}
-
-var propcAsBlocksXml = function () {
-    var code = '<xml xmlns="http://www.w3.org/1999/xhtml">';
-    code += '<block type="propc_file" id="' + generateBlockId(codePropC.getValue()) + '" x="100" y="100">';
-    code += '<field name="FILENAME">single.c</field>';
-    code += '<field name="CODE">';
-    code += btoa(codePropC.getValue().replace('/* EMPTY_PROJECT */\n', ''));
-    code += '</field></block></xml>';
-    return code;
 };
 
 var saveProject = function () {
@@ -320,7 +308,11 @@ var saveAsDialog = function () {
         if (checkLeave() && projectData['yours']) {
             utils.confirm(Blockly.Msg.DIALOG_SAVE_TITLE, Blockly.Msg.DIALOG_SAVE_FIRST, function (value) {
                 if (value) {
-                    saveProject();
+                    if (isOffline) {
+                        downloadCode();
+                    } else {
+                        saveProject();  
+                    }
                 }
             }, 'Yes', 'No');
         }
@@ -416,26 +408,6 @@ var editProjectDetails = function () {
         window.location = 'projectcreate.html?edit=true';
     } else {
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
-    }
-};
-
-var blocklyReady = function () {
-    // if debug mode is active, show the XML button
-    if (getURLParameter('debug')) {
-        document.getElementById('btn-view-xml').style.display = 'inline-block';
-    } else {
-        document.getElementById('btn-view-xml').style.display = 'none';
-    }
-
-    if (projectLoaded) {
-        setProfile(projectData['board']);
-        if (projectData['board'] !== 'propcfile') {
-            initToolbox(projectData['board']);
-        } else {
-            init(Blockly);
-        }
-    } else {
-        ready = true;
     }
 };
 
@@ -723,10 +695,17 @@ function initToolbox(profileName) {
             maxScale: 3,
             minScale: 0.3,
             scaleSpeed: 1.2
+        },
+        grid: {
+            spacing: 20,
+            length: 5,
+            colour: '#fbfbfb',
+            snap: false
         }
     });
 
     init(Blockly);
+    //Blockly.mainWorkspace.createVariable('item');      // USE AFTER CORE IS REPLACED
 }
 
 function loadToolbox(xmlText) {

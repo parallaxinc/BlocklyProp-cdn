@@ -215,7 +215,9 @@ Blockly.Blocks.set_pins = {
         pinCount = Number(pinCount);
         startPin = Number(startPin);
 
-        this.removeInput('PINS');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
         this.appendDummyInput("PINS")
                 .appendField("Values:");
         var inputPins = this.getInput('PINS');
@@ -381,7 +383,9 @@ Blockly.Blocks.base_freqout = {
         if (op === 'other') {
             this.otherPin = true;
             var label = this.getFieldValue('LABEL');
-            this.removeInput('SET_PIN');
+            if(this.getInput('SET_PIN')) {
+                this.removeInput('SET_PIN');
+            }
             this.appendValueInput('PIN')
                     .appendField(label)
                     .setCheck('Number')
@@ -389,6 +393,8 @@ Blockly.Blocks.base_freqout = {
             this.getField('RANGEVALS0').setVisible(false);
             if (moveBefore) {
                 this.moveInputBefore('PIN', moveBefore);
+            } else {
+                this.render();
             }
         }
     },
@@ -622,7 +628,7 @@ Blockly.propc.eeprom_write = function () {
         } else if (type === 'NUMBER') {
             code += 'ee_putInt(' + data + ', (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
         } else {
-            code += 'ee_putStr(' + data + ', (strlen(' + data + ') + 1), (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
+            code += 'ee_putStr(' + data + ', ((int) strlen(' + data + ') + 1), (32768 + constrainInt(' + address + ', 0, 7675)) );\n';
         }
     }
     return code;
@@ -917,7 +923,17 @@ Blockly.Blocks.fb360_setup = {
                 pinWarn = null;
             }
             if (blockName === 'fb360_init' && !this.getInput('SET_PIN')) {
-                pinWarn = null;
+                //pinWarn = null;
+            }
+            if (this.otherPin) {
+                myPin = Blockly.propc.valueToCode(this, 'PIN', Blockly.propc.ORDER_ATOMIC);
+                if (!isNaN(parseFloat(myPin)) && isFinite(myPin)) {
+                    if (blocks[x].getFieldValue('PIN') === myPin || blocks[x].getFieldValue('FB') === myPin) {
+                        pinWarn = null; 
+                    }
+                } else {
+                    pinWarn = null;
+                }
             }
             this.setWarningText(pinWarn);
         }
@@ -1080,7 +1096,7 @@ Blockly.Blocks.ab_volt_in = {
         this.setColour(colorPalette.getColor('io'));
         this.appendDummyInput()
                 .appendField("A/D channel")
-                .appendField(new Blockly.FieldDropdown([["0", "0"], ["1", "1"], ["2", "2"], ["3", "3"]]), "CHANNEL")
+                .appendField(new Blockly.FieldDropdown(profile.default.analog), "CHANNEL")
                 .appendField("read (0-5V) in volt-100ths");
         this.setOutput(true, 'Number');
         this.setPreviousStatement(false, null);
@@ -1326,7 +1342,9 @@ Blockly.Blocks.sound_play = {
         if (op === 'other') {
             this.otherChannel = true;
             var label = this.getFieldValue('LABEL');
-            this.removeInput('SET_CHANNEL');
+            if(this.getInput('SET_CHANNEL')) {
+                this.removeInput('SET_CHANNEL');
+            }
             this.appendValueInput('CHANNEL')
                     .appendField(label)
                     .setCheck('Number')
@@ -1394,7 +1412,7 @@ Blockly.propc.sound_play = function () {
     
     if (projectData['board'] && !this.disabled) {
         if (projectData['board'] === "heb" || projectData['board'] === "heb-wx") {
-            Blockly.propc.setups_["sound_start"] = 'audio0 = sound_run(' + profile.default.earphone_jack + ');';
+            Blockly.propc.setups_["sound_start"] = 'audio0 = sound_run(' + profile.default.earphone_jack_inverted + ');';
         }
         Blockly.propc.definitions_["include_soundplayer"] = '#include "sound.h"';
         Blockly.propc.definitions_["sound_define_0"] = 'sound* audio0;';       
@@ -1430,17 +1448,21 @@ Blockly.propc.wav_play = function () {
         Blockly.propc.definitions_["include wavplayer"] = '#include "wavplayer.h"';
 
         var initFound = false;
+        var wPinFound = false;
 
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
         for (var x = 0; x < allBlocks.length; x++) {
             if (allBlocks[x].type === 'sd_init') {
                 initFound = true;
             }
+            if (allBlocks[x].type === 'wav_set_pins') {
+                wPinFound = true;
+            }
         }
         if (!initFound) {
             Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');';
         }
-        if (projectData["board"] === "heb-wx") {
+        if (projectData["board"] === "heb-wx" && !wPinFound) {
             Blockly.propc.setups_["wavplayer_pin"] = 'wav_set_pins(' + profile.default.earphone_jack + ');';
         }
     }
@@ -1519,7 +1541,7 @@ Blockly.propc.wav_set_pins = function () {
         pin_right = '-1';
     }
     /*
-    // TODO: is wav_close is added, uncomment the commented out code in this block
+    // TODO: if wav_close is added, uncomment the commented out code in this block
 
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
     var wavePinBlockCount = 0;
@@ -1713,7 +1735,9 @@ Blockly.Blocks.sd_read = {
         this.setSdMode(mode);
     },
     setSdMode: function (mode) {
-        this.removeInput("SIZE");
+        if(this.getInput('SIZE')) {
+            this.removeInput('SIZE');
+        }
         if (this.getInput("VALUE")) {
             this.removeInput("VALUE");
         }
@@ -1822,7 +1846,9 @@ Blockly.Blocks.sd_file_pointer = {
     mutationToDom: Blockly.Blocks['sd_read'].mutationToDom,
     domToMutation: Blockly.Blocks['sd_read'].domToMutation,
     setSdMode: function (m) {
-        this.removeInput('FP');
+        if(this.getInput('FP')) {
+            this.removeInput('FP');
+        }
         var meq = '';
         if (m === 'set') {
             meq = ' = ';
@@ -1925,8 +1951,9 @@ Blockly.Blocks.ab_drive_init = {
         if (details['BOT'] === undefined) {
             bot = this.getFieldValue('BOT');
         }
-
-        this.removeInput('PINS');
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
         this.appendDummyInput("PINS");
         var inputPins = this.getInput('PINS');
         if (bot === 'servodiffdrive.h') {
@@ -2062,7 +2089,9 @@ Blockly.Blocks.ab_drive_ramping = {
                 ["100 ticks/s\u00B2 (sluggish)", "100"]
             ];
         }
-        this.removeInput('ACCEL');
+        if(this.getInput('ACCEL')) {
+            this.removeInput('ACCEL');
+        }
         if (robot === 'abdrive.h' || robot === 'arlodrive.h' || robot === 'abdrive360.h') {
             this.appendDummyInput('ACCEL')
                     .appendField("Robot set acceleration for")
@@ -2312,8 +2341,12 @@ Blockly.Blocks.ab_drive_speed = {
             blockLeft_.outputConnection.disconnect();
         if (blockRight_)
             blockRight_.outputConnection.disconnect();
-        this.removeInput('LEFT');
-        this.removeInput('RIGHT');
+        if(this.getInput('LEFT')) {
+            this.removeInput('LEFT');
+        }
+        if(this.getInput('RIGHT')) {
+            this.removeInput('RIGHT');
+        }
 
         if (robot === 'servodiffdrive.h' || robot === 'arlodrive.h') {
             rangeText = 'R,-500,500,0';
@@ -2568,9 +2601,12 @@ Blockly.Blocks.mcp320x_read = {
             chan_count.push([i.toString(), i.toString()]);
         }
 
-        if (this.getInput('CHANNELS'))
+        if (this.getInput('CHANNELS')) {
             this.removeInput('CHANNELS');
-        this.removeInput('SELECTS');
+        }
+        if(this.getInput('SELECTS')) {
+            this.removeInput('SELECTS');
+        }
         this.appendDummyInput('SELECTS')
                 .appendField("A/D chip read")
                 .appendField(new Blockly.FieldDropdown([["MCP3002", "02"], ["MCP3004", "04"], ["MCP3008", "08"], ["MCP3202", "22"], ["MCP3204", "24"], ["MCP3208", "28"], ["ADC0831", "81"]], function (ch_c) {

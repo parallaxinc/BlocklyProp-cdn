@@ -12,7 +12,10 @@ var baudrate = 115200;
 
 var graph_temp_data = new Array;
 var graph_data_ready = false;
+
+// The IDE reports this as an unused variable
 var graph_connection_string = '';
+
 var graph_timestamp_start = null;
 var graph_timestamp_restart = 0;
 var graph_paused = false;
@@ -24,8 +27,13 @@ var fullCycleTime = 4294967296 / 80000000;
 var graph_labels = null;
 var graph_csv_data = new Array;
 
+
+// The IDE sees this as an unused variable
 var console_header_arrived = false;
+
+// The IDE sees this as an unused variable
 var console_header = null;
+
 
 var active_connection = null;
 
@@ -60,19 +68,22 @@ var graph_data = {
 };
 
 // Minimum client/launcher version supporting base64-encoding
-var minEnc64Ver = version_as_number('0.7.0');
+const minEnc64Ver = version_as_number('0.7.0');
+
 // Minimum client/launcher version supporting coded/verbose responses
-var minCodedVer = version_as_number('0.7.5');
+const minCodedVer = version_as_number('0.7.5');
+
 // Minimum client/launcher allowed for use with this system
-var minVer = version_as_number(client_min_version);
+const minVer = version_as_number(client_min_version);
 
 /**
  * Switch the visible pane when a tab is clicked.
+ * 
  * @param {string} id ID of tab clicked.
  */
 function tabClick(id) {
 
-    var TABS_ = ['blocks', 'propc', 'xml'];
+    const TABS_ = ['blocks', 'propc', 'xml'];
 
     // If the XML tab was open, save and render the content.
     /* if (document.getElementById('tab_xml').className == 'active') {
@@ -97,42 +108,50 @@ function tabClick(id) {
 
     // Deselect all tabs and hide all panes.
     // document.getElementById('menu-save-as-propc').style.display = 'none';
-    for (var x in TABS_) {
+
+    for (let x in TABS_) {
         document.getElementById('content_' + TABS_[x]).style.display = 'none';
     }
 
     // Select the active tab.
-    var selectedTab = id.replace('tab_', '');
-    var tbxs = document.getElementsByClassName('blocklyToolboxDiv');
-    var btns = document.getElementsByClassName("btn-view-code");
+    const selectedTab = id.replace('tab_', '');
+    const tbxs = document.getElementsByClassName('blocklyToolboxDiv');
+    const btns = document.getElementsByClassName("btn-view-code");
+
     document.getElementById('btn-view-blocks').style.display = 'none';
-    if (document.getElementById('menu-save-as-propc'))
+
+    if (document.getElementById('menu-save-as-propc')) {
         document.getElementById('menu-save-as-propc').style.display = 'none';
-    for (var i = 0; i < btns.length; i++) {
+    }
+
+    // var i was a duplicate definition.
+    for (let i = 0; i < btns.length; i++) {
         btns[i].style.display = 'none';
     }
-    if (projectData['board'] !== 'propcfile') {
 
-        // Reinstate keybindings from block workspace if this is a code-only project.
+    if (projectData['board'] !== 'propcfile') {
+        // Reinstate keybindings from block workspace if this is not a code-only project.
         if (Blockly.codeOnlyKeybind === true) {
             Blockly.bindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
             Blockly.codeOnlyKeybind = false;
         }
 
         if (id === 'tab_blocks') {
-            for (var i = 0; i < btns.length; i++) {
+            for (let i = 0; i < btns.length; i++) {
                 btns[i].style.display = 'inline-block';
             }
-            for (var xt = 0; xt < tbxs.length; xt++) {
+            for (let xt = 0; xt < tbxs.length; xt++) {
                 tbxs[xt].style.display = 'block';
             }
         } else {
-            for (var xt = 0; xt < tbxs.length; xt++) {
+            for (let xt = 0; xt < tbxs.length; xt++) {
                 tbxs[xt].style.display = 'none';
             }
             document.getElementById('btn-view-blocks').style.display = 'inline-block';
-            if (document.getElementById('menu-save-as-propc'))
+
+            if (document.getElementById('menu-save-as-propc')) {
                 document.getElementById('menu-save-as-propc').style.display = 'block';
+            }
         }
     } else {
 
@@ -144,15 +163,18 @@ function tabClick(id) {
             document.getElementById('prop-btn-graph').style.display = 'none';
             document.getElementById('upload-project').style.display = 'none';
         }
+
         document.getElementById('prop-btn-pretty').style.display = 'inline-block';
         document.getElementById('prop-btn-find-replace').style.display = 'inline-block';
         document.getElementById('prop-btn-undo').style.display = 'inline-block';
         document.getElementById('prop-btn-redo').style.display = 'inline-block';
+
         $('.propc-only').removeClass('hidden');
         //document.getElementById('download-project').style.display = 'none';
     }
 
     document.getElementById('content_' + selectedTab).style.display = 'block';
+
     // Show the selected pane.
     if (projectData['board'] === 'propcfile' && selectedTab === 'xml' && getURLParameter('debug')) {
         document.getElementById('btn-view-propc').style.display = 'inline-block';
@@ -169,39 +191,58 @@ function renderContent(pane) {
     // Initialize the pane.
     if (pane === 'blocks' && projectData['board'] !== 'propcfile') {
         Blockly.mainWorkspace.render();
+
     } else if (pane === 'xml') {
-        var xmlDom = null;
-        var xmlText = '';
+        let xmlDom = null;
+        let xmlText = '';
+
         if (projectData['board'] === 'propcfile') {
             xmlText = propcAsBlocksXml();
         } else {
             xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
             xmlText = Blockly.Xml.domToPrettyText(xmlDom);
         }
+
         codeXml.setValue(xmlText);
+        codeXml.getSession().setUseWrapMode(true);
         codeXml.gotoLine(0);
+
     } else if (pane === 'propc' && projectData['board'] !== 'propcfile') {
-        prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
+        let raw_c = prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
+        codePropC.setValue(raw_c);
+        codePropC.gotoLine(0);
+
     } else if (pane === 'propc') {
-        if (codePropC.getValue() === '') {
+        if (!codePropC || codePropC.getValue() === '') {
             codePropC.setValue(atob((projectData['code'].match(/<field name="CODE">(.*)<\/field>/) || ['', ''])[1] || ''));
             codePropC.gotoLine(0);
         }
         if (codePropC.getValue() === '') {
-            var blankProjectCode = '// ------ Libraries and Definitions ------\n';
+            let blankProjectCode = '// ------ Libraries and Definitions ------\n';
             blankProjectCode += '#include "simpletools.h"\n\n\n';
             blankProjectCode += '// ------ Global Variables and Objects ------\n\n\n';
             blankProjectCode += '// ------ Main Program ------\n';
             blankProjectCode += 'int main() {\n\n\nwhile (1) {\n\n\n}}';
-            prettyCode(blankProjectCode);
+
+            let raw_c = prettyCode(blankProjectCode);
+            codePropC.setValue(raw_c);
+            codePropC.gotoLine(0);
         }   
     }
 }
 
+
+/**
+ * Pretty formatter for C code
+ *
+ * @param raw_code
+ * @returns {*}
+ */
 var prettyCode = function (raw_code) {
     if (!raw_code) {
         raw_code = codePropC.getValue();
     }
+
     raw_code = js_beautify(raw_code, {
         'brace_style': 'expand',
         'indent_size': 2
@@ -219,6 +260,7 @@ var prettyCode = function (raw_code) {
             .replace(/colorPal \* /g, "colorPal *")
             .replace(/ws2812 \* /g, "ws2812 *")
             .replace(/i2c \* /g, "i2c *")
+            .replace(/talk \* /g, "talk *")
             .replace(/sound \* /g, "sound *")
             .replace(/FILE \* /g, "FILE* ")
 
@@ -229,10 +271,14 @@ var prettyCode = function (raw_code) {
                 return "[" + m1 + "] = {" + m2 + "};";
             });
 
-    codePropC.setValue(raw_code);
-    codePropC.gotoLine(0);
+    return (raw_code);
 };
 
+
+
+/**
+ * Toggle the find-replace display style between 'block' and 'none'
+ */
 var findReplaceCode = function () {
     if (document.getElementById('find-replace').style.display === 'none') {
         document.getElementById('find-replace').style.display = 'block';
@@ -241,35 +287,102 @@ var findReplaceCode = function () {
     }
 };
 
+
+
+/**
+ * Generate a unique block ID
+ *
+ * @param nonce
+ * @returns {string}
+ */
+function generateBlockId(nonce) {
+    let blockId = btoa(nonce).replace(/=/g, '');
+    let l = blockId.length;
+
+    if (l < 20) {
+        blockId = 'zzzzzzzzzzzzzzzzzzzz'.substr(l - 20) + blockId;
+    } else {
+        blockId = blockId.substr(l - 20);
+    }
+
+    return blockId;
+}
+
+
+
+/**
+ * Covert C source code into a Blockly block
+ *
+ * @returns {string}
+ */
+var propcAsBlocksXml = function () {
+    let code = '<xml xmlns="http://www.w3.org/1999/xhtml">';
+    code += '<block type="propc_file" id="' + generateBlockId(codePropC ? codePropC.getValue() : 'thequickbrownfoxjumpedoverthelazydog') + '" x="100" y="100">';
+    code += '<field name="FILENAME">single.c</field>';
+    code += '<field name="CODE">';
+
+    if (codePropC) {
+        code += btoa(codePropC.getValue().replace('/* EMPTY_PROJECT */\n', ''));
+    }
+
+    code += '</field></block></xml>';
+    return code;
+};
+
+
+
 /**
  * Initialize Blockly.  Called on page load.
  * @param {!Blockly} blockly Instance of Blockly from iframe.
  */
 function init(blockly) {
-    codePropC = ace.edit("code-propc");
-    codePropC.setTheme("ace/theme/chrome");
-    codePropC.getSession().setMode("ace/mode/c_cpp");
-    codePropC.getSession().setTabSize(2);
-    codePropC.$blockScrolling = Infinity;
-    codePropC.setReadOnly(true);
+    if(!codePropC) {
+        codePropC = ace.edit("code-propc");
+        codePropC.setTheme("ace/theme/chrome");
+        codePropC.getSession().setMode("ace/mode/c_cpp");
+        codePropC.getSession().setTabSize(2);
+        codePropC.$blockScrolling = Infinity;
+        codePropC.setReadOnly(true);
 
-    codeXml = ace.edit("code-xml");
-    codeXml.setTheme("ace/theme/chrome");
-    codeXml.getSession().setMode("ace/mode/xml");
-    codeXml.setReadOnly(true);
+        // if the project is a propc code-only project, enable code editing.
+        if (projectData['board'] === 'propcfile') {
+            codePropC.setReadOnly(false);
+            codePropC.commands.addCommand({
+                name: "undo",
+                bindKey: {win: "Ctrl-z", mac: "Command-z"},
+                exec: function (codePropC) {
+                    codePropC.undo();
+                },
+                readOnly: true
+            });
+            codePropC.commands.addCommand({
+                name: "redo",
+                bindKey: {win: "Ctrl-y", mac: "Command-y"},
+                exec: function (codePropC) {
+                    codePropC.redo();
+                },
+                readOnly: true
+            });
+            codePropC.commands.addCommand({
+                name: "find_replace",
+                bindKey: {win: "Ctrl-f", mac: "Command-f"},
+                exec: function () {
+                    findReplaceCode();
+                },
+                readOnly: true
+            });
+            tabClick('tab_propc');
+        }
+    }
+
+    if (!codeXml) {
+        codeXml = ace.edit("code-xml");
+        codeXml.setTheme("ace/theme/chrome");
+        codeXml.getSession().setMode("ace/mode/xml");
+        codeXml.setReadOnly(true);
+    }
 
     window.Blockly = blockly;
-
-    // Make the 'Blocks' tab line up with the toolbox.
-    /*
-     if (Blockly.Toolbox) {
-     window.setTimeout(function () {
-     document.getElementById('tab_blocks').style.minWidth =
-     (Blockly.Toolbox.width - 38) + 'px';
-     // Account for the 19 pixel margin and on each side.
-     }, 1);
-     }
-     */
 
     if (projectData !== null) {
         if (projectData['code'].length < 43) {
@@ -279,53 +392,41 @@ function init(blockly) {
             loadToolbox(projectData['code']);
         }
     }
-
-    // if the project is a propc code-only project, enable code editing.
-    if (projectData['board'] === 'propcfile') {
-        codePropC.setReadOnly(false);
-        codePropC.commands.addCommand({
-            name: "undo",
-            bindKey: {win: "Ctrl-z", mac: "Command-z"},
-            exec: function (codePropC) {
-                codePropC.undo();
-            },
-            readOnly: true
-        });
-        codePropC.commands.addCommand({
-            name: "redo",
-            bindKey: {win: "Ctrl-y", mac: "Command-y"},
-            exec: function (codePropC) {
-                codePropC.redo();
-            },
-            readOnly: true
-        });
-        codePropC.commands.addCommand({
-            name: "find_replace",
-            bindKey: {win: "Ctrl-f", mac: "Command-f"},
-            exec: function () {
-                findReplaceCode();
-            },
-            readOnly: true
-        });
-        tabClick('tab_propc');
-    }
 }
 
+
+/**
+ * Set the global value for baudrate
+ *
+ * @param _baudrate
+ */
 function setBaudrate(_baudrate) {
+    // TODO: Check the supplied baudrate value to ensure that it is reasonable
+    // Set the global baudrate variable
     baudrate = _baudrate;
 }
 
+
+/**
+ * Submit a project's source code to the cloud compiler
+ *
+ * @param text
+ * @param action
+ * @param successHandler
+ */
 function cloudCompile(text, action, successHandler) {
 
     // if PropC is in edit mode, get it from the editor, otherwise render it from the blocks.
-    var propcCode = '';
+    let propcCode = '';
+
     if (codePropC.getReadOnly()) {
-        propcCode = Blockly.propc.workspaceToCode(Blockly.mainWorkspace);
+        propcCode = prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
     } else {
         propcCode = codePropC.getValue();
     }
 
-    var isEmptyProject = propcCode.indexOf("EMPTY_PROJECT") > -1;
+    let isEmptyProject = propcCode.indexOf("EMPTY_PROJECT") > -1;
+
     if (isEmptyProject) {
         alert("You can't compile an empty project");
     } else {
@@ -333,18 +434,14 @@ function cloudCompile(text, action, successHandler) {
         $("#compile-console").val('Compile... ');
         $('#compile-dialog').modal('show');
 
+        let terminalNeeded = false;
 
-        propcCode = js_beautify(propcCode, {
-            'brace_style': 'expand',
-            'indent_size': 2
-        });
-
-        var terminalNeeded = false;
         if (propcCode.indexOf("SERIAL_TERMINAL USED") > -1)
             terminalNeeded = 'term';
         else if (propcCode.indexOf("SERIAL_GRAPHING USED") > -1)
             terminalNeeded = 'graph';
 
+        // OFFLINE MODE
         if (isOffline) {
             // Compiler optimization options:
             // -O0 (None)
@@ -368,7 +465,7 @@ function cloudCompile(text, action, successHandler) {
                     document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
                 }
             });
-        } else {
+        } else {  // ONLINE MODE
             $.ajax({
                 'method': 'POST',
                 'url': baseUrl + 'rest/compile/c/' + action + '?id=' + idProject,
@@ -400,12 +497,19 @@ function cloudCompile(text, action, successHandler) {
     }
 }
 
+
+/**
+ * Stub function to the cloudCompile function
+ */
 function compile() {
     cloudCompile('Compile', 'compile', function (data, terminalNeeded) {});
 }
 
+
+
 /**
- * begins loading process
+ * Begins loading process
+ *
  * @param modal_message message shown at the top of the compile/load modal.
  * @param compile_command for the cloud compiler (bin/eeprom).
  * @param load_option command for the loader (CODE/VERBOSE/CODE_VERBOSE).
@@ -413,6 +517,9 @@ function compile() {
  *
  */
 function loadInto(modal_message, compile_command, load_option, load_action) {
+
+    // TODO: the loadInto function appears to be orphaned. Verify and remove
+
     if (ports_available) {
         cloudCompile(modal_message, compile_command, function (data, terminalNeeded) {
 
@@ -505,6 +612,10 @@ function loadInto(modal_message, compile_command, load_option, load_action) {
     }
 }
 
+
+/**
+ *
+ */
 function serial_console() {
     var newTerminal = false;
 
@@ -636,7 +747,7 @@ function graphing_console() {
         var graph_settings_temp = propcCode.substring(graph_settings_start, graph_settings_end).split(':');
         var graph_settings_str = graph_settings_temp[1].split(',');
 
-        // GRAPH_SETTINGS:rate,x_axis_val,x_axis_type,y_min,y_max:GRAPH_SETTINGS_END //
+        // GRAPH_SETTINGS_START:rate,x_axis_val,x_axis_type,y_min,y_max:GRAPH_SETTINGS_END //
 
         var graph_labels_end = propcCode.indexOf(":GRAPH_LABELS_END //") + 20;
         var graph_labels_temp = propcCode.substring(graph_labels_start, graph_labels_end).split(':');
@@ -645,7 +756,7 @@ function graphing_console() {
         graph_options.refreshRate = Number(graph_settings_str[0]);
 
         graph_options.graph_type = graph_settings_str[2];
-        if (Number(graph_settings_str[3]) !== 0 && Number(graph_settings_str[4]) !== 0) {
+        if (Number(graph_settings_str[3]) !== 0 || Number(graph_settings_str[4]) !== 0) {
             graph_options.axisY = {
                 type: Chartist.AutoScaleAxis,
                 low: Number(graph_settings_str[3]),
@@ -712,8 +823,6 @@ function graphing_console() {
             connection.onerror = function (error) {
                 console.log('WebSocket Error');
                 console.log(error);
-                //connection.close();
-                //connection = new WebSocket(url);
             };
 
             connection.onmessage = function (e) {
@@ -1120,11 +1229,11 @@ function graph_new_labels() {
 }
 
 function graph_update_labels() {
-    var row = graph_temp_data.length - 1;
+    let row = graph_temp_data.length - 1;
     if (graph_temp_data[row]) {
-        var col = graph_temp_data[row].length;
-        for (var w = 2; w < col; w++) {
-            var theLabel = document.getElementById('gValue' + (w - 1).toString(10));
+        let col = graph_temp_data[row].length;
+        for (let w = 2; w < col; w++) {
+            let theLabel = document.getElementById('gValue' + (w - 1).toString(10));
             if (theLabel) {
                 theLabel.textContent = graph_temp_data[row][w];
             }

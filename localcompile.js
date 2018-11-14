@@ -70,41 +70,21 @@ var compile_actions = {
     "EEPROM": {"compile-options": [], "extension": ".elf", "return-binary": true}
 };
 
-
 function oswalk(dir, action) {
-    
-    // Assert that it's a function
-    if (typeof action !== "function") {
+    if (typeof action !== "function") {             // Assert that it's a function
         action = function (error, file) { };
     }
-
-    // Read the directory
-    fs.readdir(dir, function (err, list) {
-        
-        // Return the error if something went wrong
+    fs.readdir(dir, function (err, list) {          // Read the directory
         if (err) {
-            return action(err);
+            return action(err);                     // Return the error if something went wrong
         }
-
-        // For every file in the list
-        list.forEach(function (file) {
-            
-            // Full path of that file
-            var p = path.join(dir, file);
-            
-            // Get the file's stats
-            fs.stat(p, function (err, stat) {
-                
-                // If the file is a directory
-                if (stat && stat.isDirectory()) {
-                    
-                    // Dive into the directory
-                    oswalk(p, action);
-                    
+        list.forEach(function (file) {              // For every file in the list
+            var p = path.join(dir, file);           // Full path of that file
+            fs.stat(p, function (err, stat) {       // Get the file's stats
+                if (stat && stat.isDirectory()) {   // If the file is a directory
+                    oswalk(p, action);              // Dive into the directory
                 } else {
-                    
-                    // Call the action
-                    action(null, p);
+                    action(null, p);                // Call the action
                 }
             });
         });
@@ -121,13 +101,13 @@ oswalk(configs['c-libraries'], function(err, f) {
 
     var pth = f.split(path.sep);
     var ext = pth[pth.length - 1].split('.');
-    if( ext[1] === 'h' || ext[1] === 'c' ) {
+    if ( ext[1] === 'h' || ext[1] === 'c' ) {
         fn = pth.pop();
         fp = pth.join('/');
         lib_files[fn] = fp;
         if ( ext[1] === 'h') {
             var data = fs.readFileSync(path.join(f), "utf8")
-	    lib_includes[fn] = parse_includes(data);
+	        lib_includes[fn] = parse_includes(data);
         }
     }
 });
@@ -230,9 +210,9 @@ function localCompile(action, source_files, app_filename, lib_opt, comp_opt, cal
 */
 
     if (success) {
-	compile_binary(source_directory, action, app_filename, library_order, external_libraries_info, comp_opt, function(output) {
-		return callback(output);
-	});
+        compile_binary(source_directory, action, app_filename, library_order, external_libraries_info, comp_opt, function(output) {
+            return callback(output);
+        });
     }
 }
 
@@ -274,7 +254,7 @@ var find_dependencies = function(library) {
             if (lib_files[files].indexOf('/lib' + library) > -1) {
 
                 external_libraries_info[library] = lib_files[files];
-		library_order.push(library);
+		        library_order.push(library);
 
                 var includes = lib_includes[files];
 
@@ -309,8 +289,8 @@ function compile_lib(working_directory, source_file, target_filename, libraries,
         // TODO: handle compiler output...?
 
         // the *entire* stdout and stderr (buffered)
-        //console.log('stdout: ${stdout}');
-        //console.log('stderr: ${stderr}');
+        console.log(stdout);
+        console.log(stderr);
 
         cleanUpAll(source_directory);
         return callback([true, "Library compile successful\n", null]);
@@ -337,43 +317,42 @@ function compile_binary(working_directory, action, source_file, binaries, librar
             
             // node couldn't open a temp file
             cleanUpAll(source_directory);
-	    var data = {
-		error:      err,
-		'message':  "Unable to open binary file.",
-		success:    false,
-		binary:     null,
-		extension:  null
-	    }
-   	    return callback(data);  
+            var data = {
+                error:      err,
+                'message':  "Unable to open binary file.",
+                success:    false,
+                binary:     null,
+                extension:  null
+            }
+            return callback(data);  
         }
         
         // TODO: find a better way to handle spaces in the directory names
         exec(executing_data.join(' ').replace(/\/Simple Libraries\//g, "/'Simple Libraries'/"), { 'cwd' : working_directory }, function(err, stdout, stderr) {
 
-	    var data = {
-		error:      null,
-		'message':  "Compiler not found.",
-		success:    false,
-		binary:     null,
-		extension:  null
-	    }
+            var data = {
+                error:      stderr,
+                details:    stdout,
+                message:    "Compiler not found.",
+                success:    false,
+                binary:     null,
+                extension:  null
+            }
 
             if (err) {
 
                 // node couldn't execute the command
                 cleanUpAll(source_directory);
-		data.error = err;
-		data['message'] = "Compiler not found.";
-   	        return callback(data);  
+		        data.error = err;
+		        data['message'] = "Compiler Error: " + stdout + "\n\n" + stderr;
+   	            return callback(data);  
             }
 
             // the *entire* stdout and stderr (buffered)
-            //console.log('stdout: ${stdout}');
-            //console.log('stderr: ${stderr}');
-            
             data['message'] = "Compile successful!";
-	    data.success = true;
-	    data.extension = compile_actions[action.toUpperCase()]["extension"];
+            data.details = stdout;
+	        data.success = true;
+	        data.extension = compile_actions[action.toUpperCase()]["extension"];
             
             if (compile_actions[action.toUpperCase()]["return-binary"]) {
                 
@@ -381,23 +360,23 @@ function compile_binary(working_directory, action, source_file, binaries, librar
                 fs.readFile(fd, function(err, u8buff) {
 
                     if (err) {
-		        cleanUpAll(source_directory);
-			data.error = err;
-			data['message'] = "Unable to read compiled file.";
-   	                return callback(data);  
+		                cleanUpAll(source_directory);
+			            data.error = err;
+			            data['message'] = "Unable to read compiled file: " + stdout + "\n\n" + stderr;
+   	                    return callback(data);  
                     }
 
-		    data.binary = _arrayBufferToBase64( u8buff );
+		            data.binary = _arrayBufferToBase64( u8buff );
 
-		    // Return results
-		    cleanUpAll(source_directory);
-   	            return callback(data);  
+                    // Return results
+                    cleanUpAll(source_directory);
+   	                return callback(data);  
                 });
             } else {
 
-		// Return results
-		cleanUpAll(source_directory);
-   	        return callback(data);  
+                // Return results
+                cleanUpAll(source_directory);
+                return callback(data);  
             }  
         });
     });
@@ -405,18 +384,18 @@ function compile_binary(working_directory, action, source_file, binaries, librar
 
 function deleteFolderRecursive(pth) {
 
-  // make sure it is our directory we are deleting
-  if (fs.existsSync(pth) && pth.indexOf('pgc-') > -1) {
-    fs.readdirSync(pth).forEach(function(fl, index){
-      var curPath = path.join(pth, fl);
-      if (fs.lstatSync(curPath).isDirectory()) { // recurse
-        deleteFolderRecursive(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(pth);
-  }
+    // make sure it is our directory we are deleting
+    if (fs.existsSync(pth) && pth.indexOf('pgc-') > -1) {
+        fs.readdirSync(pth).forEach(function(fl, index) {
+            var curPath = path.join(pth, fl);
+            if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                deleteFolderRecursive(curPath);
+            } else { // delete file
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(pth);
+    }
 };
 
 function _arrayBufferToBase64( buffer ) {
