@@ -275,7 +275,7 @@ Blockly.Blocks.array_init = {
         var theBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
         
         // If I get deleted, broadcast that to other blocks.
-        if (event.oldXml) {
+        if (event && event.oldXml) {
             var oldName = '';
             var oSerializer = new XMLSerializer();
             var sXML = oSerializer.serializeToString(event.oldXml);

@@ -309,7 +309,7 @@ Blockly.Blocks.colorpal_enable = {
     },
     onchange: function (event) {
         this.colorPalPin = this.getFieldValue('IO_PIN');
-        if (event.oldXml || event.xml) {  // only fire when a block got deleted or created
+        if (event && (event.oldXml || event.xml)) {  // only fire when a block got deleted or created
             this.onPinSet(null);
         }
     },
@@ -439,26 +439,28 @@ Blockly.Blocks.colorpal_get_colors_raw = {
         }
     },
     onchange: function (event) {
-        // only fire when a block got deleted or created, the CP_PIN field was changed
-        if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'CP_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
-            var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-            if (allBlocks.toString().indexOf('ColorPal initialize') === -1)
-            {
-                this.setWarningText('WARNING: You must use a ColorPal\ninitialize block at the beginning of your program!');
-            } else {
-                this.setWarningText(null);
-                this.warnFlag--;
-                if (this.getInput('CPIN')) {
-                    var allCpPins = '';
-                    for (var x = 0; x < allBlocks.length; x++) {
-                        if (allBlocks[x].type === 'colorpal_enable') {
-                            allCpPins += (allBlocks[x].colorPalPin || allBlocks[x].getFieldValue('IO_PIN')) + ',';
+        if (event) {
+            // only fire when a block got deleted or created, the CP_PIN field was changed
+            if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'CP_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
+                var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+                if (allBlocks.toString().indexOf('ColorPal initialize') === -1)
+                {
+                    this.setWarningText('WARNING: You must use a ColorPal\ninitialize block at the beginning of your program!');
+                } else {
+                    this.setWarningText(null);
+                    this.warnFlag--;
+                    if (this.getInput('CPIN')) {
+                        var allCpPins = '';
+                        for (var x = 0; x < allBlocks.length; x++) {
+                            if (allBlocks[x].type === 'colorpal_enable') {
+                                allCpPins += (allBlocks[x].colorPalPin || allBlocks[x].getFieldValue('IO_PIN')) + ',';
+                            }
                         }
-                    }
-                    if (allCpPins.indexOf(this.getFieldValue('CP_PIN')) === -1) {
-                        this.setWarningText('WARNING: You must use choose a new PIN for this block!');
-                        // let all changes through long enough to ensure this is set properly.
-                        this.warnFlag = allBlocks.length * 3;
+                        if (allCpPins.indexOf(this.getFieldValue('CP_PIN')) === -1) {
+                            this.setWarningText('WARNING: You must use choose a new PIN for this block!');
+                            // let all changes through long enough to ensure this is set properly.
+                            this.warnFlag = allBlocks.length * 3;
+                        }
                     }
                 }
             }

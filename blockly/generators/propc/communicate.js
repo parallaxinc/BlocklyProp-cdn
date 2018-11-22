@@ -913,7 +913,7 @@ Blockly.Blocks.serial_open = {
     onchange: function (event) {
         this.serialPin = this.getFieldValue('RXPIN') + ',' + this.getFieldValue('TXPIN');
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-        if (event.blockId === this.id || event.oldXml) {  // only fire when it's this block or a block got deleted
+        if (event && (event.blockId === this.id || event.oldXml)) {  // only fire when it's this block or a block got deleted
             for (var x = 0; x < allBlocks.length; x++) {
                 var func = allBlocks[x].serPins;
                 if (func) {
@@ -2948,9 +2948,11 @@ Blockly.propc.oled_draw_circle = function () {
         }
         code += point_x0 + ', ' + point_y0 + ', ';
         code += radius + ', ';
-        code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")) ';
-        code += ');';
-
+        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
+        } else {
+            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        }
         return code;
     }
 };
@@ -3015,8 +3017,11 @@ Blockly.propc.oled_draw_line = function () {
 
         var code = '';
         code += 'oledc_drawLine(' + x_one + ', ' + y_one + ', ' + x_two + ', ' + y_two + ', ';
-        code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
-
+        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
+        } else {
+            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        }
         return code;
     }
 };
@@ -3068,7 +3073,11 @@ Blockly.propc.oled_draw_pixel = function () {
 
         var code = '';
         code += 'oledc_drawPixel(' + point_x + ', ' + point_y + ', ';
-        code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
+        } else {
+            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        }
         return code;
     }
 };
@@ -3160,7 +3169,11 @@ Blockly.propc.oled_draw_triangle = function () {
         code += point_x0 + ', ' + point_y0 + ', ';
         code += point_x1 + ', ' + point_y1 + ', ';
         code += point_x2 + ', ' + point_y2 + ', ';
-        code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
+        } else {
+            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        }
         return code;
     }
 };
@@ -3251,7 +3264,11 @@ Blockly.propc.oled_draw_rectangle = function () {
             }
             code += point_x + ', ' + point_y + ', ' + width + ', ' + height + ', ' + corners + ', ';
         }
-        code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));\n';
+        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
+        } else {
+            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        }
         return code;
     }
 };
@@ -3600,7 +3617,7 @@ Blockly.Blocks.ws2812b_init = {
     },
     onchange: function (event) {
         this.rgbPin = this.getFieldValue('PIN');
-        if (event.oldXml || event.xml) {  // only fire when a block got deleted or created
+        if (event && (event.oldXml || event.xml)) {  // only fire when a block got deleted or created
             this.onPinSet(null);
         }
     },
@@ -3738,7 +3755,7 @@ Blockly.Blocks.ws2812b_set = {
     },
     onchange: function (event) {
         // Don't fire if BadgeWX
-        if (projectData && projectData['board'] !== 'heb-wx') {
+        if (event && projectData && projectData['board'] !== 'heb-wx') {
 
             // only fire when a block got deleted or created, the RGB_PIN field was changed
             if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'RGB_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
@@ -6220,9 +6237,9 @@ Blockly.Blocks.i2c_mode = {
     },
     onchange: function (event) {
         // only fire when a block got deleted or created, the SCL field was changed
-        if (event.oldXml || event.type === Blockly.Events.CREATE ||
+        if (event && (event.oldXml || event.type === Blockly.Events.CREATE ||
                 event.name === 'SCL' || event.name === 'SDA' ||
-                event.blockId === this.id || this.warnFlag > 0) {
+                event.blockId === this.id || this.warnFlag > 0)) {
             var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
             this.warnFlag--;
             var sda = null;
