@@ -2663,10 +2663,10 @@ Blockly.propc.mcp320x_read = function () {
             func += '{low(__MclkPin);\nlow(__McsPin);\npulse_out(__MclkPin, 250);\n';
             func += 'int __Mvolts = shift_in(__MdoPin, __MclkPin, MSBPOST, 8);\nhigh(__McsPin);\n';
             func += 'return ((__Mvolts * __MVr) / 256);}';
-            Blockly.propc.methods_["adc083x_read"] = func;
-            Blockly.propc.method_declarations_["adc083x_read"] = 'int read_adc0831(int __McsPin, int __MclkPin, int __MdoPin, int __MVr);\n';
+            Blockly.propc.methods_["adc0831_read"] = func;
+            Blockly.propc.method_declarations_["adc0831_read"] = 'int read_adc0831(int __McsPin, int __MclkPin, int __MdoPin, int __MVr);\n';
 
-            code += 'read_adc083x(' + cs_pin + ', ' + clk_pin + ', ' + do_pin + ', __Mvref)';
+            code += 'read_adc0831(' + cs_pin + ', ' + clk_pin + ', ' + do_pin + ', __Mvref)';
         } else {
             func += 'int read_mcp320x(int __McsPin, int __MclkPin, int __MdoPin, int __MdiPin, int __Mbits, int __Mdata, int __MVr, int __Mres) {\n';
             func += '  high(__McsPin);  low(__MclkPin);  low(__McsPin);\n';
