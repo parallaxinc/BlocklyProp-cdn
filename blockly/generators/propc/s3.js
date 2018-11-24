@@ -1537,7 +1537,7 @@ Blockly.Blocks.s3_eeprom_read = {
         this.setInputsInline(true);
         this.setOutput(true, 'Number');
         this.setColour(colorPalette.getColor('output'));
-    }
+  }
 };
 
 Blockly.propc.s3_eeprom_read = function () {
