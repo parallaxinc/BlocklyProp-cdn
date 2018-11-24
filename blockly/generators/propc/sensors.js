@@ -426,18 +426,6 @@ Blockly.Blocks.colorpal_get_colors_raw = {
         }
         this.cp_pins = uniq_fast(this.cp_pins);
     },
-    getVars: function () {
-        return [this.getFieldValue('R_STORAGE'), this.getFieldValue('G_STORAGE'), this.getFieldValue('B_STORAGE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('R_STORAGE'))) {
-            this.setFieldValue(newName, 'R_STORAGE');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('G_STORAGE'))) {
-            this.setFieldValue(newName, 'G_STORAGE');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('B_STORAGE'))) {
-            this.setFieldValue(newName, 'B_STORAGE');
-        }
-    },
     onchange: function (event) {
         if (event) {
             // only fire when a block got deleted or created, the CP_PIN field was changed
@@ -508,15 +496,7 @@ Blockly.Blocks.colorpal_get_colors = {
     domToMutation: Blockly.Blocks['colorpal_get_colors_raw'].domToMutation,
     colorpalPins: Blockly.Blocks['colorpal_get_colors_raw'].colorpalPins,
     updateCpin: Blockly.Blocks['colorpal_get_colors_raw'].updateCpin,
-    onchange: Blockly.Blocks['colorpal_get_colors_raw'].onchange,
-    getVars: function () {
-        return [this.getFieldValue('COLOR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('COLOR'))) {
-            this.setFieldValue(newName, 'COLOR');
-        }
-    }
+    onchange: Blockly.Blocks['colorpal_get_colors_raw'].onchange
 };
 
 Blockly.propc.colorpal_get_colors = function () {
@@ -892,18 +872,6 @@ Blockly.Blocks.MMA7455_acceleration = {
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
     },
-    getVars: function () {
-        return [this.getFieldValue('X_VAR'), this.getFieldValue('Y_VAR'), this.getFieldValue('Z_VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('X_VAR'))) {
-            this.setFieldValue(newName, 'X_VAR');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('Y_VAR'))) {
-            this.setFieldValue(newName, 'Y_VAR');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('Z_VAR'))) {
-            this.setFieldValue(newName, 'Z_VAR');
-        }
-    },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
         if (allBlocks.indexOf('Accelerometer initialize') === -1)
@@ -971,14 +939,6 @@ Blockly.Blocks.HMC5883L_read = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('HEADING')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('HEADING'))) {
-            this.setFieldValue(newName, 'HEADING');
-        }
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
@@ -1113,18 +1073,6 @@ Blockly.Blocks.lsm9ds1_read = {
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
     },
-    getVars: function () {
-        return [this.getFieldValue('X_VAR'), this.getFieldValue('Y_VAR'), this.getFieldValue('Z_VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('X_VAR'))) {
-            this.setFieldValue(newName, 'X_VAR');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('Y_VAR'))) {
-            this.setFieldValue(newName, 'Y_VAR');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('Z_VAR'))) {
-            this.setFieldValue(newName, 'Z_VAR');
-        }
-    },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
         if (allBlocks.indexOf('IMU initialize') === -1)
@@ -1219,15 +1167,6 @@ Blockly.Blocks.lsm9ds1_tilt = {
         }
         this.setFieldValue(theVar1, 'VAR1');
         this.setFieldValue(theVar2, 'VAR2');
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR1'), this.getFieldValue('VAR2')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR1')))
-            this.setFieldValue(newName, 'VAR1');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR2')))
-            this.setFieldValue(newName, 'VAR2');
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
@@ -1340,14 +1279,6 @@ Blockly.Blocks.lsm9ds1_heading = {
                     .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
         }
         this.setFieldValue(theVar, 'VAR');
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
@@ -1801,14 +1732,6 @@ Blockly.Blocks.rfid_get = {
 
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('BUFFER')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('BUFFER'))) {
-            this.setFieldValue(newName, 'BUFFER');
-        }
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
