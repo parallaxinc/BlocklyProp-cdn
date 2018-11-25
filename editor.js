@@ -705,7 +705,10 @@ function initToolbox(profileName) {
     });
 
     init(Blockly);
-    //Blockly.mainWorkspace.createVariable('item');      // USE AFTER CORE IS REPLACED
+
+    // TODO: find a better way to handle this.
+    // https://groups.google.com/forum/#!topic/blockly/SgJoEEXuzsg
+    Blockly.mainWorkspace.createVariable(Blockly.LANG_VARIABLES_GET_ITEM);
 }
 
 function loadToolbox(xmlText) {
