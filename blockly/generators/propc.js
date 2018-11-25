@@ -252,14 +252,14 @@ Blockly.propc.init = function (workspace) {
             Blockly.propc.variableDB_.reset();
         }
 
-        //Blockly.propc.variableDB_.setVariableMap(workspace.getVariableMap());    // USE WHEN CORE IS UPDATED
+        Blockly.propc.variableDB_.setVariableMap(workspace.getVariableMap());    // USE WHEN CORE IS UPDATED
 
         var defvars = [];
-        var variables = Blockly.Variables.allVariables(workspace);
-        //var variables = Blockly.Variables.allUsedVarModels(workspace);    // USE WHEN CORE IS UPDATED
+        //var variables = Blockly.Variables.allVariables(workspace);
+        var variables = Blockly.Variables.allUsedVarModels(workspace);    // USE WHEN CORE IS UPDATED
         for (var x = 0; x < variables.length; x++) {
-            var varName = Blockly.propc.variableDB_.getName(variables[x],
-            //var varName = Blockly.propc.variableDB_.getName(variables[x].getId(),    // USE WHEN CORE IS UPDATED
+            //var varName = Blockly.propc.variableDB_.getName(variables[x],
+            var varName = Blockly.propc.variableDB_.getName(variables[x].getId(),    // USE WHEN CORE IS UPDATED
                     Blockly.Variables.NAME_TYPE);
             defvars[x] = '{{$var_type_' + varName + '}} ' + varName + '{{$var_length_' + varName + '}};';
             Blockly.propc.definitions_['variable' + x.toString(10)] = defvars[x];
@@ -553,7 +553,21 @@ if (!Object.keys) {
     }());
 };
 
+
+// NOTE: Replaces core function!                   // USE WHEN CORE IS UPDATED
+Blockly.Field.prototype.render_ = function() {
+    if (!this.visible_) {
+      this.size_.width = 0;
+      return;
+    }
   
+    // Replace the text.
+    if (this.textElement_) {
+        this.textElement_.textContent = this.getDisplayText_();
+        this.updateWidth();
+    } 
+};
+
 
 // NOTE: Replaces core function!
 Blockly.BlockSvg.prototype.setCollapsed = function (b) {

@@ -696,19 +696,7 @@ Blockly.Blocks.console_scan_text = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVarType: function () {
-        return "String";
-    },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
     }
-
 };
 
 Blockly.propc.console_scan_text = function () {
@@ -738,16 +726,7 @@ Blockly.Blocks.console_scan_number = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
     }
-
 };
 
 Blockly.propc.console_scan_number = function () {
@@ -1201,19 +1180,6 @@ Blockly.Blocks.serial_receive_text = {
     domToMutation: Blockly.Blocks['serial_send_text'].domToMutation,
     serPins: Blockly.Blocks['serial_send_text'].serPins,
     updateSerPin: Blockly.Blocks['serial_send_text'].updateSerPin,
-    getVarType: function () {
-        if (this.getFieldValue('TYPE') === 'TEXT') {
-            return "String";
-        }
-    },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
-    },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
         if (allBlocks.indexOf('Serial initialize') === -1)
@@ -1649,19 +1615,6 @@ Blockly.Blocks.serial_scan_multiple = {
             warnTxt = 'Serial recieve must have at least one search term.';
         }
         this.setWarningText(warnTxt);
-    },
-    getVars: function () {
-        var theVars = [];
-        for (var i = 0; i < this.optionList_.length; i++) {
-            theVars.push(this.getFieldValue('CPU' + i));
-        }
-        return theVars;
-    },
-    renameVar: function (oldName, newName) {
-        for (var i = 0; i < this.optionList_.length; i++) {
-            if (Blockly.Names.equals(oldName, this.getFieldValue('CPU' + i)))
-                this.setFieldValue(newName, 'CPU' + i);
-        }
     }
 };
 
@@ -1763,14 +1716,6 @@ Blockly.Blocks.serial_rx = {
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.setWarningText('WARNING: This block has been deprecated\nand may not work correctly!\nPlease use one of the blocks\navailable in the menu.');
-    },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
     }
 };
 
@@ -2567,19 +2512,6 @@ Blockly.Blocks.xbee_receive = {
         } else {
             this.setWarningText(null);
         }
-    },
-    getVarType: function () {
-        if (this.getFieldValue('TYPE') === 'TEXT') {
-            return "String";
-        }
-    },
-    getVars: function () {
-        return [this.getFieldValue('VALUE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VALUE'))) {
-            this.setFieldValue(newName, 'VALUE');
-        }
     }
 };
 
@@ -2686,19 +2618,6 @@ Blockly.Blocks.xbee_scan_multiple = {
             warnTxt = 'XBee recieve must have at least one search term.';
         }
         this.setWarningText(warnTxt);
-    },
-    getVars: function () {
-        var theVars = [];
-        for (var i = 0; i < this.optionList_.length; i++) {
-            theVars.push(this.getFieldValue('CPU' + i));
-        }
-        return theVars;
-    },
-    renameVar: function (oldName, newName) {
-        for (var i = 0; i < this.optionList_.length; i++) {
-            if (Blockly.Names.equals(oldName, this.getFieldValue('CPU' + i)))
-                this.setFieldValue(newName, 'CPU' + i);
-        }
     }
 };
 
@@ -4541,22 +4460,6 @@ Blockly.Blocks.wx_scan_multiple = {
             }
             this.setWarningText(warnTxt);
         }
-    },
-    getVars: function () {
-        var theVars = [this.getFieldValue('HANDLE')];
-        for (var i = 0; i < this.optionList_.length; i++) {
-            theVars.push(this.getFieldValue('CPU' + i));
-        }
-        return theVars;
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('HANDLE')))
-            this.setFieldValue(newName, 'HANDLE');
-        for (var i = 0; i < this.optionList_.length; i++) {
-            if (Blockly.Names.equals(oldName, this.getFieldValue('CPU' + i)))
-                this.setFieldValue(newName, 'CPU' + i);
-
-        }
     }
 };
 
@@ -4641,15 +4544,7 @@ Blockly.Blocks.wx_print_multiple = {
     decompose: Blockly.Blocks['console_print_multiple'].decompose,
     compose: Blockly.Blocks['serial_print_multiple'].compose,
     saveConnections: Blockly.Blocks['console_print_multiple'].saveConnections,
-    onchange: Blockly.Blocks['wx_scan_multiple'].onchange,
-    getVars: function () {
-        return [this.getFieldValue('HANDLE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('HANDLE'))) {
-            this.setFieldValue(newName, 'HANDLE');
-        }
-    }
+    onchange: Blockly.Blocks['wx_scan_multiple'].onchange
 };
 
 Blockly.propc.wx_print_multiple = Blockly.propc.console_print_multiple;
@@ -4691,15 +4586,6 @@ Blockly.Blocks.wx_scan_string = {
         this.appendDummyInput('STORE')
                 .appendField('store string in')
                 .appendField(new Blockly.FieldVariable(data), 'VARNAME');
-    },
-    getVars: function () {
-        return [this.getFieldValue('VARNAME'), this.getFieldValue('HANDLE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('HANDLE')))
-            this.setFieldValue(newName, 'HANDLE');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VARNAME')))
-            this.setFieldValue(newName, 'VARNAME');
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
@@ -4773,14 +4659,6 @@ Blockly.Blocks.wx_send_string = {
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
     },
-    getVars: function () {
-        return [this.getFieldValue('HANDLE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('HANDLE'))) {
-            this.setFieldValue(newName, 'HANDLE');
-        }
-    },
     onchange: Blockly.Blocks['wx_scan_multiple'].onchange
 };
 
@@ -4823,17 +4701,6 @@ Blockly.Blocks.wx_receive_string = {
         this.setNextStatement(true, null);
         this.setInputsInline(false);
     },
-    getVars: function () {
-        return [this.getFieldValue('DATA'), this.getFieldValue('BYTES'), this.getFieldValue('HANDLE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('DATA')))
-            this.setFieldValue(newName, 'DATA');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('BYTES')))
-            this.setFieldValue(newName, 'BYTES');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('HANDLE')))
-            this.setFieldValue(newName, 'HANDLE');
-    },
     onchange: Blockly.Blocks['wx_scan_multiple'].onchange
 };
 
@@ -4872,17 +4739,6 @@ Blockly.Blocks.wx_poll = {
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'HANDLE');
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('ID'), this.getFieldValue('EVENT'), this.getFieldValue('HANDLE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('ID')))
-            this.setFieldValue(newName, 'ID');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('EVENT')))
-            this.setFieldValue(newName, 'EVENT');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('HANDLE')))
-            this.setFieldValue(newName, 'HANDLE');
     },
     onchange: Blockly.Blocks['wx_scan_multiple'].onchange
 };
@@ -4970,27 +4826,6 @@ Blockly.Blocks.wx_listen = {
             this.getInput('CONNVARS').setVisible(false);
         }
         this.getInput('PORT').setVisible(prefixVisible);
-    },
-    getVars: function () {
-        if (this.getFieldValue('PROTOCOL') !== 'TCP') {
-            return [this.getFieldValue('ID'), this.getFieldValue('ID1'), this.getFieldValue('ID2'), this.getFieldValue('ID3'), this.getFieldValue('ID4')];
-        } else {
-            return [this.getFieldValue('ID')];
-        }
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('ID')))
-            this.setFieldValue(newName, 'ID');
-        if (this.getFieldValue('PROTOCOL') !== 'TCP') {
-            if (Blockly.Names.equals(oldName, this.getFieldValue('ID1')))
-                this.setFieldValue(newName, 'ID1');
-            if (Blockly.Names.equals(oldName, this.getFieldValue('ID2')))
-                this.setFieldValue(newName, 'ID2');
-            if (Blockly.Names.equals(oldName, this.getFieldValue('ID3')))
-                this.setFieldValue(newName, 'ID3');
-            if (Blockly.Names.equals(oldName, this.getFieldValue('ID4')))
-                this.setFieldValue(newName, 'ID4');
-        }
     },
     onchange: Blockly.Blocks['wx_scan_multiple'].onchange
 };
@@ -5240,17 +5075,6 @@ Blockly.Blocks.wx_buffer = {
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
     },
-    getVarType: function () {
-        return "String";
-    },
-    getVars: function () {
-        return [this.getFieldValue('BUFFER')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('BUFFER'))) {
-            this.setFieldValue(newName, 'BUFFER');
-        }
-    },
     onchange: Blockly.Blocks['wx_scan_multiple'].onchange
 };
 
@@ -5306,14 +5130,6 @@ Blockly.Blocks.wx_disconnect = {
         } else {
             this.setFieldValue('wxId', 'ID');
             this.setFieldValue('ID', 'TEXT');
-        }
-    },
-    getVars: function () {
-        return [this.getFieldValue('ID')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('ID'))) {
-            this.setFieldValue(newName, 'ID');
         }
     },
     onchange: Blockly.Blocks['wx_scan_multiple'].onchange
@@ -6124,14 +5940,6 @@ Blockly.Blocks.i2c_receive = {
             this.setFieldValue(m2, 'SCL');
         }
     },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
-    },
     mutationToDom: Blockly.Blocks['i2c_send'].mutationToDom,
     domToMutation: Blockly.Blocks['i2c_send'].domToMutation,
     checkI2cPins: Blockly.Blocks['i2c_send'].checkI2cPins
@@ -6348,9 +6156,7 @@ Blockly.Blocks.string_scan_multiple = {
     compose: Blockly.Blocks['serial_scan_multiple'].compose,
     saveConnections: Blockly.Blocks['serial_scan_multiple'].saveConnections,
     updateShape_: Blockly.Blocks['serial_scan_multiple'].updateShape_,
-    updateSerPin: function () {},
-    getVars: Blockly.Blocks['wx_scan_multiple'].getVars,
-    renameVar: Blockly.Blocks['wx_scan_multiple'].renameVar
+    updateSerPin: function () {}
 };
 
 Blockly.Blocks.string_scan_container = {
@@ -6445,15 +6251,7 @@ Blockly.Blocks.string_sprint_multiple = {
     domToMutation: Blockly.Blocks['console_print_multiple'].domToMutation,
     decompose: Blockly.Blocks['console_print_multiple'].decompose,
     compose: Blockly.Blocks['console_print_multiple'].compose,
-    saveConnections: Blockly.Blocks['console_print_multiple'].saveConnections,
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
-    }
+    saveConnections: Blockly.Blocks['console_print_multiple'].saveConnections
 };
 
 Blockly.propc.string_sprint_multiple = Blockly.propc.console_print_multiple;

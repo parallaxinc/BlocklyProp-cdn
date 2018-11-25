@@ -385,14 +385,6 @@ Blockly.Blocks.control_repeat_for_loop = {
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.setInputsInline(true);
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     }
 };
 

@@ -177,8 +177,9 @@ Blockly.Msg.PROCEDURES_MUTATORCONTAINER_TITLE = "inputs";
 Blockly.Msg.REDO = "Redo";
 Blockly.Msg.REMOVE_COMMENT = "Remove Comment";
 Blockly.Msg.RENAME_VARIABLE = "Rename variable...";
-Blockly.Msg.DELETE_VARIABLE = "Delete variable %1";
+Blockly.Msg.DELETE_VARIABLE = "Delete variable '%1'";
 Blockly.Msg.RENAME_VARIABLE_TITLE = "Rename all '%1' variables to:";
+Blockly.Msg.DELETE_VARIABLE_CONFIRMATION = "Delete blocks containing %1 uses of the '%2' variable?";
 
 Blockly.Msg.TODAY = "Today";
 Blockly.Msg.UNDO = "Undo";
