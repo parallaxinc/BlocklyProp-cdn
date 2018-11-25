@@ -1189,7 +1189,11 @@ Blockly.propc.pwm_set = function () {
         duty_cycle = '100';
     }
 
-    var code = 'pwm_start(100);\npwm_set(' + pin + ', ' + channel + ', ' + duty_cycle + ');\n';
+    if (!this.disabled) {
+        Blockly.propc.setups_['pwm_start'] = 'pwm_start(100);';
+    }
+
+    var code = 'pwm_set(' + pin + ', ' + channel + ', ' + duty_cycle + ');\n';
     return code;
 };
 

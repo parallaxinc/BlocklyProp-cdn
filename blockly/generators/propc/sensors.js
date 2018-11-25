@@ -1135,38 +1135,16 @@ Blockly.Blocks.lsm9ds1_tilt = {
         this.setAxes_({"ACTION": action});
     },
     setAxes_: function (details) {
-        var theVar1 = this.getFieldValue('VAR1');
-        var theVar2 = this.getFieldValue('VAR2');
-        if(this.getInput('TILT1')) {
-            this.removeInput('TILT1');
-        }
-        if(this.getInput('TILT2')) {
-            this.removeInput('TILT2');
-        }
         if (details['ACTION'] === 'X') {
-            this.appendDummyInput('TILT1')
-                    .appendField("store y-tilt in", 'A1')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR1');
-            this.appendDummyInput('TILT2')
-                    .appendField("z-tilt in", 'A2')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR2');
+            this.setFieldValue("store y-tilt in", 'A1');
+            this.setFieldValue("z-tilt in", 'A2');
         } else if (details['ACTION'] === 'Y') {
-            this.appendDummyInput('TILT1')
-                    .appendField("store x-tilt in", 'A1')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR1');
-            this.appendDummyInput('TILT2')
-                    .appendField("z-tilt in", 'A2')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR2');
+            this.setFieldValue("store x-tilt in", 'A1');
+            this.setFieldValue("z-tilt in", 'A2');
         } else {
-            this.appendDummyInput('TILT1')
-                    .appendField("store x-tilt in", 'A1')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR1');
-            this.appendDummyInput('TILT2')
-                    .appendField("y-tilt in", 'A2')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR2');
+            this.setFieldValue("store x-tilt in", 'A1');
+            this.setFieldValue("y-tilt in", 'A2');
         }
-        this.setFieldValue(theVar1, 'VAR1');
-        this.setFieldValue(theVar2, 'VAR2');
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
@@ -1222,7 +1200,8 @@ Blockly.Blocks.lsm9ds1_heading = {
                     ["y-axis points right", "(-1.0*__imuY)"],
                     ["x-axis points left", "(-1.0*__imuX)"],
                     ["x-axis points right", "__imuX"]
-                ]), "LR_AXIS")
+                ]), "LR_AXIS");
+        this.appendDummyInput('IMUVAR')
                 .appendField("store in")
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
         this.setInputsInline(true);
@@ -1240,7 +1219,6 @@ Blockly.Blocks.lsm9ds1_heading = {
         this.setAxes_({"ACTION": action});
     },
     setAxes_: function (details) {
-        var theVar = this.getFieldValue('VAR');
         if(this.getInput('MENU2')) {
             this.removeInput('MENU2');
         }
@@ -1254,9 +1232,7 @@ Blockly.Blocks.lsm9ds1_heading = {
                         ["y-axis points right", "(-1.0*__imuY)"],
                         ["z-axis points left", "__imuZ"],
                         ["z-axis points right", "(-1.0*__imuZ)"]
-                    ]), "LR_AXIS")
-                    .appendField("store in")
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
+                    ]), "LR_AXIS");
         } else if (wh === 'Y') {
             this.appendDummyInput('MENU2')
                     .appendField(new Blockly.FieldDropdown([
@@ -1264,9 +1240,7 @@ Blockly.Blocks.lsm9ds1_heading = {
                         ["x-axis points right", "__imuX"],
                         ["z-axis points left", "__imuZ"],
                         ["z-axis points right", "(-1.0*__imuZ)"]
-                    ]), "LR_AXIS")
-                    .appendField("store in")
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
+                    ]), "LR_AXIS");
         } else {
             this.appendDummyInput('MENU2')
                     .appendField(new Blockly.FieldDropdown([
@@ -1274,11 +1248,9 @@ Blockly.Blocks.lsm9ds1_heading = {
                         ["y-axis points right", "(-1.0*__imuY)"],
                         ["x-axis points left", "(-1.0*__imuX)"],
                         ["x-axis points right", "__imuX"]
-                    ]), "LR_AXIS")
-                    .appendField("store in")
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
+                    ]), "LR_AXIS");
         }
-        this.setFieldValue(theVar, 'VAR');
+        this.moveInputBefore('MENU2', 'IMUVAR');
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
