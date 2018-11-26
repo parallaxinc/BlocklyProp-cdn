@@ -264,6 +264,10 @@ Blockly.Blocks.console_print_multiple = {
             this.appendDummyInput('NEWLINE')
                     .appendField("then a new line")
                     .appendField(new Blockly.FieldCheckbox("FALSE"), "ck_nl");
+        } else if (this.type === "xbee_print_multiple") {
+            this.appendDummyInput('NEWLINE')
+                    .appendField("then a carriage return")
+                    .appendField(new Blockly.FieldCheckbox("TRUE"), "ck_nl");
         } else if (this.type === "string_sprint_multiple") {
             this.appendDummyInput('NEWLINE')
                     .appendField("store in")
@@ -410,6 +414,10 @@ Blockly.Blocks.console_print_multiple = {
             this.appendDummyInput('NEWLINE')
                     .appendField("then a new line")
                     .appendField(new Blockly.FieldCheckbox(ck_nl || "FALSE"), "ck_nl");
+        } else if (this.type === "xbee_print_multiple") {
+            this.appendDummyInput('NEWLINE')
+                    .appendField("then a carriage return")
+                    .appendField(new Blockly.FieldCheckbox(ck_nl || "TRUE"), "ck_nl");
         } else if (this.type === "string_sprint_multiple") {
             this.appendDummyInput('NEWLINE')
                     .appendField("store in")
@@ -658,9 +666,9 @@ Blockly.propc.console_print_multiple = function () {
         }
 
         if (!this.getFieldValue('TYPE' + i).includes('float point  divide by')) {
-            varList += ', ' + (Blockly.propc.valueToCode(this, 'PRINT' + i, Blockly.propc.NONE).replace('\/%\g', '%%') || orIt);
+            varList += ', ' + (Blockly.propc.valueToCode(this, 'PRINT' + i, Blockly.propc.ORDER_NONE).replace('\/%\g', '%%') || orIt);
         } else {
-            varList += ', ((float) ' + (Blockly.propc.valueToCode(this, 'PRINT' + i, Blockly.propc.NONE) || orIt) +
+            varList += ', ((float) ' + (Blockly.propc.valueToCode(this, 'PRINT' + i, Blockly.propc.ORDER_NONE) || orIt) +
                     ') / ' + this.getFieldValue('DIV' + i) + '.0';
         }
         i++;
@@ -2421,6 +2429,9 @@ Blockly.Blocks.xbee_transmit = {
                         ), 'TYPE');
         this.appendValueInput('VALUE')
                 .setCheck(null);
+        this.appendDummyInput('NEWLINE')
+                .appendField('then a carriage return')
+                .appendField(new Blockly.FieldCheckbox("TRUE"), "ck_nl");
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -2456,6 +2467,12 @@ Blockly.propc.xbee_transmit = function () {
     } else {
         var type = this.getFieldValue('TYPE');
         var data = Blockly.propc.valueToCode(this, 'VALUE', Blockly.propc.ORDER_ATOMIC) || '0';
+        var checkbox = this.getFieldValue('ck_nl');
+        if (checkbox === 'TRUE') {
+            checkbox = '\\r';
+        } else {
+            checkbox = '';
+        }
 
         if (type === "BYTE") {
             if (!(data.length === 3 && data[0] === "'" && data[2] === "'")) {
@@ -2468,13 +2485,13 @@ Blockly.propc.xbee_transmit = function () {
 
             return 'fdserial_txChar(xbee, ' + data + ');\n';
         } else if (type === "INT") {
-            return 'dprint(xbee, "%d\\r", ' + data + ');\n';
+            return 'dprint(xbee, "%d' + checkbox + '", ' + data + ');\n';
         } else if (type === "HEX") {
-            return 'dprint(xbee, "%x\\r", ' + data + ');\n';
+            return 'dprint(xbee, "%x' + checkbox + '", ' + data + ');\n';
         } else if (type === "BIN") {
-            return 'dprint(xbee, "%b\\r", ' + data + ');\n';
+            return 'dprint(xbee, "%b' + checkbox + '", ' + data + ');\n';
         } else {
-            var code = 'dprint(xbee, "%s\\r", ' + data.replace(/%/g, "%%") + ');\n';
+            var code = 'dprint(xbee, "%s' + checkbox + '", ' + data.replace(/%/g, "%%") + ');\n';
             code += 'while(!fdserial_txEmpty(xbee));\n';
             code += 'pause(5);\n';
 
@@ -2555,6 +2572,9 @@ Blockly.Blocks.xbee_print_multiple = {
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .setCheck('Number')
                 .appendField('decimal number');
+        this.appendDummyInput('NEWLINE')
+                .appendField('then a carriage return')
+                .appendField(new Blockly.FieldCheckbox("TRUE"), "ck_nl");
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true);
         this.setInputsInline(false);
@@ -4713,7 +4733,7 @@ Blockly.propc.wx_receive_string = function () {
     {
         var data = Blockly.propc.variableDB_.getName(this.getFieldValue('DATA'), Blockly.Variables.NAME_TYPE);
         var handle = Blockly.propc.variableDB_.getName(this.getFieldValue('HANDLE'), Blockly.Variables.NAME_TYPE);
-        var max = Blockly.propc.valueToCode(this, 'MAX', Blockly.propc.NONE) || '64';
+        var max = Blockly.propc.valueToCode(this, 'MAX', Blockly.propc.ORDER_NONE) || '64';
         var bytes = Blockly.propc.variableDB_.getName(this.getFieldValue('BYTES'), Blockly.Variables.NAME_TYPE);
 
         Blockly.propc.vartype_[data] = 'char *';
@@ -5411,7 +5431,7 @@ Blockly.propc.graph_output = function () {
         var orIt = '';
         while (Blockly.propc.valueToCode(this, 'PRINT' + i, Blockly.propc.ORDER_NONE)) {
             code += ',%d';
-            varList += ', ' + Blockly.propc.valueToCode(this, 'PRINT' + i, Blockly.propc.NONE || '0');
+            varList += ', ' + Blockly.propc.valueToCode(this, 'PRINT' + i, Blockly.propc.ORDER_NONE || '0');
             labelList += this.getFieldValue("GRAPH_LABEL" + i);
             if (Blockly.propc.valueToCode(this, 'PRINT' + (i + 1), Blockly.propc.ORDER_NONE) && i < 9)
                 labelList += ',';
