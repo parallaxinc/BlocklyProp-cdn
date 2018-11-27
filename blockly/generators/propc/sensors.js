@@ -636,7 +636,7 @@ Blockly.propc.fp_scanner_add = function () {
     var act = this.getFieldValue('ACTION');
     var usr = '1';
     if (act !== "ALL")
-        usr = Blockly.propc.valueToCode(this, 'USER', Blockly.propc.NONE) || '1';
+        usr = Blockly.propc.valueToCode(this, 'USER', Blockly.propc.ORDER_NONE) || '1';
 
     var code = '';
 
@@ -712,7 +712,7 @@ Blockly.propc.fp_scanner_scan = function () {
         var act = this.getFieldValue('ACTION');
         var usr = '1';
         if (act === "COMP")
-            usr = Blockly.propc.valueToCode(this, 'USER', Blockly.propc.NONE) || '1';
+            usr = Blockly.propc.valueToCode(this, 'USER', Blockly.propc.ORDER_NONE) || '1';
 
         var func = 'int fingerScanner(int __u) {';
         func += 'int r;\nfingerprint_scan(fpScan, __u, &r);\n';
