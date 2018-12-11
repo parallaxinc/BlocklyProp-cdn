@@ -231,6 +231,18 @@ function renderContent(pane) {
     }
 }
 
+/**
+ * Formats code in editor and sets cursor to the line is was on
+ * Used by the code formatter button in the editor UI
+ * 
+ * @returns {*} raw_code 
+ */
+var formatWizard = function () {
+    var currentLine = codePropC.getCursorPosition()['row'] + 1;
+    codePropC.setValue(prettyCode());
+    codePropC.focus();
+    codePropC.gotoLine(currentLine);
+}
 
 /**
  * Pretty formatter for C code
@@ -515,10 +527,9 @@ function compile() {
  * @param load_option command for the loader (CODE/VERBOSE/CODE_VERBOSE).
  * @param load_action command for the loader (RAM/EEPROM).
  *
+ * USED by the COMPILE, LOAD TO RAM, and LOAD TO EEPROM UI buttons directly (blocklyc.jsp/blocklyc.html)
  */
 function loadInto(modal_message, compile_command, load_option, load_action) {
-
-    // TODO: the loadInto function appears to be orphaned. Verify and remove
 
     if (ports_available) {
         cloudCompile(modal_message, compile_command, function (data, terminalNeeded) {
