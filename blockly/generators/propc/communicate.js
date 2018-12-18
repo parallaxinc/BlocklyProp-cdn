@@ -5819,7 +5819,7 @@ Blockly.propc.i2c_send = function () {
     var sda = this.getFieldValue('SDA');
     var mode = '0';
     var scl = this.getFieldValue('SCL');
-    var order = (this.getFieldValue('ORDER') === '1' ? '' : '-');
+    var order = this.getFieldValue('ORDER');
     var adct = this.getFieldValue('ADDRCOUNT');
     var val = Blockly.propc.valueToCode(this, 'DATA', Blockly.propc.ORDER_NONE) || '0';
     var cnt = this.getFieldValue('COUNT') || '1';
@@ -5846,7 +5846,7 @@ Blockly.propc.i2c_send = function () {
             s2 = 'MY_';
         }
         Blockly.propc.definitions_['i2c_init' + sda] = 'i2c *i2c' + sda + ';';
-        Blockly.propc.setups_['i2c_init' + sda] = 'i2c' + sda + ' = i2c_newbus(' + s1 + sda + ', ' + s2 + scl + ', ' + mode + ');';
+        Blockly.propc.setups_['i2c_init' + sda] = 'i2c' + sda + ' = i2c_newbus(' + s2 + scl + ', ' + s1 + sda + ', ' + mode + ');';
     }
 
     var bufCode = '';
@@ -5860,25 +5860,26 @@ Blockly.propc.i2c_send = function () {
     }
 
     if (dType === 'Number') {
-        Blockly.propc.definitions_['i2c_InBuf'] = 'unsigned char i2cInBuf[4] = {0, 0, 0, 0};';
+        Blockly.propc.definitions_['i2c_Buf'] = 'unsigned char i2cBuf[4] = {0, 0, 0, 0};';
         switch (cnt) {
             default:
             case '4':
-                bufCode += 'i2cInBuf[3] = (' + val + ' >> 24) & 255; ';
+                bufCode += 'i2cBuf[3] = (' + val + ' >> 24) & 255; ';
             case '3':
-                bufCode += 'i2cInBuf[2] = (' + val + ' >> 16) & 255; ';
+                bufCode += 'i2cBuf[2] = (' + val + ' >> 16) & 255; ';
             case '2':
-                bufCode += 'i2cInBuf[1] = (' + val + ' >> 8) & 255; ';
+                bufCode += 'i2cBuf[1] = (' + val + ' >> 8) & 255; ';
             case '1':
-                bufCode += 'i2cInBuf[0] = (' + val + ') & 255;';
+                bufCode += 'i2cBuf[0] = (' + val + ') & 255;';
                 break;
         }
-        val = 'i2cInBuf';
+        val = 'i2cBuf';
     }
 
-    code += 'i2c_out(i2c' + sda + ', ' + devc + ' & 0x7F, ' + addr;
-    code += ', ' + order + adct + ', ' + val + ', ' + cnt + ');\n';
     code += bufCode;
+    code += 'i2c_out(i2c' + sda + ', ' + devc + ' & 0x7F, ' + addr;
+    code += ', ' + order.replace(/1/g,'') + adct + ', ' + val + ', ' + cnt + ');\n';
+
     return code;
 };
 
@@ -5986,7 +5987,7 @@ Blockly.propc.i2c_receive = function () {
             s2 = 'MY_';
         }
         Blockly.propc.definitions_['i2c_init' + sda] = 'i2c *i2c' + sda + ';';
-        Blockly.propc.setups_['i2c_init' + sda] = 'i2c' + sda + ' = i2c_newbus(' + s1 + sda + ', ' + s2 + scl + ', ' + mode + ');';
+        Blockly.propc.setups_['i2c_init' + sda] = 'i2c' + sda + ' = i2c_newbus(' + s2 + scl + ', ' + s1 + sda + ', ' + mode + ');';
     }
 
     var bufCode = val + ' = ';
@@ -5994,25 +5995,25 @@ Blockly.propc.i2c_receive = function () {
         Blockly.propc.vartype_[val] = 'char *';
         bufCode = '';
     } else {
-        Blockly.propc.definitions_['i2c_InBuf'] = 'unsigned char i2cInBuf[4] = {0, 0, 0, 0};';
-        val = 'i2cInBuf';
+        Blockly.propc.definitions_['i2c_Buf'] = 'unsigned char i2cBuf[4] = {0, 0, 0, 0};';
+        val = 'i2cBuf';
         bufCode += '(';
         switch (cnt) {
             case '4':
-                bufCode += '(i2cInBuf[3] << 24) | ';
+                bufCode += '(i2cBuf[3] << 24) | ';
             case '3':
-                bufCode += '(i2cInBuf[2] << 16) | ';
+                bufCode += '(i2cBuf[2] << 16) | ';
             case '2':
-                bufCode += '(i2cInBuf[1] << 8) | ';
+                bufCode += '(i2cBuf[1] << 8) | ';
             case '1':
-                bufCode += 'i2cInBuf[0]';
+                bufCode += 'i2cBuf[0]';
                 break;
         }
         bufCode += ');\n';
     }
 
     code += 'i2c_in(i2c' + sda + ', ' + devc + ' & 0x7F, ' + addr;
-    code += ', ' + adct + ' * ' + order + ', &' + val + ', ' + cnt + ');\n';
+    code += ', ' + order.replace(/1/g,'') + adct + ', ' + val + ', ' + cnt + ');\n';
     code += bufCode;
     return code;
 };
