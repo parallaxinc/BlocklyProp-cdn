@@ -931,8 +931,7 @@ Blockly.Blocks.serial_open = {
             }
             this.appendDummyInput('BAUD_RATE')
                     .appendField("baud")
-                    .appendField(new Blockly.FieldTextInput(br,
-                            Blockly.FieldTextInput.numberValidator), "BAUD");
+                    .appendField(new Blockly.FieldNumber(br, null, null, 1), "BAUD");
             this.moveInputBefore('BAUD_RATE', 'MODE');
         }
     },
@@ -1420,8 +1419,7 @@ Blockly.Blocks.serial_print_multiple = {
                         .setAlign(Blockly.ALIGN_RIGHT)
                         .setCheck(chk)
                         .appendField('float point  divide by', 'TYPE' + i)
-                        .appendField(new Blockly.FieldTextInput('100',
-                                Blockly.FieldTextInput.numberValidator), 'DIV' + i);
+                        .appendField(new Blockly.FieldNumber('100', null, null, 1), 'DIV' + i);
             } else {
                 printInput = this.appendValueInput('PRINT' + i)
                         .setAlign(Blockly.ALIGN_RIGHT)
@@ -2239,9 +2237,9 @@ Blockly.Blocks.parallel_lcd_init = {
         }
         this.appendDummyInput('PINS')
                 .appendField("Parallel LCD initialize columns")
-                .appendField(new Blockly.FieldTextInput('16', Blockly.FieldTextInput.numberValidator), "COLS")
+                .appendField(new Blockly.FieldNumber('16', null, null, 1), "COLS")
                 .appendField("rows")
-                .appendField(new Blockly.FieldTextInput('2', Blockly.FieldTextInput.numberValidator), "ROWS")
+                .appendField(new Blockly.FieldNumber('2', null, null, 1), "ROWS")
                 .appendField("RS")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "RS_PIN")
                 .appendField("EN")
@@ -3539,7 +3537,7 @@ Blockly.Blocks.ws2812b_init = {
         if (projectData && projectData['board'] === 'heb-wx') {
             this.appendDummyInput()
                     .appendField("RGB-LED set number of LEDs")
-                    .appendField(new Blockly.FieldTextInput('4', Blockly.FieldTextInput.numberValidator), "LEDNUM");
+                    .appendField(new Blockly.FieldNumber('4', null, null, 1), "LEDNUM");
         } else {
             this.appendDummyInput()
                     .appendField("RGB-LED initialize PIN")
@@ -3547,7 +3545,7 @@ Blockly.Blocks.ws2812b_init = {
                         this.sourceBlock_.onPinSet(myPin);
                     }), "PIN")
                     .appendField("number of LEDs")
-                    .appendField(new Blockly.FieldTextInput('4', Blockly.FieldTextInput.numberValidator), "LEDNUM")
+                    .appendField(new Blockly.FieldNumber('4', null, null, 1), "LEDNUM")
                     .appendField("type")
                     .appendField(new Blockly.FieldDropdown([["WS2812", "WS2812"]]), "TYPE");
             this.rgbPin = this.getFieldValue('PIN');
@@ -4019,11 +4017,11 @@ Blockly.Blocks.wx_set_widget = {
                 .appendField("widget color")
                 .appendField(new Blockly.FieldColour("#ffffff"), "COLOR")
                 .appendField(" minimum")
-                .appendField(new Blockly.FieldTextInput('0', Blockly.FieldTextInput.numberValidator), 'MIN')
+                .appendField(new Blockly.FieldNumber('0', null, null, 1), 'MIN')
                 .appendField(" maximum")
-                .appendField(new Blockly.FieldTextInput('10', Blockly.FieldTextInput.numberValidator), 'MAX')
+                .appendField(new Blockly.FieldNumber('10', null, null, 1), 'MAX')
                 .appendField(" initial value")
-                .appendField(new Blockly.FieldTextInput('5', Blockly.FieldTextInput.numberValidator), 'INITIAL');
+                .appendField(new Blockly.FieldNumber('5', null, null, 1), 'INITIAL');
         this.setInputsInline(false);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -4100,25 +4098,25 @@ Blockly.Blocks.wx_set_widget = {
             inputPins.appendField("widget color")
                     .appendField(new Blockly.FieldColour("#ffffff"), "COLOR")
                     .appendField(" minimum")
-                    .appendField(new Blockly.FieldTextInput('0', Blockly.FieldTextInput.numberValidator), 'MIN')
+                    .appendField(new Blockly.FieldNumber('0', null, null, 1), 'MIN')
                     .appendField(" maximum")
-                    .appendField(new Blockly.FieldTextInput('10', Blockly.FieldTextInput.numberValidator), 'MAX')
+                    .appendField(new Blockly.FieldNumber('10', null, null, 1), 'MAX')
                     .appendField(" initial value")
-                    .appendField(new Blockly.FieldTextInput('5', Blockly.FieldTextInput.numberValidator), 'INITIAL');
+                    .appendField(new Blockly.FieldNumber('5', null, null, 1), 'INITIAL');
         } else if (type === '1') {
             inputPins.appendField("widget color")
                     .appendField(new Blockly.FieldColour("#ffffff"), "COLOR")
                     .appendField(" off value")
-                    .appendField(new Blockly.FieldTextInput('0', Blockly.FieldTextInput.numberValidator), 'MIN')
+                    .appendField(new Blockly.FieldNumber('0', null, null, 1), 'MIN')
                     .appendField(" on value")
-                    .appendField(new Blockly.FieldTextInput('10', Blockly.FieldTextInput.numberValidator), 'MAX')
+                    .appendField(new Blockly.FieldNumber('10', null, null, 1), 'MAX')
                     .appendField(" initial state")
                     .appendField(new Blockly.FieldDropdown([['on', 'on'], ['off', 'off']]), 'INITIAL');
         } else if (type === '0' || type === '5' || type === '9') {
             inputPins.appendField("widget color")
                     .appendField(new Blockly.FieldColour("#ffffff"), "COLOR")
                     .appendField(" initial value")
-                    .appendField(new Blockly.FieldTextInput('5', Blockly.FieldTextInput.numberValidator), 'INITIAL');
+                    .appendField(new Blockly.FieldNumber('5', null, null, 1), 'INITIAL');
         } else if (type === '8') {
             inputPins.appendField("widget color")
                     .appendField(new Blockly.FieldColour("#ffffff"), "COLOR")
@@ -5088,8 +5086,7 @@ Blockly.Blocks.wx_buffer = {
                 .appendField("WX buffer use variable")
                 .appendField(new Blockly.FieldVariable('wxBuffer'), "BUFFER")
                 .appendField("set size to")
-                .appendField(new Blockly.FieldTextInput('64',
-                        Blockly.FieldTextInput.numberValidator), "SIZE")
+                .appendField(new Blockly.FieldNumber('64', null, null, 1), "SIZE")
                 .appendField("characters");
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
@@ -5458,8 +5455,7 @@ Blockly.Blocks.graph_settings = {
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField("Graph initialize  keep")
-                .appendField(new Blockly.FieldTextInput('40',
-                        Blockly.FieldTextInput.numberValidator), "XAXIS")
+                .appendField(new Blockly.FieldNumber('40', null, null, 1), "XAXIS")
                 .appendField('seconds of data')
                 .appendField(new Blockly.FieldDropdown([
                     ["time series- autoscale", "AUTO"],
@@ -5498,25 +5494,19 @@ Blockly.Blocks.graph_settings = {
         if (s === 'FIXED') {
             this.appendDummyInput('RANGES')
                     .appendField("y-axis minimum", 'LABELMIN')
-                    .appendField(new Blockly.FieldTextInput('0',
-                            Blockly.FieldTextInput.numberValidator), "YMIN")
+                    .appendField(new Blockly.FieldNumber('0', null, null, 1), "YMIN")
                     .appendField(" maximum", 'LABELMAX')
-                    .appendField(new Blockly.FieldTextInput('0',
-                            Blockly.FieldTextInput.numberValidator), "YMAX");
+                    .appendField(new Blockly.FieldNumber('100', null, null, 1), "YMAX");
         } else {
             this.appendDummyInput('RANGES')
                     .appendField("x-axis min")
-                    .appendField(new Blockly.FieldTextInput('0',
-                            Blockly.FieldTextInput.numberValidator), "XMIN")
+                    .appendField(new Blockly.FieldNumber('0', null, null, 1), "XMIN")
                     .appendField(" max")
-                    .appendField(new Blockly.FieldTextInput('0',
-                            Blockly.FieldTextInput.numberValidator), "XMAX")
+                    .appendField(new Blockly.FieldNumber('100', null, null, 1), "XMAX")
                     .appendField(" y-axis min")
-                    .appendField(new Blockly.FieldTextInput('0',
-                            Blockly.FieldTextInput.numberValidator), "YMIN")
+                    .appendField(new Blockly.FieldNumber('0', null, null, 1), "YMIN")
                     .appendField(" max")
-                    .appendField(new Blockly.FieldTextInput('0',
-                            Blockly.FieldTextInput.numberValidator), "YMAX");
+                    .appendField(new Blockly.FieldNumber('100', null, null, 1), "YMAX");
         }
     },
     mutationToDom: function () {
@@ -5710,8 +5700,7 @@ Blockly.Blocks.i2c_send = {
         this.setColour(colorPalette.getColor('protocols'));
         this.appendValueInput("DATA")
                 .appendField("i\u00B2c controller send")
-                .appendField(new Blockly.FieldTextInput('2',
-                        Blockly.FieldTextInput.numberValidator), "COUNT")
+                .appendField(new Blockly.FieldNumber('2', null, null, 1), "COUNT")
                 .appendField("bytes of data");
         this.appendValueInput("ADDR")
                 .setAlign(Blockly.ALIGN_RIGHT)
@@ -5901,8 +5890,7 @@ Blockly.Blocks.i2c_receive = {
         this.appendValueInput("ADDR")
                 .setCheck(null)
                 .appendField("i\u00B2c controller receive")
-                .appendField(new Blockly.FieldTextInput('2',
-                        Blockly.FieldTextInput.numberValidator), "COUNT")
+                .appendField(new Blockly.FieldNumber('2', null, null, 1), "COUNT")
                 .appendField("bytes")
                 .appendField(new Blockly.FieldDropdown([["MSB", "1"], ["LSB", "-1"]]), "ORDER")
                 .appendField("first  from register");

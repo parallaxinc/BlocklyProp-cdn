@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    $.get('http://localhost:8080/blockly/rest/profile/get', function(res) {
+    $.get('rest/profile/get/', function(res) {
         console.log(res);
     }).fail(function(res) {
         console.log('user info failure:');

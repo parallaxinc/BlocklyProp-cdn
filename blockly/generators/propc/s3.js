@@ -29,7 +29,7 @@ Blockly.Blocks.scribbler_limited_loop = {
     init: function () {
         this.appendDummyInput()
                 .appendField("loop")
-                .appendField(new Blockly.FieldTextInput('10', Blockly.FieldTextInput.numberValidator), 'LOOP_COUNT')
+                .appendField(new Blockly.FieldNumber('10', null, null, 1), 'LOOP_COUNT')
                 .appendField("times");
         this.appendStatementInput("LOOP");
 
@@ -72,7 +72,7 @@ Blockly.Blocks.scribbler_simple_wait = {
     init: function () {
         this.appendDummyInput()
                 .appendField("wait")
-                .appendField(new Blockly.FieldTextInput('5', Blockly.FieldTextInput.numberValidator), 'WAITTIME')
+                .appendField(new Blockly.FieldNumber('5', null, null, 1), 'WAITTIME')
                 .appendField(new Blockly.FieldDropdown([
             ['seconds', '1000'], 
             ['tenths of a second', '100'], 

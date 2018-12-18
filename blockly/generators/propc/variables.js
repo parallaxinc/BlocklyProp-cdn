@@ -220,8 +220,7 @@ Blockly.Blocks.array_init = {
                     return a;
                 }), 'VAR')
                 .appendField("with")
-                .appendField(new Blockly.FieldTextInput('10',
-                        Blockly.FieldTextInput.numberValidator), 'NUM')
+                .appendField(new Blockly.FieldNumber('10', null, null, 1), 'NUM')
                 .appendField("elements");
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true);
