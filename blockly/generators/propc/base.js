@@ -45,7 +45,7 @@ if (!Blockly.Blocks)
 
 Blockly.Blocks.math_number = {
     init: function () {
-        if (profile.default.description === "Scribbler Robot") {
+        if (profile.default.description === 'Scribbler Robot') {
             this.setHelpUrl(Blockly.MSG_S3_MATH_HELPURL);
             this.setColour(colorPalette.getColor('math'));
         } else {
@@ -54,8 +54,7 @@ Blockly.Blocks.math_number = {
         }
         this.setTooltip(Blockly.MSG_MATH_NUMBER_TOOLTIP);
         this.appendDummyInput('MAIN')
-                .appendField(new Blockly.FieldTextInput('0',
-                        Blockly.FieldTextInput.numberValidator), 'NUM');
+                .appendField(new Blockly.FieldNumber('0', null, null, 1), 'NUM');
         this.appendDummyInput('HIDDENVALS')
                 .appendField('', 'RVALS')
                 .appendField('', 'CONN')
@@ -121,8 +120,7 @@ Blockly.Blocks.math_number = {
                                 this.removeInput('MAIN');
                             }
                             this.appendDummyInput('MAIN')
-                                    .appendField(new Blockly.FieldTextInput(theVal,
-                                            Blockly.FieldTextInput.numberValidator), 'NUM');
+                                    .appendField(new Blockly.FieldNumber(theVal, null, null, 1), 'NUM');
                             this.currentInputType = 'number' + theVal;
                         }
                     }
@@ -135,8 +133,7 @@ Blockly.Blocks.math_number = {
                                 this.removeInput('MAIN');
                             }
                             this.appendDummyInput('MAIN')
-                                    .appendField(new Blockly.FieldTextInput(theVal,
-                                            Blockly.FieldTextInput.numberValidator), 'NUM');
+                                    .appendField(new Blockly.FieldNumber(theVal, null, null, 1), 'NUM');
                             this.currentInputType = 'number' + theVal;
                         }
                     }
@@ -186,8 +183,7 @@ Blockly.Blocks.math_number = {
                             this.removeInput('MAIN');
                         }
                         this.appendDummyInput('MAIN')
-                                .appendField(new Blockly.FieldTextInput(data,
-                                        Blockly.FieldTextInput.numberValidator), 'NUM')
+                                .appendField(new Blockly.FieldNumber(data, null, null, 1), 'NUM')
                                 .appendField('', 'TITLE');
                         this.currentInputType = 'titlenumber' + data;
                     }
@@ -202,8 +198,7 @@ Blockly.Blocks.math_number = {
                             this.currentInputType = 'slider' + range[0].toString(10) + 'to' + range[1].toString(10);
                         } else {
                             this.appendDummyInput('MAIN')
-                                    .appendField(new Blockly.FieldTextInput(data,
-                                            Blockly.FieldTextInput.numberValidator), 'NUM');
+                                    .appendField(new Blockly.FieldNumber(data, null, null, 1), 'NUM');
                             this.currentInputType = 'number' + data;
                         }
                     }
@@ -215,8 +210,7 @@ Blockly.Blocks.math_number = {
                         this.removeInput('MAIN');
                     }
                     this.appendDummyInput('MAIN')
-                            .appendField(new Blockly.FieldTextInput(data,
-                                    Blockly.FieldTextInput.numberValidator), 'NUM');
+                            .appendField(new Blockly.FieldNumber(data, null, null, 1), 'NUM');
                     this.currentInputType = 'number' + data;
                 }
                 this.setFieldValue('', 'RVALS');
@@ -1108,7 +1102,7 @@ Blockly.Blocks.string_var_length = {
                         .appendField('variable')
                         .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR_NAME' + i)
                         .appendField('to')
-                        .appendField(new Blockly.FieldTextInput("64", Blockly.FieldTextInput.numberValidator), "VAR_LEN" + i)
+                        .appendField(new Blockly.FieldNumber('64', null, null, 1), "VAR_LEN" + i)
                         .appendField('characters');
             }
         }
@@ -2106,7 +2100,16 @@ Blockly.Blocks.number_hex = {
         this.setTooltip(Blockly.MSG_NUMBER_HEX_TOOLTIP);
         this.setColour(colorPalette.getColor('programming'));
         this.appendDummyInput()
-                .appendField(new Blockly.FieldTextInput("7F"), "NUMBER")
+                .appendField(new Blockly.FieldTextInput("7F", function (text) {
+                    if (text === null) {
+                        return null;
+                    }
+                    // 'O' is sometimes mistaken for '0' by inexperienced users.
+                    text = text.replace(/O/ig, '0');
+                    // remove anything that isn't a hexadecimal number.
+                    text = text.replace(/[^0-9A-F]/ig, '').toUpperCase();
+                    return text;
+                }), "NUMBER")
                 .appendField("hexadecimal");
         this.setOutput(true, "Number");
     }
@@ -2128,9 +2131,9 @@ Blockly.Blocks.constrain_value = {
                 .appendField("constrain");
         this.appendDummyInput()
                 .appendField("from")
-                .appendField(new Blockly.FieldTextInput("0", Blockly.FieldTextInput.numberValidator), "MIN")
+                .appendField(new Blockly.FieldNumber('0', null, null, 1), "MIN")
                 .appendField("(min) to")
-                .appendField(new Blockly.FieldTextInput("100", Blockly.FieldTextInput.numberValidator), "MAX")
+                .appendField(new Blockly.FieldNumber('100', null, null, 1), "MAX")
                 .appendField("(max)");
         this.setInputsInline(true);
         this.setOutput(true, "Number");
@@ -2156,13 +2159,13 @@ Blockly.Blocks.map_value = {
                 .appendField("map");
         this.appendDummyInput()
                 .appendField("with range")
-                .appendField(new Blockly.FieldTextInput("0", Blockly.FieldTextInput.numberValidator), "IMIN")
+                .appendField(new Blockly.FieldNumber('0', null, null, 1), "IMIN")
                 .appendField("(from A)")
-                .appendField(new Blockly.FieldTextInput("50", Blockly.FieldTextInput.numberValidator), "IMAX")
+                .appendField(new Blockly.FieldNumber('50', null, null, 1), "IMAX")
                 .appendField("(from B) to range")
-                .appendField(new Blockly.FieldTextInput("0", Blockly.FieldTextInput.numberValidator), "FMIN")
+                .appendField(new Blockly.FieldNumber('0', null, null, 1), "FMIN")
                 .appendField("(to A)")
-                .appendField(new Blockly.FieldTextInput("100", Blockly.FieldTextInput.numberValidator), "FMAX")
+                .appendField(new Blockly.FieldNumber('100', null, null, 1), "FMAX")
                 .appendField("(to B)");
         this.setInputsInline(true);
         this.setOutput(true, "Number");

@@ -2667,8 +2667,7 @@ Blockly.Blocks.mcp320x_set_vref = {
         this.setColour(colorPalette.getColor('io'));
         this.appendDummyInput()
                 .appendField("A/D set Vref to")
-                .appendField(new Blockly.FieldTextInput('330',
-                        Blockly.FieldTextInput.numberValidator), "VREF")
+                .appendField(new Blockly.FieldNumber('330', null, null, 1), "VREF")
                 .appendField("volt 100ths");
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
