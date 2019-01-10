@@ -591,6 +591,7 @@ Blockly.propc.math_crement = function () {
     var variable = Blockly.propc.valueToCode(this, 'VAR', Blockly.propc.ORDER_UNARY_PREFIX) || '0';
 
     var code = variable + operator + ';\n';
+
     return code;
 };
 
@@ -821,6 +822,8 @@ Blockly.Blocks.waitcnt = {
 
 Blockly.propc.waitcnt = function () {
     var target = Blockly.propc.valueToCode(this, 'TARGET', Blockly.propc.ORDER_NONE);
+
+    // Return code fragment
     return 'waitcnt(' + target + ');\n';
 };
 
@@ -1298,6 +1301,7 @@ Blockly.propc.comment = function () {
  };
  */
 
+/* Color Picker block */
 Blockly.Blocks.color_picker = {
     helpUrl: Blockly.MSG_VALUES_HELPURL,
     init: function () {
@@ -1317,7 +1321,8 @@ Blockly.propc.color_picker = function () {
     var color = this.getFieldValue('COLOR');
     color = "0x" + color.substr(1);
 
-    return [color];
+    // Return an array
+    return [color,Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.color_value_from = {
@@ -1357,8 +1362,11 @@ Blockly.propc.color_value_from = function () {
     Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
 
     var output = 'getColorRRGGBB(' + red + ', ' + green + ', ' + blue + ')';
-    return [output];
+
+    // Return an array
+    return [output,Blockly.propc.ORDER_NONE];
 };
+
 
 Blockly.Blocks.get_channel_from = {
     helpUrl: Blockly.MSG_VALUES_HELPURL,
@@ -1384,6 +1392,7 @@ Blockly.propc.get_channel_from = function () {
 
     Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
 
+    // TODO: Retruning an array with one element. Should this be a string?
     return ['get8bitColor(' + color + ', "' + channel + '")'];
 };
 
@@ -1414,7 +1423,9 @@ Blockly.propc.compare_colors = function () {
     Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
 
     var code = 'compareRRGGBB(' + color1 + ', ' + color2 + ')';
-    return [code];
+
+    // Return an array
+    return [code,Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.logic_compare = {
@@ -1446,6 +1457,7 @@ Blockly.propc.logic_compare = function () {
     var argument0 = Blockly.propc.valueToCode(this, 'A', order) || '0';
     var argument1 = Blockly.propc.valueToCode(this, 'B', order) || '0';
     var code = argument0 + ' ' + operator + ' ' + argument1;
+
     return [code, order];
 };
 
@@ -1480,6 +1492,7 @@ Blockly.propc.logic_operation = function () {
     var argument0 = Blockly.propc.valueToCode(this, 'A', order) || '0';
     var argument1 = Blockly.propc.valueToCode(this, 'B', order) || '0';
     var code = argument0 + ' ' + operator + argument1;
+
     return [code, order];
 };
 
@@ -1506,6 +1519,7 @@ Blockly.Blocks.parens = {
 Blockly.propc.parens = function () {
     var argument0 = Blockly.propc.valueToCode(this, 'BOOL', Blockly.propc.ORDER_ATOMIC) || '0';
     var code = '(' + argument0 + ')';
+
     return [code, Blockly.propc.ORDER_ATOMIC];
 };
 
@@ -1561,6 +1575,7 @@ Blockly.Blocks.logic_boolean = {
 Blockly.propc.logic_boolean = function () {
     // Boolean values true and false.
     var code = (this.getFieldValue('BOOL') === 'TRUE') ? '1' : '0';
+
     return [code, Blockly.propc.ORDER_ATOMIC];
 };
 
