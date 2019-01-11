@@ -583,16 +583,31 @@ Blockly.FieldDropdown.prototype.render_ = function() {
         while ((child = this.textElement_.firstChild)) {
             this.textElement_.removeChild(child);
         }
-    }
-    if (this.imageElement_) {
-        Blockly.utils.removeNode(this.imageElement_);
-        this.imageElement_ = null;
-    }
-  
-    if (this.imageJson_) {
-        this.renderSelectedImage_();
+    
+        if (this.imageElement_) {
+            Blockly.utils.removeNode(this.imageElement_);
+            this.imageElement_ = null;
+        }
+    
+        if (this.imageJson_) {
+            this.renderSelectedImage_();
+        } else {
+            this.renderSelectedText_();
+        }
     } else {
-        this.renderSelectedText_();
+        var textNode = document.createTextNode(' ');
+        this.textElement_.appendChild(textNode);
+        // Insert dropdown arrow.
+        if (this.sourceBlock_.RTL) {
+        this.textElement_.insertBefore(this.arrow_, this.textElement_.firstChild);
+        } else {
+        this.textElement_.appendChild(this.arrow_);
+        }
+        this.textElement_.setAttribute('text-anchor', 'start');
+        this.textElement_.setAttribute('x', 0);
+    
+        this.size_.height = Blockly.BlockSvg.MIN_BLOCK_Y;
+        this.size_.width = Blockly.Field.getCachedWidth(this.textElement_);
     }
     this.borderRect_.setAttribute('height', this.size_.height - 9);
     this.borderRect_.setAttribute('width',
