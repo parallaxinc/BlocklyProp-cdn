@@ -1,3 +1,4 @@
+
 $(document).ready(function () {
     $.get('rest/profile/get/', function(res) {
         console.log(res);
