@@ -2598,7 +2598,7 @@ Blockly.Blocks.custom_code_multiple = {
                 }
             }
         }
-        this.render();
+        //this.render();
     }
 };
 
