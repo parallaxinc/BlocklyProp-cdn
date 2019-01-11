@@ -1322,7 +1322,7 @@ Blockly.propc.color_picker = function () {
     color = "0x" + color.substr(1);
 
     // Return an array
-    return [color,Blockly.propc.ORDER_NONE];
+    return [color, Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.color_value_from = {
@@ -1364,7 +1364,7 @@ Blockly.propc.color_value_from = function () {
     var output = 'getColorRRGGBB(' + red + ', ' + green + ', ' + blue + ')';
 
     // Return an array
-    return [output,Blockly.propc.ORDER_NONE];
+    return [output, Blockly.propc.ORDER_NONE];
 };
 
 
@@ -1392,8 +1392,7 @@ Blockly.propc.get_channel_from = function () {
 
     Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
 
-    // TODO: Retruning an array with one element. Should this be a string?
-    return ['get8bitColor(' + color + ', "' + channel + '")'];
+    return ['get8bitColor(' + color + ', "' + channel + '")', Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.compare_colors = {
@@ -1425,7 +1424,7 @@ Blockly.propc.compare_colors = function () {
     var code = 'compareRRGGBB(' + color1 + ', ' + color2 + ')';
 
     // Return an array
-    return [code,Blockly.propc.ORDER_NONE];
+    return [code, Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.logic_compare = {

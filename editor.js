@@ -483,17 +483,40 @@ function downloadCode() {
 
             // put all of the pieces together into a downloadable file
             var saveData = (function () {
-                var a = document.createElement("a");
-                document.body.appendChild(a);
-                a.style = "display: none";
-                return function (data, fileName) {
-                    var blob = new Blob([data], {type: "octet/stream"});
-                    var url = window.URL.createObjectURL(blob);
-                    a.href = url;
-                    a.download = fileName;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                };
+                // TODO: WIP - swapping out download for node.js/nwsaveas dialog option
+                //if (!isOffline) {
+                    var a = document.createElement("a");
+                    document.body.appendChild(a);
+                    a.style = "display: none";
+                    return function (data, fileName) {
+                        var blob = new Blob([data], {type: "octet/stream"});
+                        var url = window.URL.createObjectURL(blob);
+                        a.href = url;
+                        a.download = fileName;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    };
+                //} else {
+                    /*
+                    var a = document.createElement("input");
+                    a.type = "file";
+                    a.name = "member" + i;
+
+                    document.body.appendChild(a);
+                    a.style = "display: none";
+                    return function (data, fileName) {
+                        var att = document.createAttribute("nwsaveas");
+                        att.value = fileName;
+                        a.setAttributeNode(att);
+                        a.addEventListener("change", function() {
+                            var filePath = this.value;
+                            console.log("Saving to: " + filePath);
+                            localSaveAs(filePath, data);
+                        });
+                        a.click();
+                    };
+                    */ 
+                //}
             }());
 
             // a header with the necessary svg XML header and style information to make the blocks render correctly
