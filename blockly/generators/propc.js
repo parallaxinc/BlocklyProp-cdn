@@ -568,6 +568,38 @@ Blockly.Field.prototype.render_ = function() {
     } 
 };
 
+//NOTE: Replaces core function!
+Blockly.FieldDropdown.prototype.render_ = function() {
+    if (!this.visible_) {
+        this.size_.width = 0;
+        return;
+    }
+    if (this.sourceBlock_ && this.arrow_) {
+      // Update arrow's colour.
+        this.arrow_.style.fill = this.sourceBlock_.getColour();
+    }
+    var child;
+    if (this.textElement_) {
+        while ((child = this.textElement_.firstChild)) {
+            this.textElement_.removeChild(child);
+        }
+    }
+    if (this.imageElement_) {
+        Blockly.utils.removeNode(this.imageElement_);
+        this.imageElement_ = null;
+    }
+  
+    if (this.imageJson_) {
+        this.renderSelectedImage_();
+    } else {
+        this.renderSelectedText_();
+    }
+    this.borderRect_.setAttribute('height', this.size_.height - 9);
+    this.borderRect_.setAttribute('width',
+    this.size_.width + Blockly.BlockSvg.SEP_SPACE_X);
+};
+  
+
 // NOTE: Replaces core function!                   // USE WHEN CORE IS UPDATED	
 /**	
  * Return a sorted list of variable names for variable dropdown menus.	
