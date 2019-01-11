@@ -1321,8 +1321,7 @@ Blockly.propc.color_picker = function () {
     var color = this.getFieldValue('COLOR');
     color = "0x" + color.substr(1);
 
-    // Return an array
-    return [color,Blockly.propc.ORDER_NONE];
+    return [color, Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.color_value_from = {
@@ -1355,16 +1354,15 @@ Blockly.Blocks.color_value_from = {
 };
 
 Blockly.propc.color_value_from = function () {
-    var red = Blockly.propc.valueToCode(this, 'RED_VALUE', Blockly.propc.ORDER_NONE) || '0';
-    var green = Blockly.propc.valueToCode(this, 'GREEN_VALUE', Blockly.propc.ORDER_NONE) || '0';
-    var blue = Blockly.propc.valueToCode(this, 'BLUE_VALUE', Blockly.propc.ORDER_NONE) || '0';
-
     Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
 
-    var output = 'getColorRRGGBB(' + red + ', ' + green + ', ' + blue + ')';
+    const red = Blockly.propc.valueToCode(this, 'RED_VALUE', Blockly.propc.ORDER_NONE) || '0';
+    const green = Blockly.propc.valueToCode(this, 'GREEN_VALUE', Blockly.propc.ORDER_NONE) || '0';
+    const blue = Blockly.propc.valueToCode(this, 'BLUE_VALUE', Blockly.propc.ORDER_NONE) || '0';
+    const output = 'getColorRRGGBB(' + red + ', ' + green + ', ' + blue + ')';
 
     // Return an array
-    return [output,Blockly.propc.ORDER_NONE];
+    return [output, Blockly.propc.ORDER_NONE];
 };
 
 
@@ -1386,14 +1384,15 @@ Blockly.Blocks.get_channel_from = {
     }
 };
 
+// Generate C code for the get_channel_from block definition
 Blockly.propc.get_channel_from = function () {
-    var channel = this.getFieldValue("CHANNEL");
-    var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+    const channel = this.getFieldValue("CHANNEL");
+    const color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
 
+    // Set include file required for the library call below
     Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
 
-    // TODO: Retruning an array with one element. Should this be a string?
-    return ['get8bitColor(' + color + ', "' + channel + '")'];
+    return [ 'get8bitColor(' + color + ', "' + channel + '")', Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.compare_colors = {
