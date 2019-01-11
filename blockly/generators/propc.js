@@ -569,6 +569,7 @@ Blockly.Field.prototype.render_ = function() {
 };
 
 //NOTE: Replaces core function!
+/*
 Blockly.FieldDropdown.prototype.render_ = function() {
     if (!this.visible_) {
         this.size_.width = 0;
@@ -599,10 +600,11 @@ Blockly.FieldDropdown.prototype.render_ = function() {
     } else {
         this.renderSelectedText_();
     }
-    
+
     this.borderRect_.setAttribute('height', this.size_.height - 9);
     this.borderRect_.setAttribute('width', this.size_.width + Blockly.BlockSvg.SEP_SPACE_X);
 };
+*/
   
 
 // NOTE: Replaces core function!                   // USE WHEN CORE IS UPDATED	
