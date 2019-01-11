@@ -1321,6 +1321,8 @@ Blockly.propc.color_picker = function () {
     var color = this.getFieldValue('COLOR');
     color = "0x" + color.substr(1);
 
+
+    // Return an array
     return [color, Blockly.propc.ORDER_NONE];
 };
 
@@ -1392,7 +1394,7 @@ Blockly.propc.get_channel_from = function () {
     // Set include file required for the library call below
     Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
 
-    return [ 'get8bitColor(' + color + ', "' + channel + '")', Blockly.propc.ORDER_NONE];
+    return ['get8bitColor(' + color + ', "' + channel + '")', Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.compare_colors = {
@@ -1424,7 +1426,7 @@ Blockly.propc.compare_colors = function () {
     var code = 'compareRRGGBB(' + color1 + ', ' + color2 + ')';
 
     // Return an array
-    return [code,Blockly.propc.ORDER_NONE];
+    return [code, Blockly.propc.ORDER_NONE];
 };
 
 Blockly.Blocks.logic_compare = {
