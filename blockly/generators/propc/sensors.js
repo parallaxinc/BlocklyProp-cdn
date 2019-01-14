@@ -72,7 +72,12 @@ Blockly.Blocks.sensor_ping = {
             if (moveBefore) {
                 this.moveInputBefore(this.pinChoices[pinOpt], moveBefore);
             } else {
-                this.render();
+                try {
+                    this.render();
+                } catch (err) {
+                    console.log("Block Rendering Error: " + err);
+                }
+    
             }
         }
     },

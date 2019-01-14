@@ -394,7 +394,11 @@ Blockly.Blocks.base_freqout = {
             if (moveBefore) {
                 this.moveInputBefore('PIN', moveBefore);
             } else {
-                this.render();
+                try {
+                    this.render();
+                } catch (err) {
+                    console.log("Block Rendering Error: " + err);
+                }    
             }
         }
     },

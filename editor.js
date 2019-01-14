@@ -40,7 +40,7 @@ $(document).ready(function () {
     }
 
     // if blockXML debugging is requested, display the XML button
-    if (getURLParameter('debug')) {
+    if (getURLParameter('debug') || isOffline) {
         document.getElementById('btn-view-xml').style.display = 'inline-block';
     } else {
         document.getElementById('btn-view-xml').style.display = 'none';
