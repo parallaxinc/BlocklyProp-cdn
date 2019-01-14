@@ -2532,9 +2532,9 @@ Blockly.Blocks.custom_code_multiple = {
     },
     setOutputType: function (outType) {
         if (outType === 'INL') {
+            this.setOutput(false);
             this.setPreviousStatement(true);
             this.setNextStatement(true);
-            this.setOutput(false);
         } else if (outType === 'NUM') {
             this.setPreviousStatement(false);
             this.setNextStatement(false);
