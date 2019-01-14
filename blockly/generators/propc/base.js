@@ -2590,11 +2590,10 @@ Blockly.Blocks.custom_code_multiple = {
                 }
             }
         }
-        try {
-            this.render();
-        } catch (err) {
-            console.log("Block Rendering Error: " + err);
-        }
+        var currBlockTimeout = this;
+        setTimeout(function() {
+            currBlockTimeout.render();
+        }, 200);
     }
 };
 
