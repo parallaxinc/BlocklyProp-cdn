@@ -2433,6 +2433,14 @@ Blockly.Blocks.custom_code_multiple = {
                     this.sourceBlock_.hideInputs(blockEdit);
                 }), 'EDIT')
                 .appendField('  User defined code', 'LABEL');
+        this.buildFields();
+        this.setInputsInline(false);
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true);
+        this.setFieldValue('FALSE', 'EDIT');
+        this.hideInputs('FALSE');
+    },
+    buildFields: function() {
         this.appendDummyInput('SET_LABEL')
                 .appendField('label')
                 .appendField(new Blockly.FieldTextInput('User defined code', function (blockLabel) {
@@ -2464,19 +2472,7 @@ Blockly.Blocks.custom_code_multiple = {
                     ['a numeric value', 'NUM'],
                     ['a string value', 'STR']
                 ], function (outType) {
-                    if (outType === 'INL') {
-                        this.sourceBlock_.setPreviousStatement(true);
-                        this.sourceBlock_.setNextStatement(true);
-                        this.sourceBlock_.setOutput(false);
-                    } else if (outType === 'NUM') {
-                        this.sourceBlock_.setPreviousStatement(false);
-                        this.sourceBlock_.setNextStatement(false);
-                        this.sourceBlock_.setOutput(true, 'Number');
-                    } else {
-                        this.sourceBlock_.setPreviousStatement(false);
-                        this.sourceBlock_.setNextStatement(false);
-                        this.sourceBlock_.setOutput(true, 'String');
-                    }
+                    this.sourceBlock_.setOutputType(outType)
                 }), 'TYPE');
         this.appendDummyInput('FUNC')
                 .appendField('functions code')
@@ -2496,11 +2492,6 @@ Blockly.Blocks.custom_code_multiple = {
                 ], function (inSet) {
                     this.sourceBlock_.setupInputs(inSet);
                 }), 'ARG_COUNT');
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, "Block");
-        this.setNextStatement(true);
-        this.setFieldValue('FALSE', 'EDIT');
-        this.hideInputs('FALSE');
     },
     mutationToDom: function () {
         var container = document.createElement('mutation');
@@ -2527,7 +2518,6 @@ Blockly.Blocks.custom_code_multiple = {
     domToMutation: function (xmlElement) {
         var args = xmlElement.getAttribute('args');
         this.setupInputs(args);
-        this.getField('EDIT').setValue('FALSE');
         for (var tk = 1; tk < 10; tk++) {
             var mv = xmlElement.getAttribute('a' + tk.toString(10))
             if (this.getField('EDIT_ARG' + tk.toString(10)) && mv) {
@@ -2536,8 +2526,13 @@ Blockly.Blocks.custom_code_multiple = {
         }
         this.setFieldValue(xmlElement.getAttribute('color'), 'COLOR');
         var outType = xmlElement.getAttribute('type');
+        this.setOutputType(outType);
+        this.setFieldValue('FALSE', 'EDIT');
+        this.hideInputs('FALSE');
+    },
+    setOutputType: function (outType) {
         if (outType === 'INL') {
-            this.setPreviousStatement(true, "Block");
+            this.setPreviousStatement(true);
             this.setNextStatement(true);
             this.setOutput(false);
         } else if (outType === 'NUM') {
@@ -2549,8 +2544,6 @@ Blockly.Blocks.custom_code_multiple = {
             this.setNextStatement(false);
             this.setOutput(true, 'String');
         }
-        this.setFieldValue('FALSE', 'EDIT');
-        this.hideInputs('FALSE');
     },
     setupInputs: function (argsCount) {
         for (var i = 1; i <= Number(argsCount); i++) {
@@ -2566,7 +2559,6 @@ Blockly.Blocks.custom_code_multiple = {
                 this.removeInput('ARG' + i.toString(10));
             }
         }
-        //this.render();
     },
     hideInputs: function (hideState) {
         var fieldNameList_ = ['SET_LABEL', 'SET_COLOR', 'INCL', 'GLOB', 'SETS', 'MAIN', 'OUTS', 'FUNC', 'ARGS'];
@@ -2598,7 +2590,11 @@ Blockly.Blocks.custom_code_multiple = {
                 }
             }
         }
-        //this.render();
+        try {
+            this.render();
+        } catch (err) {
+            console.log("Block Rendering Error: " + err);
+        }
     }
 };
 
