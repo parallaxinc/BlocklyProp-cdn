@@ -72,12 +72,10 @@ Blockly.Blocks.sensor_ping = {
             if (moveBefore) {
                 this.moveInputBefore(this.pinChoices[pinOpt], moveBefore);
             } else {
-                try {
-                    this.render();
-                } catch (err) {
-                    console.log("Block Rendering Error: " + err);
-                }
-    
+                var currBlockTimeout = this;
+                setTimeout(function() {
+                    currBlockTimeout.render();
+                }, 200);
             }
         }
     },
@@ -1600,7 +1598,10 @@ Blockly.Blocks.GPS_date_time = {
                         zone_label.setVisible(false);
                         zone_value.setVisible(false);
                     }
-                    this.sourceBlock_.render();
+                    var currBlockTimeout = this.sourceBlock_;
+                    setTimeout(function() {
+                        currBlockTimeout.render();
+                    }, 200);
                 }), "TIME_UNIT")
                 .appendField("time zone", 'ZONE_LABEL')
                 .appendField(new Blockly.FieldDropdown(timeZones), "ZONE_VALUE");
