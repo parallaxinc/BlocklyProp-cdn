@@ -176,10 +176,10 @@ function tabClick(id) {
     document.getElementById('content_' + selectedTab).style.display = 'block';
 
     // Show the selected pane.
-    if (projectData['board'] === 'propcfile' && selectedTab === 'xml' && getURLParameter('debug')) {
+    if (projectData['board'] === 'propcfile' && selectedTab === 'xml' && (getURLParameter('debug') || isOffline)) {
         document.getElementById('btn-view-propc').style.display = 'inline-block';
         document.getElementById('btn-view-xml').style.display = 'none';
-    } else if (projectData['board'] === 'propcfile' && selectedTab === 'propc' && getURLParameter('debug')) {
+    } else if (projectData['board'] === 'propcfile' && selectedTab === 'propc' && (getURLParameter('debug') || isOffline)) {
         document.getElementById('btn-view-xml').style.display = 'inline-block';
         document.getElementById('btn-view-propc').style.display = 'none';
     }
@@ -190,7 +190,13 @@ function tabClick(id) {
 function renderContent(pane) {
     // Initialize the pane.
     if (pane === 'blocks' && projectData['board'] !== 'propcfile') {
-        Blockly.mainWorkspace.render();
+        if ((getURLParameter('debug') || isOffline) && codeXml.getValue().length > 40) {
+            let xmlDom = null;
+            xmlDom = Blockly.Xml.textToDom(codeXml.getValue());
+            Blockly.Xml.clearWorkspaceAndLoadFromXml(xmlDom, Blockly.mainWorkspace);
+        } else {
+            Blockly.mainWorkspace.render();
+        }
 
     } else if (pane === 'xml') {
         let xmlDom = null;
@@ -231,6 +237,18 @@ function renderContent(pane) {
     }
 }
 
+/**
+ * Formats code in editor and sets cursor to the line is was on
+ * Used by the code formatter button in the editor UI
+ * 
+ * @returns {*} raw_code 
+ */
+var formatWizard = function () {
+    var currentLine = codePropC.getCursorPosition()['row'] + 1;
+    codePropC.setValue(prettyCode());
+    codePropC.focus();
+    codePropC.gotoLine(currentLine);
+}
 
 /**
  * Pretty formatter for C code
@@ -375,11 +393,11 @@ function init(blockly) {
         }
     }
 
-    if (!codeXml) {
+    if (!codeXml && (getURLParameter('debug') || isOffline)) {
         codeXml = ace.edit("code-xml");
         codeXml.setTheme("ace/theme/chrome");
         codeXml.getSession().setMode("ace/mode/xml");
-        codeXml.setReadOnly(true);
+        //codeXml.setReadOnly(true);
     }
 
     window.Blockly = blockly;
@@ -515,10 +533,9 @@ function compile() {
  * @param load_option command for the loader (CODE/VERBOSE/CODE_VERBOSE).
  * @param load_action command for the loader (RAM/EEPROM).
  *
+ * USED by the COMPILE, LOAD TO RAM, and LOAD TO EEPROM UI buttons directly (blocklyc.jsp/blocklyc.html)
  */
 function loadInto(modal_message, compile_command, load_option, load_action) {
-
-    // TODO: the loadInto function appears to be orphaned. Verify and remove
 
     if (ports_available) {
         cloudCompile(modal_message, compile_command, function (data, terminalNeeded) {
