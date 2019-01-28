@@ -44,14 +44,6 @@ Blockly.Blocks.variables_get = {
                         Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
         this.setOutput(true);
         this.typeCheckRun = null;
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     }
 };
 
@@ -67,25 +59,7 @@ Blockly.Blocks.variables_set = {
                 .appendField('=');
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true);
-    },
-    /*
-    getVarType: function () {
-        if (this.getInputTargetBlock('VALUE')) {
-            return this.getInputTargetBlock('VALUE').outputConnection.check_.toString();
-        } else {
-            return null;
-        }
-    },
-    */
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
     }
-
 };
 
 Blockly.propc.variables_get = function () {
@@ -246,8 +220,7 @@ Blockly.Blocks.array_init = {
                     return a;
                 }), 'VAR')
                 .appendField("with")
-                .appendField(new Blockly.FieldTextInput('10',
-                        Blockly.FieldTextInput.numberValidator), 'NUM')
+                .appendField(new Blockly.FieldNumber('10', null, null, 1), 'NUM')
                 .appendField("elements");
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true);
@@ -275,7 +248,7 @@ Blockly.Blocks.array_init = {
         var theBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
         
         // If I get deleted, broadcast that to other blocks.
-        if (event.oldXml) {
+        if (event && event.oldXml) {
             var oldName = '';
             var oSerializer = new XMLSerializer();
             var sXML = oSerializer.serializeToString(event.oldXml);

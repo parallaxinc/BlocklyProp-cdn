@@ -72,7 +72,10 @@ Blockly.Blocks.sensor_ping = {
             if (moveBefore) {
                 this.moveInputBefore(this.pinChoices[pinOpt], moveBefore);
             } else {
-                this.render();
+                var currBlockTimeout = this;
+                setTimeout(function() {
+                    currBlockTimeout.render();
+                }, 200);
             }
         }
     },
@@ -309,7 +312,7 @@ Blockly.Blocks.colorpal_enable = {
     },
     onchange: function (event) {
         this.colorPalPin = this.getFieldValue('IO_PIN');
-        if (event.oldXml || event.xml) {  // only fire when a block got deleted or created
+        if (event && (event.oldXml || event.xml)) {  // only fire when a block got deleted or created
             this.onPinSet(null);
         }
     },
@@ -426,39 +429,29 @@ Blockly.Blocks.colorpal_get_colors_raw = {
         }
         this.cp_pins = uniq_fast(this.cp_pins);
     },
-    getVars: function () {
-        return [this.getFieldValue('R_STORAGE'), this.getFieldValue('G_STORAGE'), this.getFieldValue('B_STORAGE')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('R_STORAGE'))) {
-            this.setFieldValue(newName, 'R_STORAGE');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('G_STORAGE'))) {
-            this.setFieldValue(newName, 'G_STORAGE');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('B_STORAGE'))) {
-            this.setFieldValue(newName, 'B_STORAGE');
-        }
-    },
     onchange: function (event) {
-        // only fire when a block got deleted or created, the CP_PIN field was changed
-        if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'CP_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
-            var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
-            if (allBlocks.toString().indexOf('ColorPal initialize') === -1)
-            {
-                this.setWarningText('WARNING: You must use a ColorPal\ninitialize block at the beginning of your program!');
-            } else {
-                this.setWarningText(null);
-                this.warnFlag--;
-                if (this.getInput('CPIN')) {
-                    var allCpPins = '';
-                    for (var x = 0; x < allBlocks.length; x++) {
-                        if (allBlocks[x].type === 'colorpal_enable') {
-                            allCpPins += (allBlocks[x].colorPalPin || allBlocks[x].getFieldValue('IO_PIN')) + ',';
+        if (event) {
+            // only fire when a block got deleted or created, the CP_PIN field was changed
+            if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'CP_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
+                var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+                if (allBlocks.toString().indexOf('ColorPal initialize') === -1)
+                {
+                    this.setWarningText('WARNING: You must use a ColorPal\ninitialize block at the beginning of your program!');
+                } else {
+                    this.setWarningText(null);
+                    this.warnFlag--;
+                    if (this.getInput('CPIN')) {
+                        var allCpPins = '';
+                        for (var x = 0; x < allBlocks.length; x++) {
+                            if (allBlocks[x].type === 'colorpal_enable') {
+                                allCpPins += (allBlocks[x].colorPalPin || allBlocks[x].getFieldValue('IO_PIN')) + ',';
+                            }
                         }
-                    }
-                    if (allCpPins.indexOf(this.getFieldValue('CP_PIN')) === -1) {
-                        this.setWarningText('WARNING: You must use choose a new PIN for this block!');
-                        // let all changes through long enough to ensure this is set properly.
-                        this.warnFlag = allBlocks.length * 3;
+                        if (allCpPins.indexOf(this.getFieldValue('CP_PIN')) === -1) {
+                            this.setWarningText('WARNING: You must use choose a new PIN for this block!');
+                            // let all changes through long enough to ensure this is set properly.
+                            this.warnFlag = allBlocks.length * 3;
+                        }
                     }
                 }
             }
@@ -506,15 +499,7 @@ Blockly.Blocks.colorpal_get_colors = {
     domToMutation: Blockly.Blocks['colorpal_get_colors_raw'].domToMutation,
     colorpalPins: Blockly.Blocks['colorpal_get_colors_raw'].colorpalPins,
     updateCpin: Blockly.Blocks['colorpal_get_colors_raw'].updateCpin,
-    onchange: Blockly.Blocks['colorpal_get_colors_raw'].onchange,
-    getVars: function () {
-        return [this.getFieldValue('COLOR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('COLOR'))) {
-            this.setFieldValue(newName, 'COLOR');
-        }
-    }
+    onchange: Blockly.Blocks['colorpal_get_colors_raw'].onchange
 };
 
 Blockly.propc.colorpal_get_colors = function () {
@@ -654,7 +639,7 @@ Blockly.propc.fp_scanner_add = function () {
     var act = this.getFieldValue('ACTION');
     var usr = '1';
     if (act !== "ALL")
-        usr = Blockly.propc.valueToCode(this, 'USER', Blockly.propc.NONE) || '1';
+        usr = Blockly.propc.valueToCode(this, 'USER', Blockly.propc.ORDER_NONE) || '1';
 
     var code = '';
 
@@ -730,7 +715,7 @@ Blockly.propc.fp_scanner_scan = function () {
         var act = this.getFieldValue('ACTION');
         var usr = '1';
         if (act === "COMP")
-            usr = Blockly.propc.valueToCode(this, 'USER', Blockly.propc.NONE) || '1';
+            usr = Blockly.propc.valueToCode(this, 'USER', Blockly.propc.ORDER_NONE) || '1';
 
         var func = 'int fingerScanner(int __u) {';
         func += 'int r;\nfingerprint_scan(fpScan, __u, &r);\n';
@@ -890,18 +875,6 @@ Blockly.Blocks.MMA7455_acceleration = {
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
     },
-    getVars: function () {
-        return [this.getFieldValue('X_VAR'), this.getFieldValue('Y_VAR'), this.getFieldValue('Z_VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('X_VAR'))) {
-            this.setFieldValue(newName, 'X_VAR');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('Y_VAR'))) {
-            this.setFieldValue(newName, 'Y_VAR');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('Z_VAR'))) {
-            this.setFieldValue(newName, 'Z_VAR');
-        }
-    },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
         if (allBlocks.indexOf('Accelerometer initialize') === -1)
@@ -969,14 +942,6 @@ Blockly.Blocks.HMC5883L_read = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('HEADING')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('HEADING'))) {
-            this.setFieldValue(newName, 'HEADING');
-        }
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
@@ -1111,18 +1076,6 @@ Blockly.Blocks.lsm9ds1_read = {
         this.setNextStatement(true, null);
         this.setPreviousStatement(true, "Block");
     },
-    getVars: function () {
-        return [this.getFieldValue('X_VAR'), this.getFieldValue('Y_VAR'), this.getFieldValue('Z_VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('X_VAR'))) {
-            this.setFieldValue(newName, 'X_VAR');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('Y_VAR'))) {
-            this.setFieldValue(newName, 'Y_VAR');
-        } else if (Blockly.Names.equals(oldName, this.getFieldValue('Z_VAR'))) {
-            this.setFieldValue(newName, 'Z_VAR');
-        }
-    },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
         if (allBlocks.indexOf('IMU initialize') === -1)
@@ -1185,47 +1138,16 @@ Blockly.Blocks.lsm9ds1_tilt = {
         this.setAxes_({"ACTION": action});
     },
     setAxes_: function (details) {
-        var theVar1 = this.getFieldValue('VAR1');
-        var theVar2 = this.getFieldValue('VAR2');
-        if(this.getInput('TILT1')) {
-            this.removeInput('TILT1');
-        }
-        if(this.getInput('TILT2')) {
-            this.removeInput('TILT2');
-        }
         if (details['ACTION'] === 'X') {
-            this.appendDummyInput('TILT1')
-                    .appendField("store y-tilt in", 'A1')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR1');
-            this.appendDummyInput('TILT2')
-                    .appendField("z-tilt in", 'A2')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR2');
+            this.setFieldValue("store y-tilt in", 'A1');
+            this.setFieldValue("z-tilt in", 'A2');
         } else if (details['ACTION'] === 'Y') {
-            this.appendDummyInput('TILT1')
-                    .appendField("store x-tilt in", 'A1')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR1');
-            this.appendDummyInput('TILT2')
-                    .appendField("z-tilt in", 'A2')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR2');
+            this.setFieldValue("store x-tilt in", 'A1');
+            this.setFieldValue("z-tilt in", 'A2');
         } else {
-            this.appendDummyInput('TILT1')
-                    .appendField("store x-tilt in", 'A1')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR1');
-            this.appendDummyInput('TILT2')
-                    .appendField("y-tilt in", 'A2')
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR2');
+            this.setFieldValue("store x-tilt in", 'A1');
+            this.setFieldValue("y-tilt in", 'A2');
         }
-        this.setFieldValue(theVar1, 'VAR1');
-        this.setFieldValue(theVar2, 'VAR2');
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR1'), this.getFieldValue('VAR2')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR1')))
-            this.setFieldValue(newName, 'VAR1');
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR2')))
-            this.setFieldValue(newName, 'VAR2');
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
@@ -1281,7 +1203,8 @@ Blockly.Blocks.lsm9ds1_heading = {
                     ["y-axis points right", "(-1.0*__imuY)"],
                     ["x-axis points left", "(-1.0*__imuX)"],
                     ["x-axis points right", "__imuX"]
-                ]), "LR_AXIS")
+                ]), "LR_AXIS");
+        this.appendDummyInput('IMUVAR')
                 .appendField("store in")
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
         this.setInputsInline(true);
@@ -1299,7 +1222,6 @@ Blockly.Blocks.lsm9ds1_heading = {
         this.setAxes_({"ACTION": action});
     },
     setAxes_: function (details) {
-        var theVar = this.getFieldValue('VAR');
         if(this.getInput('MENU2')) {
             this.removeInput('MENU2');
         }
@@ -1313,9 +1235,7 @@ Blockly.Blocks.lsm9ds1_heading = {
                         ["y-axis points right", "(-1.0*__imuY)"],
                         ["z-axis points left", "__imuZ"],
                         ["z-axis points right", "(-1.0*__imuZ)"]
-                    ]), "LR_AXIS")
-                    .appendField("store in")
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
+                    ]), "LR_AXIS");
         } else if (wh === 'Y') {
             this.appendDummyInput('MENU2')
                     .appendField(new Blockly.FieldDropdown([
@@ -1323,9 +1243,7 @@ Blockly.Blocks.lsm9ds1_heading = {
                         ["x-axis points right", "__imuX"],
                         ["z-axis points left", "__imuZ"],
                         ["z-axis points right", "(-1.0*__imuZ)"]
-                    ]), "LR_AXIS")
-                    .appendField("store in")
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
+                    ]), "LR_AXIS");
         } else {
             this.appendDummyInput('MENU2')
                     .appendField(new Blockly.FieldDropdown([
@@ -1333,19 +1251,9 @@ Blockly.Blocks.lsm9ds1_heading = {
                         ["y-axis points right", "(-1.0*__imuY)"],
                         ["x-axis points left", "(-1.0*__imuX)"],
                         ["x-axis points right", "__imuX"]
-                    ]), "LR_AXIS")
-                    .appendField("store in")
-                    .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'VAR');
+                    ]), "LR_AXIS");
         }
-        this.setFieldValue(theVar, 'VAR');
-    },
-    getVars: function () {
-        return [this.getFieldValue('VAR')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('VAR'))) {
-            this.setFieldValue(newName, 'VAR');
-        }
+        this.moveInputBefore('MENU2', 'IMUVAR');
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
@@ -1690,7 +1598,10 @@ Blockly.Blocks.GPS_date_time = {
                         zone_label.setVisible(false);
                         zone_value.setVisible(false);
                     }
-                    this.sourceBlock_.render();
+                    var currBlockTimeout = this.sourceBlock_;
+                    setTimeout(function() {
+                        currBlockTimeout.render();
+                    }, 200);
                 }), "TIME_UNIT")
                 .appendField("time zone", 'ZONE_LABEL')
                 .appendField(new Blockly.FieldDropdown(timeZones), "ZONE_VALUE");
@@ -1799,14 +1710,6 @@ Blockly.Blocks.rfid_get = {
 
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
-    },
-    getVars: function () {
-        return [this.getFieldValue('BUFFER')];
-    },
-    renameVar: function (oldName, newName) {
-        if (Blockly.Names.equals(oldName, this.getFieldValue('BUFFER'))) {
-            this.setFieldValue(newName, 'BUFFER');
-        }
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
