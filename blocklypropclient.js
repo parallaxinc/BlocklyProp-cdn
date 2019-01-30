@@ -20,11 +20,6 @@
  * SOFTWARE.
  */
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 // Annotations to help the closure compiler to be even more efficient.
 // https://github.com/google/closure-compiler/wiki/Annotating-JavaScript-for-the-Closure-Compiler
@@ -97,10 +92,33 @@ var client_min_version = "0.6.0";
 var client_recommended_version = "0.7.0";
 
 
-
+// TODO: Document what the 'client_use_type' variable represents
+/**
+ * Not sure what this does
+ *
+ * @type {string}
+ */
 var client_use_type = 'none';
+
+
+// TODO: Document what the 'client_ws_connection' variable represents
+/**
+ * Not sure what this does
+ *
+ * @type {null}
+ */
 var client_ws_connection = null;
+
+
+// TODO: Uninitialized variable
+// TODO: Document what the 'client_ws_heatbeat' variable represents
+/**
+ *
+ */
 var client_ws_heartbeat;
+
+
+
 var client_ws_heartbeat_interval = null;
 
 var check_com_ports_interval = null;

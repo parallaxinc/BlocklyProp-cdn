@@ -1,22 +1,86 @@
+/*
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 // Node.js libraries
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { exec } = require('child_process');
 
-
+/**
+ *
+ * @type {string}
+ */
 var compiler_output = '';
+
+
+/**
+ *
+ * @type {Array}
+ */
 var library_order = [];
+
+
+/**
+ *
+ * @type {Array}
+ */
 var external_libraries = [];
+
+
+/**
+ *
+ * @type {{}}
+ */
 var external_libraries_info = {};
+
+
+/**
+ *
+ * @type {string}
+ */
 var source_directory = '';
 
+
+/**
+ *
+ * @type {{"c-libraries": string, "c-compiler": string}}
+ */
 var configs = {
     'c-libraries' : "",
     'c-compiler' : ""
 };
 
+
+/**
+ *
+ * @type {Date}
+ */
 var tt = new Date();
+
+
+/**
+ *
+ * @type {{shared: boolean, private: boolean, code: string, created: Date, "description-html": string, description: string, type: string, name: string, modified: Date, id: number, user: string, yours: boolean, board: string}}
+ */
 document.localProject = {
     'board': "activity-board",
     'code': "<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>",
@@ -31,10 +95,22 @@ document.localProject = {
     'type': "PROPC",
     'user': "offline",
     'yours': true,
-}
+};
 
+
+/**
+ *
+ * @type {string[]}
+ */
 var c_cmp = ["/", "Users", os.userInfo().username, "Documents", "SimpleIDE", "Learn", "Simple Libraries"];
+
+
+/**
+ *
+ * @type {string[]}
+ */
 var c_pth = ["/", "Applications", "SimpleIDE.app", "Contents", "propeller-gcc", "bin", "propeller-elf-gcc"];
+
 
 if (navigator.browserSpecs.system === "Windows") {
     c_pth = ["/", "Program Files (x86)", "SimpleIDE", "propeller-gcc", "bin", "propeller-elf-gcc"];
@@ -43,9 +119,11 @@ if (navigator.browserSpecs.system === "Windows") {
 if ($("meta[name=c-libraries-path]").attr("content")) {
     c_cmp = $("meta[name=c-libraries-path]").attr("content").split('|');
 }
+
 if ($("meta[name=c-compiler-path]").attr("content")) {
     c_pth = $("meta[name=c-compiler-path]").attr("content").split('|');
 }
+
 
 for (var i = 0; i < c_cmp.length; i++) {
     configs['c-libraries'] = path.join(configs['c-libraries'], c_cmp[i]);
@@ -100,11 +178,26 @@ function oswalk(dir, action) {
             });
         });
     });
-};
+}
 
+
+/**
+ *
+ * @type {{}}
+ */
 var lib_files = {};
+
+
+/**
+ *
+ * @type {{}}
+ */
 var lib_includes = {};
 
+
+/**
+ *
+ */
 oswalk(configs['c-libraries'], function(err, f) {
     if (err) {
         return err;
@@ -112,18 +205,33 @@ oswalk(configs['c-libraries'], function(err, f) {
 
     var pth = f.split(path.sep);
     var ext = pth[pth.length - 1].split('.');
+
     if ( ext[1] === 'h' || ext[1] === 'c' ) {
-        fn = pth.pop();
-        fp = pth.join('/');
-        lib_files[fn] = fp;
+        let fn = pth.pop();
+
+        // fp = pth.join('/');
+        // lib_files[fn] = fp;
+
+        lib_files[fn] = pth.join('/');
+
         if ( ext[1] === 'h') {
-            var data = fs.readFileSync(path.join(f), "utf8")
+            var data = fs.readFileSync(path.join(f), "utf8");
 	        lib_includes[fn] = parse_includes(data);
         }
     }
 });
 
 
+//FIXME: compiler says that this function is unreferenced
+/**
+ *
+ * @param action
+ * @param source_files
+ * @param app_filename
+ * @param lib_opt
+ * @param comp_opt
+ * @param callback
+ */
 function localCompile(action, source_files, app_filename, lib_opt, comp_opt, callback) {
 
     // create a temporary directory to store files
@@ -227,7 +335,12 @@ function localCompile(action, source_files, app_filename, lib_opt, comp_opt, cal
     }
 }
 
+
 // TODO: put this in all error handlers
+/**
+ *
+ * @param sd
+ */
 function cleanUpAll(sd) {
     // delete the temp directory
     deleteFolderRecursive(sd);  
@@ -240,16 +353,27 @@ function cleanUpAll(sd) {
     source_directory = '';
 }
 
+
+/**
+ *
+ * @param header_file
+ * @param header_files
+ * @param c_files
+ */
 function determine_order(header_file, header_files, c_files) {
 
     if (library_order.toString().indexOf(header_file) === -1) {
+
         // TODO review to check what happens if no header supplied (if that is valid)
         if (header_files.toString().indexOf(header_file + '.h') > -1) {
             var includes = c_files[header_files[header_file + '.h']['c_filename']]['includes'];
+
             for (var include in includes) {
                 determine_order(include, header_files, c_files);
             }
+
             library_order.push(header_file);
+
         } else {
             if (external_libraries.toString().indexOf(header_file) === -1) {
                 external_libraries.push(header_file);
@@ -258,8 +382,12 @@ function determine_order(header_file, header_files, c_files) {
     }
 }
 
+
+/**
+ *
+ * @param library
+ */
 var find_dependencies = function(library) {
-  
     for (var files in lib_files) {
         if (files.indexOf(library + '.h') > -1) {
             if (lib_files[files].indexOf('/lib' + library) > -1) {
@@ -280,6 +408,16 @@ var find_dependencies = function(library) {
     }
 };
 
+
+/**
+ *
+ * @param working_directory
+ * @param source_file
+ * @param target_filename
+ * @param libraries
+ * @param lib_opt
+ * @param callback
+ */
 function compile_lib(working_directory, source_file, target_filename, libraries, lib_opt, callback) {
     var out_text = working_directory + ' -> Compiling ' + source_file + ' into ' + target_filename + '\n';
 
@@ -308,6 +446,17 @@ function compile_lib(working_directory, source_file, target_filename, libraries,
     });   
 }
 
+
+/**
+ *
+ * @param working_directory
+ * @param action
+ * @param source_file
+ * @param binaries
+ * @param libraries
+ * @param comp_opt
+ * @param callback
+ */
 function compile_binary(working_directory, action, source_file, binaries, libraries, comp_opt, callback) {
     
     var file_out = 'usr' + (Math.random().toString(36).substring(2, 10)) + 'pgc' + compile_actions[action.toUpperCase()]["extension"];
@@ -393,8 +542,12 @@ function compile_binary(working_directory, action, source_file, binaries, librar
     });
 }
 
-function deleteFolderRecursive(pth) {
 
+/**
+ *
+ * @param pth
+ */
+function deleteFolderRecursive(pth) {
     // make sure it is our directory we are deleting
     if (fs.existsSync(pth) && pth.indexOf('pgc-') > -1) {
         fs.readdirSync(pth).forEach(function(fl, index) {
@@ -409,6 +562,13 @@ function deleteFolderRecursive(pth) {
     }
 };
 
+
+/**
+ *
+ * @param buffer
+ * @returns {string}
+ * @private
+ */
 function _arrayBufferToBase64( buffer ) {
     var binary = '';
     var bytes = new Uint8Array( buffer );
@@ -419,6 +579,12 @@ function _arrayBufferToBase64( buffer ) {
     return window.btoa( binary );
 }
 
+
+/**
+ *
+ * @param source_file
+ * @returns {Array}
+ */
 function parse_includes(source_file) {
     icl = [];
 
@@ -429,6 +595,15 @@ function parse_includes(source_file) {
     return icl;
 }
 
+
+/**
+ *
+ * @param lib_c_file_name
+ * @param binary_file
+ * @param descriptors
+ * @param lib_opt
+ * @returns {*[]|*}
+ */
 function create_lib_executing_data(lib_c_file_name, binary_file, descriptors, lib_opt) {
     executable = configs['c-compiler'];
 
@@ -455,6 +630,16 @@ function create_lib_executing_data(lib_c_file_name, binary_file, descriptors, li
     return executing_data;
 }
 
+
+/**
+ *
+ * @param main_c_file_name
+ * @param binary_file
+ * @param binaries
+ * @param descriptors
+ * @param comp_opt
+ * @returns {*[]|*}
+ */
 function create_executing_data(main_c_file_name, binary_file, binaries, descriptors, comp_opt) {
     executable = configs['c-compiler'];
 
@@ -494,11 +679,22 @@ function create_executing_data(main_c_file_name, binary_file, binaries, descript
 }
 
 
+/**
+ *
+ * @param filename
+ * @param file_content
+ */
 var localSaveAs = function(filename, file_content) {
     // TODO: Switch this to ASYNC and add error reporting
     fs.writeFileSync(filename, file_content);
 }
 
+
+/**
+ *
+ * @param filenames
+ * @param file_contents
+ */
 var localSaveMultiplefiles = function(filenames, file_contents) {
     for (var idx = 0; idx < filenames.length; idx++) {
         // TODO: Switch this to ASYNC and add error reporting
