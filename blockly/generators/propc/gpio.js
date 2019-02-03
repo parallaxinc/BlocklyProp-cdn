@@ -394,7 +394,10 @@ Blockly.Blocks.base_freqout = {
             if (moveBefore) {
                 this.moveInputBefore('PIN', moveBefore);
             } else {
-                this.render();
+                var currBlockTimeout = this;
+                setTimeout(function() {
+                    currBlockTimeout.render();
+                }, 200);    
             }
         }
     },

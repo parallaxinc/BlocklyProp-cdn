@@ -58,6 +58,17 @@ console.log(c_cmp);
 console.log(c_pth);
 
 /*
+// FOR TESTING
+var propLoadApp = '/Applications/BlocklyPropClient.app/Contents/Resources/propeller-tools/mac/proploader -P';
+
+exec(propLoadApp, function(err, stdout, stderr) {
+    console.log('errors: ' + err);
+    console.log('stdout: ' + stdout);
+    console.log('stderr: ' + stderr);
+});
+*/
+
+/*
 var configs = {
     'c-libraries': path.join("/", "Users", os.userInfo().username, "Documents", "SimpleIDE", "Learn", "Simple Libraries"),
     'c-compiler': path.join("/", "Applications", "SimpleIDE.app", "Contents", "propeller-gcc", "bin", "propeller-elf-gcc")
@@ -482,3 +493,15 @@ function create_executing_data(main_c_file_name, binary_file, binaries, descript
     return executing_data;
 }
 
+
+var localSaveAs = function(filename, file_content) {
+    // TODO: Switch this to ASYNC and add error reporting
+    fs.writeFileSync(filename, file_content);
+}
+
+var localSaveMultiplefiles = function(filenames, file_contents) {
+    for (var idx = 0; idx < filenames.length; idx++) {
+        // TODO: Switch this to ASYNC and add error reporting
+        fs.writeFileSync(filenames[idx], file_contents[idx]);
+    }
+}

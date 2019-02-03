@@ -176,10 +176,10 @@ function tabClick(id) {
     document.getElementById('content_' + selectedTab).style.display = 'block';
 
     // Show the selected pane.
-    if (projectData['board'] === 'propcfile' && selectedTab === 'xml' && getURLParameter('debug')) {
+    if (projectData['board'] === 'propcfile' && selectedTab === 'xml' && (getURLParameter('debug') || isOffline)) {
         document.getElementById('btn-view-propc').style.display = 'inline-block';
         document.getElementById('btn-view-xml').style.display = 'none';
-    } else if (projectData['board'] === 'propcfile' && selectedTab === 'propc' && getURLParameter('debug')) {
+    } else if (projectData['board'] === 'propcfile' && selectedTab === 'propc' && (getURLParameter('debug') || isOffline)) {
         document.getElementById('btn-view-xml').style.display = 'inline-block';
         document.getElementById('btn-view-propc').style.display = 'none';
     }
@@ -190,7 +190,13 @@ function tabClick(id) {
 function renderContent(pane) {
     // Initialize the pane.
     if (pane === 'blocks' && projectData['board'] !== 'propcfile') {
-        Blockly.mainWorkspace.render();
+        if ((getURLParameter('debug') || isOffline) && codeXml.getValue().length > 40) {
+            let xmlDom = null;
+            xmlDom = Blockly.Xml.textToDom(codeXml.getValue());
+            Blockly.Xml.clearWorkspaceAndLoadFromXml(xmlDom, Blockly.mainWorkspace);
+        } else {
+            Blockly.mainWorkspace.render();
+        }
 
     } else if (pane === 'xml') {
         let xmlDom = null;
@@ -387,11 +393,11 @@ function init(blockly) {
         }
     }
 
-    if (!codeXml) {
+    if (!codeXml && (getURLParameter('debug') || isOffline)) {
         codeXml = ace.edit("code-xml");
         codeXml.setTheme("ace/theme/chrome");
         codeXml.getSession().setMode("ace/mode/xml");
-        codeXml.setReadOnly(true);
+        //codeXml.setReadOnly(true);
     }
 
     window.Blockly = blockly;
