@@ -337,16 +337,18 @@ Blockly.propc.finish = function (code) {
             definitions[def] = definitions[def].replace(/\{\{\$var_type_.*?\}\}/ig, "int").replace(/\{\{\$var_length_.*?\}\}/ig, '');
         }
 
-        // Exclude variables with "__" in the name for now because those are buffers for private functions
-        if (definitions[def].indexOf("char *") > -1 && definitions[def].indexOf("__") === -1 && definitions[def].indexOf("rfidBfr") === -1  && definitions[def].indexOf("wxBuffer") === -1) {
-            definitions[def] = definitions[def].replace("char *", "char ").replace(";", "[64];");
-        } else if (definitions[def].indexOf("wxBuffer") > -1) {
-            definitions[def] = definitions[def].replace("char *", "char ").replace("wxBuffer;", "wxBuffer[64];");
+        if (def.indexOf(cCode) === -1) {  // exclude custom code blocks from these modifiers
+            // Exclude variables with "__" in the name for now because those are buffers for private functions
+            if (definitions[def].indexOf("char *") > -1 && definitions[def].indexOf("__") === -1 && definitions[def].indexOf("rfidBfr") === -1  && definitions[def].indexOf("wxBuffer") === -1) {
+                definitions[def] = definitions[def].replace("char *", "char ").replace(";", "[64];");
+            } else if (definitions[def].indexOf("wxBuffer") > -1) {
+                definitions[def] = definitions[def].replace("char *", "char ").replace("wxBuffer;", "wxBuffer[64];");
+            }
+            
+            // TODO: Temporary patch to correct some weirdness with char array pointer declarations:
+            definitions[def] = definitions[def].replace(/char \*(\w+)\[/g, 'char $1[');
         }
-        
-        // TODO: Temporary patch to correct some weirdness with char array pointer declarations:
-        definitions[def] = definitions[def].replace(/char \*(\w+)\[/g, 'char $1[');
-        
+
         // Sets the length of string arrays based on the lengths specified in the string set length block.
         var vl = Blockly.propc.string_var_lengths.length;
         for (var vt = 0; vt < vl; vt++) {
