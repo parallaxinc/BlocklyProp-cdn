@@ -273,6 +273,7 @@ var prettyCode = function (raw_code) {
             .replace(/\( & /g, "(&")
             .replace(/\( \* /g, "(*")
             .replace(/char \* /g, "char *")
+            .replace(/bme680 \* /g, "bme680 *")
             .replace(/serial \* /g, "serial *")
             .replace(/lcdParallel \* /g, "lcdParallel *")
             .replace(/colorPal \* /g, "colorPal *")
@@ -475,6 +476,7 @@ function cloudCompile(text, action, successHandler) {
                 } else {
                     var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
                     $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
+    console.log(data);                
                     if (data.success && data.binary) {
                         successHandler(data, terminalNeeded);
                     }

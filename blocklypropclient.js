@@ -108,52 +108,48 @@ var set_ui_buttons = function (ui_btn_state) {
 };
 
 var check_client = function () {
-
-    if (client_use_type !== 'ws') {
-        $.get(client_url, function (data) {
-            if (!client_available) {
-                client_version = version_as_number((typeof data.version_str !== "undefined") ? data.version_str : data.version);
-                if (!data.server || data.server !== 'BlocklyPropHTTP') {
-                    $('.bpc-version').addClass('hidden');
-                    $("#client-unknown-span").removeClass("hidden");
-                    $(".client-required-version").html(client_min_version);
-                    $(".client-your-version").html(data.version || '<b>UNKNOWN</b>');
-                    $('#client-version-modal').modal('show');                 
-                } else if (client_version < version_as_number(client_min_version)) {
-                    //bootbox.alert("This system now requires at least version " + client_min_version + " of BlocklyPropClient- yours is: " + data.version);                    
-                    $('.bpc-version').addClass('hidden');
-                    $("#client-danger-span").removeClass("hidden");
-                    $(".client-required-version").html(client_min_version);
-                    $(".client-your-version").html(data.version);
-                    $('#client-version-modal').modal('show');
-                } else if (client_version < version_as_number(client_recommended_version)) {
-                    $('.bpc-version').addClass('hidden');
-                    $("#client-warning-span").removeClass("hidden");
-                    $(".client-required-version").html(client_recommended_version);
-                    $(".client-your-version").html(data.version);
-                    $('#client-version-modal').modal('show');
-                }
-
-                client_use_type = 'http';
-                client_available = true;
-                set_ui_buttons('available');
-                if (check_com_ports && typeof (check_com_ports) === "function") {
-                    check_com_ports();
-                    check_com_ports_interval = setInterval(check_com_ports, 5000);
-                }
+    $.get(client_url, function (data) {
+        if (!client_available) {
+            client_version = version_as_number((typeof data.version_str !== "undefined") ? data.version_str : data.version);
+            if (!data.server || data.server !== 'BlocklyPropHTTP') {
+                $('.bpc-version').addClass('hidden');
+                $("#client-unknown-span").removeClass("hidden");
+                $(".client-required-version").html(client_min_version);
+                $(".client-your-version").html(data.version || '<b>UNKNOWN</b>');
+                $('#client-version-modal').modal('show');                 
+            } else if (client_version < version_as_number(client_min_version)) {
+                //bootbox.alert("This system now requires at least version " + client_min_version + " of BlocklyPropClient- yours is: " + data.version);                    
+                $('.bpc-version').addClass('hidden');
+                $("#client-danger-span").removeClass("hidden");
+                $(".client-required-version").html(client_min_version);
+                $(".client-your-version").html(data.version);
+                $('#client-version-modal').modal('show');
+            } else if (client_version < version_as_number(client_recommended_version)) {
+                $('.bpc-version').addClass('hidden');
+                $("#client-warning-span").removeClass("hidden");
+                $(".client-required-version").html(client_recommended_version);
+                $(".client-your-version").html(data.version);
+                $('#client-version-modal').modal('show');
             }
 
-            setTimeout(check_client, 20000);
+            client_use_type = 'http';
+            client_available = true;
+            set_ui_buttons('available');
+            if (check_com_ports && typeof (check_com_ports) === "function") {
+                check_com_ports();
+                check_com_ports_interval = setInterval(check_com_ports, 5000);
+            }
+        }
+        setTimeout(check_client, 20000);
 
-        }).fail(function () {
-            clearInterval(check_com_ports_interval);
-            client_use_type = 'none';
-            client_available = false;
-            ports_available = false;
-            set_ui_buttons('unavailable');
-            check_ws_socket_timeout = setTimeout(find_client, 3000);
-        });
-    }
+    }).fail(function () {
+        clearInterval(check_com_ports_interval);
+        client_use_type = 'none';
+        client_available = false;
+        ports_available = false;
+        set_ui_buttons('unavailable');
+        check_ws_socket_timeout = setTimeout(find_client, 3000);
+    });
 };
 
 var connection_heartbeat = function () {
@@ -161,8 +157,7 @@ var connection_heartbeat = function () {
     // If it's been too long, close the connection.
     if (client_use_type === 'ws') {
         var d = new Date();
-        var heartbeat_check = d.getTime();
-        if (client_ws_heartbeat + 12000 < heartbeat_check) {
+        if (client_ws_heartbeat + 12000 < d.getTime()) {
             // Client is taking too long to check in - close the connection and clean up
             client_ws_connection.close();
             lostWSConnection();
@@ -318,15 +313,13 @@ function establish_socket() {
             else if (ws_msg.type === 'serial-terminal' &&
                     (typeof ws_msg.msg === 'string' || ws_msg.msg instanceof String)) { // sometimes some weird stuff comes through...
                 // type: 'serial-terminal'
-                // msg: [String message]
+                // msg: [String Base64-encoded message]
 
                 var msg_in = atob(ws_msg.msg);
 
-                //terminal_dump += ws_msg.packetID + ', ' + ws_msg.msg + ', ' + msg_in + '\n';
-
                 if (ws_msg.msg !== undefined) {
                     if (term !== null) { // is the terminal open?
-                        //term.write(msg_in);
+
                         displayInTerm(msg_in);
                         $('#serial_console').focus();
                     } else if (graph !== null) { // is the graph open?
