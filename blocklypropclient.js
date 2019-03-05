@@ -1,28 +1,124 @@
+
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
+
+
+// Annotations to help the closure compiler to be even more efficient.
+// https://github.com/google/closure-compiler/wiki/Annotating-JavaScript-for-the-Closure-Compiler
 
 //var terminal_dump = null;
 
-// client_available flags whether BP Client/Launcher is found
+/**
+ * Client_available flags whether BP Client/Launcher is found
+ *
+ * @type {boolean}
+ */
 var client_available = false;
-// ports_available flags whether one or more communication ports are available
+
+
+/**
+ * Ports_available flags whether one or more communication ports are available
+ *
+ * @type {boolean}
+ */
 var ports_available = false;
 
+
+/**
+ * The URL used to talk with the BlocklyProp Client via HTTP
+ *
+ * @type {string}
+ * URL used to reach the client
+ */
 var client_url = 'http://localhost:6009/';
+
+
+/**
+ * The version number the BlocklyProp Client reported
+ *
+ * @type {number}
+ */
 var client_version = 0;
 
+
+// TODO: Verify that this variable is a host name and not a domain name
+/**
+ * Client host name
+ *
+ * @type {string}
+ */
 var client_domain_name = "localhost";
+
+
+/**
+ * Port number component of the BlocklyProp Client interface
+ *
+ * @type {number}
+ */
 var client_domain_port = 6009;
 
+
+/**
+ * The minimum version of the BlocklyProp Client that can be used with this interface
+ *
+ * @type {string}
+ */
 var client_min_version = "0.6.0";
+
+
+/**
+ * The most recent version of the BlocklyPro Client that can be used with this interface
+ *
+ * @type {string}
+ */
 var client_recommended_version = "0.7.0";
 
+
+// TODO: Document what the 'client_use_type' variable represents
+/**
+ * Not sure what this does
+ *
+ * @type {string}
+ */
 var client_use_type = 'none';
+
+
+// TODO: Document what the 'client_ws_connection' variable represents
+/**
+ * Not sure what this does
+ *
+ * @type {null}
+ */
 var client_ws_connection = null;
+
+
+// TODO: Uninitialized variable
+// TODO: Document what the 'client_ws_heatbeat' variable represents
+/**
+ *
+ */
 var client_ws_heartbeat;
+
+
+
 var client_ws_heartbeat_interval = null;
 
 var check_com_ports_interval = null;
@@ -33,8 +129,12 @@ var launcher_result = "";
 var launcher_download = false;
 
 // Status Notice IDs
-const nsDownloading                = 002;
-const nsDownloadSuccessful         = 005;
+//const nsDownloading                = 002;
+//const nsDownloadSuccessful         = 005;
+const nsDownloading                = 2;
+const nsDownloadSuccessful         = 5;
+
+
 // Error Notice IDs
 const neDownloadFailed             = 102;
 

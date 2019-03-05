@@ -1,26 +1,109 @@
+
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
+
+/** GLOBAL VARIABLES **/
+
+/**
+ *
+ * @type {*|jQuery}
+ */
 var baseUrl = $("meta[name=base]").attr("content");
-var cdnUrl = $("meta[name=cdn]").attr("content");   // TODO: this is used in the  blocklypropclient.js file, but that file is loaded first, so when JS is condensed, make sure this global is decalred at the top of the file
+
+
+/*
+* TODO: This is used in the  blocklypropclient.js file, but that file is loaded
+*  first, so when JS is condensed, make sure this global is decalred at the top
+*  of the file
+*/
+
+/**
+ *
+ * @type {*|jQuery}
+ */
+var cdnUrl = $("meta[name=cdn]").attr("content");
+
+
+/**
+ *
+ * @type {boolean}
+ */
 var user_authenticated = ($("meta[name=user-auth]").attr("content") === 'true') ? true : false;
+
+
+/**
+ *
+ * @type {boolean}
+ */
 var isOffline = ($("meta[name=isOffline]").attr("content") === 'true') ? true : false;
 
+
+//QUESTION: What does this do?
+/**
+ *
+ * @type {null}
+ */
 var projectData = null;
+
+
+/**
+ *
+ * @type {boolean}
+ */
 var ignoreSaveCheck = false;
 
+
+/**
+ *
+ * @type {number}
+ */
 var last_saved_timestamp = 0;
+
+
+/**
+ *
+ * @type {number}
+ */
 var last_saved_time = 0;
 
+
+/**
+ *
+ * @type {number}
+ */
 var idProject = 0;
 
+
+/**
+ *
+ * @type {string}
+ */
 var uploadedXML = '';
 
+
+/**
+ *
+ */
 $(document).ready(function () {
-    
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
         $('.auth-false').css('display', 'none');
@@ -123,6 +206,11 @@ $(document).ready(function () {
     });
 });
 
+
+/**
+ *
+ * @param data
+ */
 var setupWorkspace = function (data) {
     console.log(data);
     projectData = data;
@@ -160,6 +248,12 @@ var setupWorkspace = function (data) {
     setInterval(checkLastSavedTime, 60000);
 }
 
+
+/**
+ *
+ * @param mins
+ * @param resetTimer
+ */
 var timestampSaveTime = function (mins, resetTimer) {
     // Mark the time when the project was opened, add 20 minutes to it.
     var d_save = new Date();
@@ -174,6 +268,10 @@ var timestampSaveTime = function (mins, resetTimer) {
     }
 };
 
+
+/**
+ *
+ */
 var checkLastSavedTime = function () {
     var d_now = new Date();
     var t_now = d_now.getTime();
@@ -190,6 +288,11 @@ var checkLastSavedTime = function () {
     }
 };
 
+
+/**
+ *
+ * @param data
+ */
 var showInfo = function (data) {
     //console.log(data);
     $(".project-name").text(data['name']);
@@ -213,6 +316,10 @@ var showInfo = function (data) {
     $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
 };
 
+
+/**
+ *
+ */
 var saveProject = function () {
     if (projectData['yours']) {
         var code = '';
@@ -280,8 +387,11 @@ var saveProject = function () {
     }
 };
 
-var saveAsDialog = function () {
 
+/**
+ *
+ */
+var saveAsDialog = function () {
     // Production still uses the uses the plain 'save-as' endpoint for now.
     if (inDemo !== 'demo') {     // if (1 === 1) {
 
@@ -334,6 +444,11 @@ var saveAsDialog = function () {
     }
 };
 
+
+/**
+ *
+ * @param requestor
+ */
 var checkBoardType = function (requestor) {
     if (requestor !== 'offline') {
         var current_type = projectData['board'];
@@ -347,6 +462,12 @@ var checkBoardType = function (requestor) {
     }
 };
 
+
+/**
+ * Save an existing project under a new project ID with the new project owner
+ *
+ * @param requestor
+ */
 var saveProjectAs = function (requestor) {
     // Retrieve the field values
     var p_type = $('#save-as-board-type').val();
@@ -398,6 +519,10 @@ var saveProjectAs = function (requestor) {
     }  
 };
 
+
+/**
+ *
+ */
 var editProjectDetails = function () {
     if(isOffline) {
         // Save the current code
@@ -411,12 +536,23 @@ var editProjectDetails = function () {
     }
 };
 
+
+/**
+ * Event handler for the OnBeforeUnload event
+ *
+ * @returns {string}
+ */
 window.onbeforeunload = function () {
     if (checkLeave() && !isOffline) {
         return Blockly.Msg.DIALOG_CHANGED_SINCE;
     }
 };
 
+
+/**
+ *
+ * @returns {boolean}
+ */
 var checkLeave = function () {
     var currentXml = '';
     var savedXml = projectData['code'];
@@ -443,10 +579,21 @@ var checkLeave = function () {
     }
 };
 
+
+/**
+ *
+ * @type {number}
+ */
 var pingInterval = setInterval(function () {
     $.get(baseUrl + 'ping');
 }, 60000);
 
+
+/**
+ *
+ * @param str
+ * @returns {number}
+ */
 function hashCode(str) {
     var hash = 0, i = 0, len = str.length;
     while (i < len) {
@@ -455,6 +602,10 @@ function hashCode(str) {
     return (hash + 2147483647) + 1;
 }
 
+
+/**
+ *
+ */
 function downloadCode() {
     var projXMLcode = '';
     
@@ -566,6 +717,10 @@ function downloadCode() {
     });
 }
 
+
+/**
+ *
+ */
 function uploadCode() {
     if (checkLeave() && !isOffline) {
         utils.showMessage(Blockly.Msg.DIALOG_UNSAVED_PROJECT, Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
@@ -574,6 +729,11 @@ function uploadCode() {
     }
 }
 
+
+/**
+ *
+ * @param files
+ */
 function uploadHandler(files) {
     var UploadReader = new FileReader();
     UploadReader.onload = function () {
@@ -655,6 +815,10 @@ function uploadHandler(files) {
     UploadReader.readAsText(files[0]);
 }
 
+
+/**
+ *
+ */
 function clearUploadInfo() {
     // Reset all of the upload fields and containers
     uploadedXML = '';
@@ -664,6 +828,11 @@ function clearUploadInfo() {
     document.getElementById("selectfile-verify-boardtype").style.display = "none";
 }
 
+
+/**
+ *
+ * @param append
+ */
 function uploadMergeCode(append) {
     $('#upload-dialog').modal('hide');
     if (uploadedXML !== '') {
@@ -685,6 +854,11 @@ function uploadMergeCode(append) {
     }
 }
 
+
+/**
+ *
+ * @param profileName
+ */
 function initToolbox(profileName) {
 
     var ff = getURLParameter('font');
@@ -734,16 +908,31 @@ function initToolbox(profileName) {
     Blockly.mainWorkspace.createVariable(Blockly.LANG_VARIABLES_GET_ITEM);
 }
 
+
+/**
+ *
+ * @param xmlText
+ */
 function loadToolbox(xmlText) {
     var xmlDom = Blockly.Xml.textToDom(xmlText);
     Blockly.Xml.domToWorkspace(xmlDom, Blockly.mainWorkspace);
 }
 
+
+/**
+ *
+ * @returns {string}
+ */
 function getXml() {
     var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
     return Blockly.Xml.domToText(xml);
 }
 
+
+/**
+ *
+ * @param o
+ */
 function showOS(o) {
     $("body").removeClass('Windows')
             .removeClass('MacOS')
@@ -752,6 +941,13 @@ function showOS(o) {
     $("body").addClass(o);
 }
 
+
+/**
+ *
+ * @param o
+ * @param i
+ * @param t
+ */
 function showStep(o, i, t) {
     for (var j = 1; j <= t; j++) {
         $('#' + o + j.toString() + '-btn').addClass('btn-default').removeClass('btn-primary');

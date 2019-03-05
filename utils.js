@@ -1,3 +1,30 @@
+
+/*
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+
+/**
+ *
+ * @type {{confirm: utils.confirm, showMessage: utils.showMessage, prompt: utils.prompt}}
+ */
 var utils = {
     showMessage: function (title, message, callback) {
         bootbox.dialog({
@@ -12,6 +39,7 @@ var utils = {
             }
         });
     },
+
     prompt: function (title, defaultValue, callback) {
         bootbox.prompt({
             title: title,
@@ -32,6 +60,7 @@ var utils = {
 
         });
     },
+
     confirm: function (title, message, callback, optionLabelConfirm, optionLabelCancel) {
         bootbox.dialog({
             title: title,
@@ -55,6 +84,7 @@ var utils = {
         });
     }
 };
+
 
 // POLYFILLS
 if (!String.prototype.endsWith) {
@@ -97,7 +127,10 @@ function getURLParameter(name) {
 
 // Server (demo/production) detection & url parameter override
 var inDemo = $("meta[name=in-demo]").attr("content");
+
+// Does the 'experimental' URL parameter exist?
 if (getURLParameter('experimental')) {
+    // Production system does not support the use of the experimental flag
     if (getURLParameter('experimental') !== 'true') {
         inDemo = 'production';
     } else {
@@ -105,15 +138,33 @@ if (getURLParameter('experimental')) {
     }
 }
 
-// Operating system detection
+
+
+/**
+ * Operating system detection
+ *
+ * @type {string}
+ */
 var osName = 'unknown-client';
 
+
+/**
+ *  Identify the operating system reported by the browser
+ *
+ * @param x
+ * @param y
+ * @param z
+ */
 function nav(x, y, z) {
+    // set z value to the value of y if there is no initial z value
     z = z || y;
+
+    // The navigator object contains information about the browser.
     if (navigator[x] && navigator[x].indexOf(y) !== -1) {
         osName = z;
     }
 }
+
 
 /*   navigator     value     download  */
 nav("appVersion", "X11", "UNIX");
@@ -128,6 +179,9 @@ nav("oscpu", "Windows");
 nav("appVersion", "CrOS", "ChromeOS");
 
 
+/**
+ *
+ */
 $(document).ready(function () {
     // Use the "external_link" class to make links open in new tabs
     $(".external_link").click(function (e) {
@@ -144,6 +198,7 @@ $(document).ready(function () {
     
     console.log(navigator.browserSpecs);
 });
+
 
 // https://stackoverflow.com/questions/5916900/how-can-you-detect-the-version-of-a-browser
 navigator.browserSpecs = (function(){

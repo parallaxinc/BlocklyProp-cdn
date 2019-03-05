@@ -1,10 +1,64 @@
+
+/*
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/**
+ *
+ * @type {*|jQuery}
+ */
 var baseUrl = $("meta[name=base]").attr("content");
+
+
+/**
+ *
+ * @type {string}
+ */
 var cloneUrl = '';
+
+
+/**
+ *
+ * @type {string}
+ */
 var deleteUrl = '';
+
+
+/**
+ *
+ * @type {string}
+ */
 var linkShareUrl = '';
 
+
+/**
+ *
+ * @type {null}
+ */
 var idProject = null;
 
+
+/**
+ *
+ * @type {{SPIN: {editor: string, class: string}, PROPC: {editor: string, class: string}}}
+ */
 var projectTypes = {
     "PROPC": {
         "editor": "blocklyc.jsp",
@@ -16,25 +70,41 @@ var projectTypes = {
     }
 };
 
+
+/**
+ *
+ * @type {null}
+ */
 var simplemde = null;
 
+
+/**
+ *
+ */
 $(document).ready(function () {
-    simplemde = new SimpleMDE({element: document.getElementById("project-form-description"), hideIcons: ["link"], spellChecker: false});
+    simplemde = new SimpleMDE({
+        element: document.getElementById("project-form-description"),
+        hideIcons: ["link"],
+        spellChecker: false
+    });
 
     cloneUrl = $('.clone-project').data('href');
     deleteUrl = $('.delete-project').data('href');
     linkShareUrl = $('#project-link-share').data('href');
+
     if (window.location.hash && window.location.hash !== "#") {
         loadProject(window.location.hash.substr(1));
         $("#project-form-container").addClass('in');
-    } else {
+        }
+    else {
         $("#project-table-container").addClass('in');
-    }
+        }
 
     $(window).on('hashchange', function () {
         if (window.location.hash && window.location.hash !== "#") {
             showProject(window.location.hash.substr(1));
-        } else {
+            }
+        else {
             showTable();
         }
     });
@@ -99,12 +169,21 @@ $(document).ready(function () {
     });
 });
 
+
+/**
+ *
+ */
 function showTable() {
     $("#project-table").bootstrapTable('refresh');
     $("#project-table-container").collapse('show');
     $("#project-form-container").collapse('hide');
 }
 
+
+/**
+ *
+ * @param idProject
+ */
 function showProject(idProject) {
     // Clear form
     $(".sharing").removeProp('checked').parent().removeClass('active');
@@ -118,6 +197,11 @@ function showProject(idProject) {
     $("#project-form-container").collapse('show');
 }
 
+
+/**
+ *
+ * @param idProject
+ */
 function loadProject(idProject) {
     window.idProject = idProject;
 
@@ -175,6 +259,11 @@ function loadProject(idProject) {
     });
 }
 
+
+/**
+ *
+ * @returns {string}
+ */
 function guid() {
     function s4() {
         return Math.floor((1 + Math.random()) * 0x10000)
