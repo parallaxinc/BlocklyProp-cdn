@@ -466,6 +466,7 @@ var prettyCode = function (raw_code) {
             .replace(/\( & /g, "(&")
             .replace(/\( \* /g, "(*")
             .replace(/char \* /g, "char *")
+            .replace(/bme680 \* /g, "bme680 *")
             .replace(/serial \* /g, "serial *")
             .replace(/lcdParallel \* /g, "lcdParallel *")
             .replace(/colorPal \* /g, "colorPal *")
@@ -669,6 +670,7 @@ function cloudCompile(text, action, successHandler) {
                 } else {
                     var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
                     $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
+    console.log(data);                
                     if (data.success && data.binary) {
                         successHandler(data, terminalNeeded);
                     }
@@ -1323,6 +1325,7 @@ function graph_new_data(stream) {
                                 x: graph_temp_data[row][0],
                                 y: graph_temp_data[row][j] || null
                             });
+                            $('.ct_line').css('stroke-width','2.5px');  // TODO: if this slows performance too much - explore changing the stylesheet (https://stackoverflow.com/questions/50036922/change-a-css-stylesheets-selectors-properties/50036923#50036923)
                             if (graph_temp_data[row][0] > graph_options.sampleTotal)
                                 graph_data.series[j - 2].shift();
                         }                        
@@ -1334,6 +1337,7 @@ function graph_new_data(stream) {
                     if (graph_csv_data.length > 15000) {
                         graph_csv_data.shift();
                     }
+                    //$('.ct_line').css('stroke-width','1px'); // TODO: verify if this is even necessary
                 }
 
                 graph_temp_string = '';
