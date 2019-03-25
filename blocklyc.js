@@ -474,6 +474,7 @@ var prettyCode = function (raw_code) {
             .replace(/i2c \* /g, "i2c *")
             .replace(/talk \* /g, "talk *")
             .replace(/sound \* /g, "sound *")
+            .replace(/screen \* /g, "screen *")
             .replace(/FILE \* /g, "FILE* ")
 
             // improve the way functions and arrays are rendered
