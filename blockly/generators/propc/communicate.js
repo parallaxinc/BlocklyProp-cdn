@@ -279,6 +279,7 @@ Blockly.Blocks.console_print_multiple = {
         var subBlock = 'console_print_';
         if (this.type === 'console_print_multiple' || 
                 this.type === 'oled_print_multiple' || 
+                this.type === 'epaper_print_multiple' ||
                 this.type === 'debug_lcd_print_multiple' || 
                 this.type === 'parallel_lcd_print_multiple' ||
                 this.type === 'heb_print_multiple') {
@@ -607,7 +608,12 @@ Blockly.propc.console_print_multiple = function () {
         case 'oled_print_multiple':
             initBlock = 'OLED initialize';
             errorString = '// ERROR: OLED is not initialized!\n';
-            code += 'oledc_print("';
+            code += 'drawPrint(oledc, "';
+            break;
+        case 'epaper_print_multiple':
+            initBlock = 'ePaper initialize';
+            errorString = '// ERROR: ePaper is not initialized!\n';
+            code += 'drawPrint(ePaper, "';
             break;
         case 'xbee_print_multiple':
             initBlock = 'XBee initialize';
@@ -2681,9 +2687,17 @@ Blockly.propc.xbee_scan_multiple = function () {
 
 // -------------- OLED Display blocks ------------------------------------------
 Blockly.Blocks.oled_initialize = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_INITIALIZE_TOOLTIP);
+        if (this.type === 'oled_initialize') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_initialize') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setColour(colorPalette.getColor('protocols'));
         // Field order DIN, CLK, CS, D/C, RES
         this.appendDummyInput('PINS');
@@ -2699,7 +2713,7 @@ Blockly.Blocks.oled_initialize = {
             this.removeInput('PINS');
         }
         this.appendDummyInput('PINS')
-                .appendField("OLED initialize")
+                .appendField(this.displayKind + " initialize")
                 .appendField("DIN")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "DIN")
                 .appendField("CLK")
@@ -2710,6 +2724,11 @@ Blockly.Blocks.oled_initialize = {
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "DC")
                 .appendField("RES")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "RES");
+        if (this.myType === 'ePaper') {
+            this.getInput('PINS')
+                    .appendField('BUSY')
+                    .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "BUSY");
+        }
         for (var i = 0; i < 5; i++) {
             if (m[i] && m[i] === ov && nv) {
                 this.setFieldValue(nv, mv[i]);
@@ -2723,16 +2742,32 @@ Blockly.Blocks.oled_initialize = {
 Blockly.propc.oled_initialize = function () {
     if (!this.disbled) {
         var pin = [this.getFieldValue('DIN'), this.getFieldValue('CLK'), this.getFieldValue('CS'), this.getFieldValue('DC'), this.getFieldValue('RES')];
-        for (var i = 0; i < 4; i++) {
+        var devType = 'ssd1331';
+        var devWidthHeight = ', 96, 64';
+        if (this.myType === 'ePaper') {
+            devType = 'il3820';
+            devWidthHeight = ', 128, 296';
+            pin.push(this.getFieldValue('BUSY'));
+        }
+        for (var i = 0; i < pin.length; i++) {
             if (profile.default.digital.toString().indexOf(pin[i] + ',' + pin[i]) === -1) {
                 pin[i] = 'MY_' + pin[i];
             }
         }
-        Blockly.propc.definitions_["oledtools"] = '#include "oledc.h"';
-        Blockly.propc.setups_["oled"] = 'oledc_init(' + pin[0] + ', ' + pin[1] + ', ' + pin[2] + ', ' + pin[3] + ', ' + pin[4] + ', 2);';
+        if (!this.disabled) {
+            Blockly.propc.global_vars_[this.myType + 'global'] = 'screen *' + this.myType + ';';
+            Blockly.propc.definitions_[this.myType + 'tools'] = '#include "' + devType + '.h"';
+            Blockly.propc.setups_[this.myType] = this.myType + ' = ' + devType + '_init(' + pin.join(', ') + devWidthHeight + ');';
+            if (this.myType === 'oledc') {
+                Blockly.propc.setups_[this.myType + 'rotation'] = 'setDisplayRotation(oledc, 2);'
+            }
+        }
     }
     return '';
 };
+
+Blockly.Blocks.epaper_initialize = Blockly.Blocks.oled_initialize;
+Blockly.propc.epaper_initialize  = Blockly.propc.oled_initialize;
 
 Blockly.Blocks.oled_font_loader = {
     helpUrl: Blockly.MSG_OLED_HELPURL,
@@ -2740,7 +2775,7 @@ Blockly.Blocks.oled_font_loader = {
         this.setTooltip(Blockly.MSG_OLED_FONT_LOADER_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
-                .appendField("OLED font loader (EEPROM only)");
+                .appendField("Display font loader (EEPROM only)");
     }
 };
 
@@ -2753,17 +2788,26 @@ Blockly.propc.oled_font_loader = function () {
 };
 
 Blockly.Blocks.oled_clear_screen = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
+        if (this.type === 'oled_clear_screen') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_clear_screen') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setTooltip(Blockly.MSG_OLED_CLEAR_SCREEN_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
-                .appendField("OLED command")
+                .appendField(this.displayKind + " command")
                 .appendField(new Blockly.FieldDropdown([
                         ["clear screen", "CLS"], 
                         ["sleep", "SLEEP"], 
                         ["wake", "WAKE"], 
-                        ["invert", "INV"],
+                        ["invert colors", "INV"],
+                        ["normal colors", "NORMAL"],
                         ["orient pins up", "O-UP"],
                         ["orient pins down", "O-DOWN"],
                         ["orient pins left", "O-LEFT"],
@@ -2776,9 +2820,9 @@ Blockly.Blocks.oled_clear_screen = {
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
+        if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
         {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
+            this.setWarningText('WARNING: You must use an ' + this.displayKind + '\ninitialize block at the beginning of your program!');
         } else {
             this.setWarningText(null);
         }
@@ -2787,43 +2831,84 @@ Blockly.Blocks.oled_clear_screen = {
 
 Blockly.propc.oled_clear_screen = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var cmd = this.getFieldValue("CMD");
 
         var code = '';
         if (cmd === 'CLS') {
-            code += 'oledc_clear(0, 0, oledc_getWidth(), oledc_getHeight() );\n';
+            code += 'clearDisplay(' + this.myType + ');\n';
         } else if (cmd === 'WAKE') {
-            code += 'oledc_wake();\n';
+            code += 'sleepWakeDisplay(' + this.myType + ', 0);\n';
         } else if (cmd === 'SLEEP') {
-            code += 'oledc_sleep();\n';
+            code += 'sleepWakeDisplay(' + this.myType + ', 1);\n';
         } else if (cmd === 'INV') {
-            code += 'oledc_invertDisplay();\n';
+            code += 'invertDisplay(' + this.myType + ', 1);\n';
+        } else if (cmd === 'NORMAL') {
+            code += 'invertDisplay(' + this.myType + ', 0);\n';
         } else if (cmd === 'O-UP') {
-            code += 'oledc_setRotation(0);\n';
+            code += 'setDisplayRotation(' + this.myType + ', 0);\n';
         } else if (cmd === 'O-DOWN') {
-            code += 'oledc_setRotation(2);\n';
+            code += 'setDisplayRotation(' + this.myType + ', 2);\n';
         } else if (cmd === 'O-LEFT') {
-            code += 'oledc_setRotation(1);\n';
+            code += 'setDisplayRotation(' + this.myType + ', 1);\n';
         } else if (cmd === 'O-RIGHT') {
-            code += 'oledc_setRotation(3);\n';
+            code += 'setDisplayRotation(' + this.myType + ', 3);\n';
         }
         return code;
     }
-}
-;
+};
+
+Blockly.Blocks.epaper_clear_screen = Blockly.Blocks.oled_clear_screen;
+Blockly.propc.epaper_clear_screen  = Blockly.propc.oled_clear_screen;
+
+Blockly.Blocks.epaper_update = {
+    init: function () {
+        this.setTooltip(Blockly.MSG_OLED_UPDATE_TOOLTIP);
+        if (this.type === 'epaper_update') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
+        this.setColour(colorPalette.getColor('protocols'));
+        this.appendDummyInput()
+                .appendField(this.displayKind + " update");
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+        this.setWarningText(null);
+    },
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
+};
+
+Blockly.propc.epaper_update = function () {
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
+    {
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
+    } else {
+        return'updateDisplay(' + this.myType + ');\n';
+    }
+};
 
 Blockly.Blocks.oled_draw_circle = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_DRAW_CIRCLE_TOOLTIP);
+        if (this.type === 'oled_draw_circle') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_draw_circle') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         // First x/y coordinates
         this.appendValueInput("POINT_X")
                 .setCheck("Number")
-                .appendField("OLED draw circle at (x)");
+                .appendField(this.displayKind + " draw circle at (x)");
         this.appendValueInput("POINT_Y")
                 .setCheck(null)
                 .setAlign(Blockly.ALIGN_RIGHT)
@@ -2833,10 +2918,21 @@ Blockly.Blocks.oled_draw_circle = {
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .appendField("radius");
         // Color picker control
-        this.appendValueInput('COLOR')
-                .setAlign(Blockly.ALIGN_RIGHT)
-                .setCheck('Number')
-                .appendField("color");
+        if (this.displayKind === 'OLED') {
+            this.appendValueInput('COLOR')
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .setCheck('Number')
+                    .appendField("color");
+        } else if (this.displayKind === 'ePaper') {
+            this.appendDummyInput('COLOR')
+                    .appendField("color")
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField(new Blockly.FieldDropdown([
+                        ["black", "0"], 
+                        ["white", "1"], 
+                        ["invert", "2"]
+                    ]), 'COLOR_VALUE');
+        }
         this.appendDummyInput()
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .appendField("fill")
@@ -2849,59 +2945,59 @@ Blockly.Blocks.oled_draw_circle = {
         this.setColour(colorPalette.getColor('protocols'));
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_draw_circle = function () {
-    // Ensure header file is included
-    if (!this.disabled) {
-        Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
-    }
-
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var point_x0 = Blockly.propc.valueToCode(this, 'POINT_X', Blockly.propc.ORDER_NONE);
         var point_y0 = Blockly.propc.valueToCode(this, 'POINT_Y', Blockly.propc.ORDER_NONE);
         var radius = Blockly.propc.valueToCode(this, 'RADIUS', Blockly.propc.ORDER_NONE);
-        var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
-        var checkbox = this.getFieldValue('ck_fill');
-        var code;
-
-        if (checkbox === 'TRUE') {
-            code = 'oledc_fillCircle(';
-        } else {
-            code = 'oledc_drawCircle(';
+        var color = 0;
+        if (this.displayKind === 'OLED') {
+            if (!this.disabled) { // Ensure header file is included
+                Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
+            }
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+                color = color.substr(2,6);
+            }
+            color = 'remapColor(0x' + parseInt(color, 16).toString(16) + ', "8R8G8B", "5R6G5B")';
+        } else if (this.displayKind === 'ePaper') {
+            color = this.getFieldValue('COLOR_VALUE');
         }
-        code += point_x0 + ', ' + point_y0 + ', ';
-        code += radius + ', ';
-        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
-            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
-        } else {
-            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        var code = 'drawCircle(' + this.myType + ', ';
+        if (this.getFieldValue('ck_fill') === 'TRUE') {
+            code = 'fillCircle(' + this.myType + ', ';
         }
+        code += point_x0 + ', ' + point_y0 + ', ' + radius + ', ' + color + ');'; 
         return code;
     }
 };
 
+Blockly.Blocks.epaper_draw_circle = Blockly.Blocks.oled_draw_circle
+Blockly.propc.epaper_draw_circle =  Blockly.propc.oled_draw_circle
+
 Blockly.Blocks.oled_draw_line = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_DRAW_LINE_TOOLTIP);
+        if (this.type === 'oled_draw_line') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_draw_line') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setColour(colorPalette.getColor('protocols'));
         this.appendValueInput("X_ONE")
                 .setCheck('Number')
-                .appendField("OLED draw line from 1 (x)");
+                .appendField(this.displayKind + " draw line from 1 (x)");
         this.appendValueInput("Y_ONE")
                 .setCheck('Number')
                 .setAlign(Blockly.ALIGN_RIGHT)
@@ -2914,120 +3010,148 @@ Blockly.Blocks.oled_draw_line = {
                 .setCheck('Number')
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .appendField("(y)");
-        this.appendValueInput('COLOR')
-                .setAlign(Blockly.ALIGN_RIGHT)
-                .setCheck('Number')
-                .appendField("color");
-
+        if (this.displayKind === 'OLED') {
+            this.appendValueInput('COLOR')
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .setCheck('Number')
+                    .appendField("color");
+        } else if (this.displayKind === 'ePaper') {
+            this.appendDummyInput('COLOR')
+                    .appendField("color")
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField(new Blockly.FieldDropdown([
+                        ["black", "0"], 
+                        ["white", "1"], 
+                        ["invert", "2"]
+                    ]), 'COLOR_VALUE');
+        }        
         this.setInputsInline(false);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_draw_line = function () {
-    // Ensure header file is included
-    if (!this.disabled) {
-        Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
-    }
-
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var x_one = Blockly.propc.valueToCode(this, "X_ONE", Blockly.propc.ORDER_NONE);
         var y_one = Blockly.propc.valueToCode(this, "Y_ONE", Blockly.propc.ORDER_NONE);
         var x_two = Blockly.propc.valueToCode(this, "X_TWO", Blockly.propc.ORDER_NONE);
         var y_two = Blockly.propc.valueToCode(this, "Y_TWO", Blockly.propc.ORDER_NONE);
-        var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
-
-        var code = '';
-        code += 'oledc_drawLine(' + x_one + ', ' + y_one + ', ' + x_two + ', ' + y_two + ', ';
-        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
-            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
-        } else {
-            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        var color = 0;
+        if (this.displayKind === 'OLED') {
+            if (!this.disabled) { // Ensure header file is included
+                Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
+            }
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+                color = color.substr(2,6);
+            }
+            color = 'remapColor(0x' + parseInt(color, 16).toString(16) + ', "8R8G8B", "5R6G5B")';
+        } else if (this.displayKind === 'ePaper') {
+            color = this.getFieldValue('COLOR_VALUE');
         }
+        var code = '';
+        code += 'drawLine(' + this.myType + ', ' + x_one + ', ' + y_one + ', ' + x_two + ', ' + y_two + ', ' + color + ');';
         return code;
     }
 };
 
+Blockly.Blocks.epaper_draw_line = Blockly.Blocks.oled_draw_line;
+Blockly.propc.epaper_draw_line =  Blockly.propc.oled_draw_line;
+
 Blockly.Blocks.oled_draw_pixel = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_DRAW_PIXEL_TOOLTIP);
+        if (this.type === 'oled_draw_pixel') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_draw_pixel') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setColour(colorPalette.getColor('protocols'));
         this.appendValueInput("X_AXIS")
                 .setCheck('Number')
-                .appendField("OLED draw pixel at");
+                .appendField(this.displayKind + " draw pixel at");
         this.appendValueInput("Y_AXIS")
                 .setCheck('Number')
                 .appendField(",");
-        this.appendValueInput('COLOR')
-                .setCheck('Number')
-                .appendField("color");
-
+        if (this.displayKind === 'OLED') {
+            this.appendValueInput('COLOR')
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .setCheck('Number')
+                    .appendField("color");
+        } else if (this.displayKind === 'ePaper') {
+            this.appendDummyInput('COLOR')
+                    .appendField("color")
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField(new Blockly.FieldDropdown([
+                        ["black", "0"], 
+                        ["white", "1"], 
+                        ["invert", "2"]
+                    ]), 'COLOR_VALUE');
+        }        
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_draw_pixel = function () {
-    if (!this.disabled) {
-        Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
-    }
-
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var point_x = Blockly.propc.valueToCode(this, 'X_AXIS', Blockly.propc.ORDER_ATOMIC);
         var point_y = Blockly.propc.valueToCode(this, 'Y_AXIS', Blockly.propc.ORDER_ATOMIC);
-        var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
-
-        var code = '';
-        code += 'oledc_drawPixel(' + point_x + ', ' + point_y + ', ';
-        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
-            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
-        } else {
-            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
+        var color = 0;
+        if (this.displayKind === 'OLED') {
+            if (!this.disabled) { // Ensure header file is included
+                Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
+            }
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+                color = color.substr(2,6);
+            }
+            color = 'remapColor(0x' + parseInt(color, 16).toString(16) + ', "8R8G8B", "5R6G5B")';
+        } else if (this.displayKind === 'ePaper') {
+            color = this.getFieldValue('COLOR_VALUE');
         }
-        return code;
+        return 'drawPixel(' + this.myType + ', ' + point_x + ', ' + point_y + ', ' + color + ');';
     }
 };
 
+Blockly.Blocks.epaper_draw_pixel = Blockly.Blocks.oled_draw_pixel;
+Blockly.propc.epaper_draw_pixel =  Blockly.propc.oled_draw_pixel;
+
 Blockly.Blocks.oled_draw_triangle = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_DRAW_TRIANGLE_TOOLTIP);
+        if (this.type === 'oled_draw_triangle') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_draw_triangle') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setColour(colorPalette.getColor('protocols'));
         // First x/y coordinates
         this.appendValueInput("POINT_X0")
                 .setCheck("Number")
-                .appendField("OLED draw triangle at 1 (x)");
+                .appendField(this.displayKind + " draw triangle at 1 (x)");
         this.appendValueInput("POINT_Y0")
                 .setCheck("Number")
                 .setAlign(Blockly.ALIGN_RIGHT)
@@ -3051,41 +3175,39 @@ Blockly.Blocks.oled_draw_triangle = {
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .appendField("(y)");
         // Color picker control
-        this.appendValueInput('COLOR')
-                .setCheck('Number')
-                .setAlign(Blockly.ALIGN_RIGHT)
-                .appendField("color");
+        if (this.displayKind === 'OLED') {
+            this.appendValueInput('COLOR')
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .setCheck('Number')
+                    .appendField("color");
+        } else if (this.displayKind === 'ePaper') {
+            this.appendDummyInput('COLOR')
+                    .appendField("color")
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField(new Blockly.FieldDropdown([
+                        ["black", "0"], 
+                        ["white", "1"], 
+                        ["invert", "2"]
+                    ]), 'COLOR_VALUE');
+        }        
         this.appendDummyInput()
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .appendField("fill")
                 .appendField(new Blockly.FieldCheckbox("TRUE"), "ck_fill");
-
         // Other details
         this.setInputsInline(false);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_draw_triangle = function () {
-    if (!this.disabled) {
-        Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
-    }
-
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var point_x0 = Blockly.propc.valueToCode(this, 'POINT_X0', Blockly.propc.ORDER_NONE);
         var point_y0 = Blockly.propc.valueToCode(this, 'POINT_Y0', Blockly.propc.ORDER_NONE);
@@ -3093,35 +3215,50 @@ Blockly.propc.oled_draw_triangle = function () {
         var point_y1 = Blockly.propc.valueToCode(this, 'POINT_Y1', Blockly.propc.ORDER_NONE);
         var point_x2 = Blockly.propc.valueToCode(this, 'POINT_X2', Blockly.propc.ORDER_NONE);
         var point_y2 = Blockly.propc.valueToCode(this, 'POINT_Y2', Blockly.propc.ORDER_NONE);
-        var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
-
-        var checkbox = this.getFieldValue('ck_fill');
-        var code;
-        if (checkbox === 'TRUE') {
-            code = 'oledc_fillTriangle(';
-        } else {
-            code = 'oledc_drawTriangle(';
+        var color = 0;
+        if (this.displayKind === 'OLED') {
+            if (!this.disabled) { // Ensure header file is included
+                Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
+            }
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+                color = color.substr(2,6);
+            }
+            color = 'remapColor(0x' + parseInt(color, 16).toString(16) + ', "8R8G8B", "5R6G5B")';
+        } else if (this.displayKind === 'ePaper') {
+            color = this.getFieldValue('COLOR_VALUE');
         }
-
+        var code = 'drawTriangle(';
+        if (this.getFieldValue('ck_fill') === 'TRUE') {
+            code = 'fillTriangle(';
+        }
+        code += this.myType + ', '
         code += point_x0 + ', ' + point_y0 + ', ';
         code += point_x1 + ', ' + point_y1 + ', ';
         code += point_x2 + ', ' + point_y2 + ', ';
-        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
-            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
-        } else {
-            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
-        }
+        code += color + ');'
         return code;
     }
 };
 
+Blockly.Blocks.epaper_draw_triangle = Blockly.Blocks.oled_draw_triangle;
+Blockly.propc.epaper_draw_triangle =  Blockly.propc.oled_draw_triangle;
+
 Blockly.Blocks.oled_draw_rectangle = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_DRAW_RECTANGLE_TOOLTIP);
+        if (this.type === 'oled_draw_rectangle') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_draw_rectangle') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.appendValueInput("POINT_X")
                 .setCheck("Number")
-                .appendField("OLED draw rectangle at (x)");
+                .appendField(this.displayKind + " draw rectangle at (x)");
         this.appendValueInput("POINT_Y")
                 .setCheck("Number")
                 .setAlign(Blockly.ALIGN_RIGHT)
@@ -3139,10 +3276,21 @@ Blockly.Blocks.oled_draw_rectangle = {
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .appendField("roundness");
         // Color picker control
-        this.appendValueInput('COLOR')
-                .setAlign(Blockly.ALIGN_RIGHT)
-                .setCheck('Number')
-                .appendField("color");
+        if (this.displayKind === 'OLED') {
+            this.appendValueInput('COLOR')
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .setCheck('Number')
+                    .appendField("color");
+        } else if (this.displayKind === 'ePaper') {
+            this.appendDummyInput('COLOR')
+                    .appendField("color")
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField(new Blockly.FieldDropdown([
+                        ["black", "0"], 
+                        ["white", "1"], 
+                        ["invert", "2"]
+                    ]), 'COLOR_VALUE');
+        }        
         this.appendDummyInput()
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .appendField("fill")
@@ -3155,68 +3303,65 @@ Blockly.Blocks.oled_draw_rectangle = {
         this.setColour(colorPalette.getColor('protocols'));
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_draw_rectangle = function () {
-    if (!this.disabled) {
-        Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
-    }
-
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var point_x = Blockly.propc.valueToCode(this, 'POINT_X', Blockly.propc.ORDER_NONE);
         var point_y = Blockly.propc.valueToCode(this, 'POINT_Y', Blockly.propc.ORDER_NONE);
         var width = Blockly.propc.valueToCode(this, 'RECT_WIDTH', Blockly.propc.ORDER_NONE);
         var height = Blockly.propc.valueToCode(this, 'RECT_HEIGHT', Blockly.propc.ORDER_NONE);
         var corners = Blockly.propc.valueToCode(this, 'RECT_ROUND', Blockly.propc.ORDER_NONE);
-        var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
-        var checkbox = this.getFieldValue('ck_fill');
-        var code;
-
+        var color = 0;
+        if (this.displayKind === 'OLED') {
+            if (!this.disabled) { // Ensure header file is included
+                Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
+            }
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            if (/0x[0-9A-Fa-f]{4}/.test(color)) {
+                color = color.substr(2,6);
+            }
+            color = 'remapColor(0x' + parseInt(color, 16).toString(16) + ', "8R8G8B", "5R6G5B")';
+        } else if (this.displayKind === 'ePaper') {
+            color = this.getFieldValue('COLOR_VALUE');
+        }
+        var code = 'drawRoundRect(';
+        if (this.getFieldValue('ck_fill') === 'TRUE') {
+            code = 'fillRoundRect(';
+        }
+        code += this.myType + ', ' + point_x + ', ' + point_y + ', ' + width + ', ' + height + ', ';
         if (corners === '0') {
-            if (checkbox === 'TRUE') {
-                code = 'oledc_fillRect(';
-            } else {
-                code = 'oledc_drawRect(';
-            }
-            code += point_x + ', ' + point_y + ', ' + width + ', ' + height + ', ';
+            code = code.replace(/RoundRect\(/g, 'Rect(');
         } else {
-            // Rounded rectangle
-            if (checkbox === 'TRUE') {
-                code = 'oledc_fillRoundRect(';
-            } else {
-                code = 'oledc_drawRoundRect(';
-            }
-            code += point_x + ', ' + point_y + ', ' + width + ', ' + height + ', ' + corners + ', ';
+            code += corners + ', ';            
         }
-        if (/0x[0-9A-Fa-f]{4}/.test(color)) {
-            code += 'oledc_color565(' + parseInt(color.substr(2,2), 16).toString(10) + ', ' + parseInt(color.substr(4,2), 16).toString(10) + ', ' + parseInt(color.substr(6,2), 16).toString(10) + '));'; 
-        } else {
-            code += 'oledc_color565(get8bitColor(' + color + ', "RED"), get8bitColor(' + color + ', "GREEN"), get8bitColor(' + color + ', "BLUE")));';
-        }
-        return code;
+        return code + color + ');';
     }
 };
 
+Blockly.Blocks.epaper_draw_rectangle = Blockly.Blocks.oled_draw_rectangle;
+Blockly.propc.epaper_draw_rectangle =  Blockly.propc.oled_draw_rectangle;
+
 Blockly.Blocks.oled_text_size = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_TEXT_SIZE_TOOLTIP);
+        if (this.type === 'oled_text_size') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_text_size') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
-                .appendField("OLED text size")
+                .appendField(this.displayKind + " text size")
                 .appendField(new Blockly.FieldDropdown([["small", "SMALL"], ["medium", "MEDIUM"], ["large", "LARGE"]]), "size_select")
                 .appendField("font")
                 .appendField(new Blockly.FieldDropdown([["sans", "FONT_SANS"], ["serif", "FONT_SERIF"], ["script", "FONT_SCRIPT"], ["bubble", "FONT_BUBBLE"]]), "font_select");
@@ -3224,93 +3369,120 @@ Blockly.Blocks.oled_text_size = {
         this.setNextStatement(true, null);
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_text_size = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var size = this.getFieldValue('size_select');
         var font = this.getFieldValue('font_select');
 
         var code = '';
-        code += 'oledc_setTextSize(' + size + ');\n';
-        code += 'oledc_setTextFont(' + font + ');\n';
+        code += 'setTextSize(' + this.myType + ', ' + size + ');\n';
+        code += 'setTextFont(' + this.myType + ', ' + font + ');\n';
         return code;
     }
 };
 
+Blockly.Blocks.epaper_text_size = Blockly.Blocks.oled_text_size;
+Blockly.propc.epaper_text_size =  Blockly.propc.oled_text_size;
+
 Blockly.Blocks.oled_text_color = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_TEXT_COLOR_TOOLTIP);
+        if (this.type === 'oled_text_color') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_text_color') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setColour(colorPalette.getColor('protocols'));
-        this.appendValueInput('FONT_COLOR')
-                .setCheck('Number')
-                .appendField("OLED font color");
-        this.appendValueInput('BACKGROUND_COLOR')
-                .setCheck('Number')
-                .appendField("font background color");
-
+        if (this.displayKind === 'OLED') {
+            this.appendValueInput('FONT_COLOR')
+                    .setCheck('Number')
+                    .appendField("OLED font color");
+            this.appendValueInput('BACKGROUND_COLOR')
+                    .setCheck('Number')
+                    .appendField("font background color");
+        } else if (this.displayKind === 'ePaper') {
+            this.appendDummyInput('FONT_COLOR')
+                    .appendField("ePaper font color      ")
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField(new Blockly.FieldDropdown([
+                        ["black", "0"], 
+                        ["white", "1"], 
+                        ["invert", "2"]
+                    ]), 'FONT_COLOR_VALUE');
+            this.appendDummyInput('BACKGROUND_COLOR')
+                    .appendField("font background color")
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField(new Blockly.FieldDropdown([
+                        ["black", "0"], 
+                        ["white", "1"], 
+                        ["invert", "2"]
+                    ]), 'BACKGROUND_COLOR_VALUE');
+        }        
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_text_color = function () {
-    if (!this.disabled) {
-        Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
-    }
-
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
-        var font_color = Blockly.propc.valueToCode(this, 'FONT_COLOR', Blockly.propc.ORDER_NONE);
-        var background_color = Blockly.propc.valueToCode(this, 'BACKGROUND_COLOR', Blockly.propc.ORDER_NONE);
-
+        var font_color = 0;
+        var background_color = 0;
+        if (this.displayKind === 'OLED') {
+            if (!this.disabled) { // Ensure header file is included
+                Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
+            }
+            font_color = Blockly.propc.valueToCode(this, 'FONT_COLOR', Blockly.propc.ORDER_NONE);
+            background_color = Blockly.propc.valueToCode(this, 'BACKGROUND_COLOR', Blockly.propc.ORDER_NONE);
+            if (/0x[0-9A-Fa-f]{4}/.test(font_color)) font_color = font_color.substr(2,6);
+            font_color = 'remapColor(0x' + parseInt(font_color, 16).toString(16) + ', "8R8G8B", "5R6G5B")';
+            if (/0x[0-9A-Fa-f]{4}/.test(background_color)) background_color = background_color.substr(2,6);
+            background_color = 'remapColor(0x' + parseInt(background_color, 16).toString(16) + ', "8R8G8B", "5R6G5B")';
+        } else if (this.displayKind === 'ePaper') {
+            font_color = this.getFieldValue('FONT_COLOR_VALUE');
+            background_color = this.getFieldValue('BACKGROUND_COLOR_VALUE');
+        }
         var code = '';
-        code += 'oledc_setTextColor(';
-
-        //  TO DO: Try this - it's shorter but slightly slower:
-        //  code += 'remapColor(' + font_color + ', "8R8G8B", "5R6G5B"), remapColor(' + background_color + ', "8R8G8B", "5R6G5B"));\n';
-
-        code += 'oledc_color565(get8bitColor(' + font_color + ', "RED"), get8bitColor(' + font_color + ', "GREEN"), get8bitColor(' + font_color + ', "BLUE")), ';
-        code += 'oledc_color565(get8bitColor(' + background_color + ', "RED"), get8bitColor(' + background_color + ', "GREEN"), get8bitColor(' + background_color + ', "BLUE")));';
+        code += 'oledc_setTextColor(' + this.myType + ', ' + font_color;
+        code += 'oledc_setBgColor(' + this.myType + ', ' + background_color;
         return code;
     }
 };
 
+Blockly.Blocks.epaper_text_color = Blockly.Blocks.oled_text_color;
+Blockly.propc.epaper_text_color =  Blockly.propc.oled_text_color;
+
 Blockly.Blocks.oled_get_max_height = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_GET_MAX_HEIGHT_TOOLTIP);
+        if (this.type.split('_')[0] === 'oled') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type.split('_')[0] === 'epaper') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
-                .appendField("OLED max height");
-
+                .appendField(this.displayKind + " max " + this.type.split('_')[3]);
         this.setPreviousStatement(false, null);
         this.setNextStatement(false, null);
         this.setOutput(true, "Number");
@@ -3319,45 +3491,38 @@ Blockly.Blocks.oled_get_max_height = {
 
 Blockly.propc.oled_get_max_height = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
         return ['0', Blockly.propc.ORDER_NONE];
     } else {
-        return ['oledc_getHeight()', Blockly.propc.ORDER_NONE];
+        var code = 'getDisplayWidth('
+        if (this.type.split('_')[3] === 'height') code = 'getDisplayHeight('
+        return [code + this.myType + ')', Blockly.propc.ORDER_NONE];
     }
 };
 
-Blockly.Blocks.oled_get_max_width = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
-    init: function () {
-        this.setTooltip(Blockly.MSG_OLED_GET_MAX_WIDTH_TOOLTIP);
-        this.setColour(colorPalette.getColor('protocols'));
-        this.appendDummyInput()
-                .appendField("OLED max width");
-
-        this.setPreviousStatement(false, null);
-        this.setNextStatement(false, null);
-        this.setOutput(true, "Number");
-    }
-};
-
-Blockly.propc.oled_get_max_width = function () {
-    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
-    {
-        return ['0', Blockly.propc.ORDER_NONE];
-    } else {
-        return ['oledc_getWidth()', Blockly.propc.ORDER_NONE];
-    }
-};
+Blockly.Blocks.oled_get_max_width = Blockly.Blocks.oled_get_max_height;
+Blockly.propc.oled_get_max_width =  Blockly.propc.oled_get_max_height;
+Blockly.Blocks.epaper_get_max_height = Blockly.Blocks.oled_get_max_height;
+Blockly.propc.epaper_get_max_height =  Blockly.propc.oled_get_max_height;
+Blockly.Blocks.epaper_get_max_width = Blockly.Blocks.oled_get_max_height;
+Blockly.propc.epaper_get_max_width =  Blockly.propc.oled_get_max_height;
 
 Blockly.Blocks.oled_set_cursor = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
         this.setTooltip(Blockly.MSG_OLED_SET_CURSOR_TOOLTIP);
+        if (this.type === 'oled_set_cursor') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_set_cursor') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.appendValueInput('X_POS')
                 .setCheck('Number')
-                .appendField("OLED set cursor at (x)");
+                .appendField(this.displayKind + " set cursor to (x)");
         this.appendValueInput('Y_POS')
                 .setCheck('Number')
                 .appendField("(y)");
@@ -3367,39 +3532,42 @@ Blockly.Blocks.oled_set_cursor = {
         this.setColour(colorPalette.getColor('protocols'));
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_set_cursor = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         // Get user input
         var x = Blockly.propc.valueToCode(this, 'X_POS', Blockly.propc.ORDER_NONE);
         var y = Blockly.propc.valueToCode(this, 'Y_POS', Blockly.propc.ORDER_NONE);
 
-        return 'oledc_setCursor(' + x + ', ' + y + ',0);';
+        return 'setCursor(' + this.myType + ', ' + x + ', ' + y + ',0);';
     }
 
 };
 
+Blockly.Blocks.epaper_set_cursor = Blockly.Blocks.oled_set_cursor;
+Blockly.propc.epaper_set_cursor =  Blockly.propc.oled_set_cursor;
+
 Blockly.Blocks.oled_print_text = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
+        if (this.type === 'oled_print_text') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_print_text') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setTooltip(Blockly.MSG_OLED_PRINT_TEXT_TOOLTIP);
         this.appendValueInput('MESSAGE')
                 .setCheck('String')
-                .appendField("OLED print text ");
+                .appendField(this.displayKind + " print text ");
 
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
@@ -3407,35 +3575,38 @@ Blockly.Blocks.oled_print_text = {
         this.setColour(colorPalette.getColor('protocols'));
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_print_text = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var msg = Blockly.propc.valueToCode(this, 'MESSAGE', Blockly.propc.ORDER_NONE);
-        return 'oledc_drawText(' + msg + ');';
+        return 'drawText(' + this.myType + ', ' + msg + ');';
     }
 };
 
+Blockly.Blocks.epaper_print_text = Blockly.Blocks.oled_print_text;
+Blockly.propc.epaper_print_text =  Blockly.propc.oled_print_text;
+
 Blockly.Blocks.oled_print_number = {
-    helpUrl: Blockly.MSG_OLED_HELPURL,
     init: function () {
+        if (this.type === 'oled_print_number') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_print_number') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
         this.setTooltip(Blockly.MSG_OLED_PRINT_NUMBER_TOOLTIP);
         this.appendValueInput('NUMIN')
                 .setCheck('Number')
-                .appendField("OLED print number ");
+                .appendField(this.displayKind + " print number ");
         this.appendDummyInput()
                 .appendField(new Blockly.FieldDropdown([["Decimal", "DEC"], ["Hexadecimal", "HEX"], ["Binary", "BIN"]]), "type");
         this.setInputsInline(true);
@@ -3444,28 +3615,23 @@ Blockly.Blocks.oled_print_number = {
         this.setColour(colorPalette.getColor('protocols'));
         this.setWarningText(null);
     },
-    onchange: function () {
-        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1)
-        {
-            this.setWarningText('WARNING: You must use an OLED\ninitialize block at the beginning of your program!');
-        } else {
-            this.setWarningText(null);
-        }
-    }
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
 };
 
 Blockly.propc.oled_print_number = function () {
     var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-    if (allBlocks.indexOf('OLED initialize') === -1)
+    if (allBlocks.indexOf(this.displayKind + ' initialize') === -1)
     {
-        return '// ERROR: OLED is not initialized!\n';
+        return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
     } else {
         var num = Blockly.propc.valueToCode(this, 'NUMIN', Blockly.propc.ORDER_NONE);
         var type = this.getFieldValue('type');
-        return 'oledc_drawNumber(' + num + ', ' + type + ');';
+        return 'drawNumber(' + this.myType + ', ' + num + ', ' + type + ');';
     }
 };
+
+Blockly.Blocks.epaper_print_number = Blockly.Blocks.oled_print_number;
+Blockly.propc.epaper_print_number =  Blockly.propc.oled_print_number;
 
 Blockly.Blocks.oled_print_multiple = {
     init: function () {
@@ -3476,6 +3642,9 @@ Blockly.Blocks.oled_print_multiple = {
             myTooltip = Blockly.MSG_HEB_PRINT_MULTIPLE_TOOLTIP;
             myHelpUrl = Blockly.MSG_BADGE_DISPLAY_HELPURL;
             this.myDevice = 'Display';
+        } else if (this.type === 'epaper_print_multiple') {
+            myHelpUrl = Blockly.MSG_BADGE_DISPLAY_HELPURL;
+            this.myDevice = 'ePaper';
         }
         this.setTooltip(myTooltip);
         this.setHelpUrl(myHelpUrl);
@@ -3509,15 +3678,18 @@ Blockly.Blocks.oled_print_multiple = {
             warnTxt = this.myDevice + ' print multiple must have at least one term.';
         }
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-        if (allBlocks.indexOf('OLED initialize') === -1 && this.type !== 'heb_print_multiple')
+        if (allBlocks.indexOf(this.myDevice + ' initialize') === -1 && this.type !== 'heb_print_multiple')
         {
-            warnTxt = 'WARNING: You must use an OLED\ninitialize block at the beginning of your program!';
+            warnTxt = 'WARNING: You must use an ' + this.myDevice + '\ninitialize block at the beginning of your program!';
         }
         this.setWarningText(warnTxt);
     }
 };
 
 Blockly.propc.oled_print_multiple = Blockly.propc.console_print_multiple;
+Blockly.Blocks.epaper_print_multiple = Blockly.Blocks.oled_print_multiple;
+Blockly.propc.epaper_print_multiple =  Blockly.propc.console_print_multiple;
+
 
 // -------------- RGB LEDs (WS2812B module) blocks -----------------------------
 Blockly.Blocks.ws2812b_init = {
