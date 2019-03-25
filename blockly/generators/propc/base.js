@@ -672,9 +672,19 @@ Blockly.Blocks.base_delay = {
         this.setNextStatement(true, null);
     }//,
     // For testing purposes - use the pause block to capture onchange events and report them to the console.
-    //onchange: function (event) {
-    //    console.log(event);
-    //}
+    /*
+    onchange: function (event) {
+        console.log(event.type);
+        var ws = this.workspace;
+        if (event.ids) {
+            for (var t = 0; t < event.ids.length; t++) {
+                console.log(ws.getBlockById(event.ids[t]).type);
+            }
+        } else if (event.blockId) {
+            console.log(ws.getBlockById(event.blockId).type)
+        }
+    }
+    */
 };
 
 Blockly.propc.base_delay = function () {
