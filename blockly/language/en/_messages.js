@@ -353,6 +353,7 @@ Blockly.MSG_OLED_DRAW_LINE_TOOLTIP = "Display draw line: set start and end point
 Blockly.MSG_OLED_DRAW_TRIANGLE_TOOLTIP = "Display draw triangle: set x,y position of each corner.";
 Blockly.MSG_OLED_DRAW_RECTANGLE_TOOLTIP = "Display draw rectangle: set x,y position of each corner.";
 Blockly.MSG_OLED_DRAW_CIRCLE_TOOLTIP = "Display draw circle: x,y of center point, radius, color, fill. ";
+Blockly.MSG_OLED_BITMAP_TOOLTIP = "Display Bitmap: Enter the name of the file (don't include the .bmp at the end) and the\nx,y position (top-left corner) to begin drawing the bitmap image."
 Blockly.MSG_CONSOLE_PRINT_TOOLTIP = "Terminal print text: display contents of string block.";
 Blockly.MSG_CONSOLE_PRINT_VARIABLES_TOOLTIP = "Terminal print number: display value as decimal, hex, binary, or ASCII.";
 Blockly.MSG_CONSOLE_PRINT_MULTIPLE_TOOLTIP = "Terminal print multiple: send attached values or text to the terminal.";
