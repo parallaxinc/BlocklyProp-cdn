@@ -3413,7 +3413,7 @@ Blockly.Blocks.oled_text_color = {
                     .appendField("font background color");
         } else if (this.displayKind === 'ePaper') {
             this.appendDummyInput('FONT_COLOR')
-                    .appendField("ePaper font color      ")
+                    .appendField("ePaper font color        ")
                     .setAlign(Blockly.ALIGN_RIGHT)
                     .appendField(new Blockly.FieldDropdown([
                         ["black", "0"], 
@@ -3689,6 +3689,80 @@ Blockly.Blocks.oled_print_multiple = {
 Blockly.propc.oled_print_multiple = Blockly.propc.console_print_multiple;
 Blockly.Blocks.epaper_print_multiple = Blockly.Blocks.oled_print_multiple;
 Blockly.propc.epaper_print_multiple =  Blockly.propc.console_print_multiple;
+
+Blockly.Blocks.oled_bitmap = {
+    init: function () {
+        if (this.type === 'oled_bitmap') {
+            this.myType = 'oledc';
+            this.displayKind = 'OLED';
+            this.setHelpUrl(Blockly.MSG_OLED_HELPURL);
+        } else if (this.type === 'epaper_bitmap') {
+            this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
+            this.myType = 'ePaper';
+            this.displayKind = 'ePaper';
+        }
+        this.setTooltip(Blockly.MSG_OLED_BITMAP_TOOLTIP);
+        this.setColour(colorPalette.getColor('protocols'));
+        this.appendDummyInput()
+                .appendField(this.displayKind + " draw BMP image")
+                .appendField(new Blockly.FieldTextInput('filename', function (fn) {
+                    fn = fn.replace(/[^A-Z0-9a-z_]/g, '').toLowerCase();
+                    if (fn.length > 8) {
+                        fn = fn.substring(0,7);
+                    }
+                    return fn;
+                }), 'FILENAME');
+        this.appendValueInput('POS_X')
+                .appendField('at (x)');
+        this.appendValueInput('POS_Y')
+                .appendField('(y)');
+        this.setInputsInline(true);
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true, null);
+    },
+    onchange: Blockly.Blocks['oled_clear_screen'].onchange
+    /*
+    onchange: function () {
+        var warnTxt = null;
+        if (this.workspace && this.optionList_.length < 1) {
+            warnTxt = this.myDevice + ' print multiple must have at least one term.';
+        }
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+        if (allBlocks.indexOf(this.myDevice + ' initialize') === -1 && this.type !== 'heb_print_multiple')
+        {
+            warnTxt = 'WARNING: You must use an ' + this.myDevice + '\ninitialize block at the beginning of your program!';
+        }
+        this.setWarningText(warnTxt);
+    }
+    */
+};
+
+Blockly.propc.oled_bitmap = function () {
+    if (!this.disabled) {
+        var initFound = false;
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
+        if (allBlocks.toString().indexOf(this.displayKind + ' initialize') === -1) {
+            return '// ERROR: ' + this.displayKind + ' is not initialized!\n';
+        }        
+        for (var x = 0; x < allBlocks.length; x++) {
+            if (allBlocks[x].type === 'sd_init') {
+                initFound = true;
+            }
+        }
+        if (!initFound) {
+            Blockly.propc.setups_["sd_card"] = 'sd_mount(' + profile.default.sd_card + ');';
+        }
+    }
+
+    var filename = this.getFieldValue('FILENAME');
+    var pos_x = Blockly.propc.valueToCode(this, 'POS_X', Blockly.propc.ORDER_NONE) || '0';
+    var pos_y = Blockly.propc.valueToCode(this, 'POS_Y', Blockly.propc.ORDER_NONE) || '0';
+
+    return 'drawBitmap(' + this.myType + ', "' + filename + '.bmp", ' + pos_x + ', ' + pos_y + ');';
+};
+
+Blockly.Blocks.epaper_bitmap = Blockly.Blocks.oled_bitmap;
+Blockly.propc.epaper_bitmap =  Blockly.propc.oled_bitmap;
 
 
 // -------------- RGB LEDs (WS2812B module) blocks -----------------------------
