@@ -1178,7 +1178,11 @@ Blockly.propc.string_var_length = function () {
         if (this.optionList_[i] === 'con') {
             varPref = 'MY_';
         }
-        Blockly.propc.string_var_lengths.push([this.getFieldValue('VAR_NAME' + i.toString(10)), varPref + varLenValue]);
+        Blockly.propc.string_var_lengths.push([
+                Blockly.propc.variableDB_.getName(this.getFieldValue('VAR_NAME' + i.toString(10)), 
+                        Blockly.Variables.NAME_TYPE), 
+                varPref + varLenValue
+        ]);
         i++;
     }
     return '';
