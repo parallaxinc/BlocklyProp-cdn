@@ -2688,7 +2688,6 @@ Blockly.propc.xbee_scan_multiple = function () {
 // -------------- OLED Display blocks ------------------------------------------
 Blockly.Blocks.oled_initialize = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_INITIALIZE_TOOLTIP);
         if (this.type === 'oled_initialize') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -2698,6 +2697,7 @@ Blockly.Blocks.oled_initialize = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_INITIALIZE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         // Field order DIN, CLK, CS, D/C, RES
         this.appendDummyInput('PINS');
@@ -2798,7 +2798,7 @@ Blockly.Blocks.oled_clear_screen = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
-        this.setTooltip(Blockly.MSG_OLED_CLEAR_SCREEN_TOOLTIP);
+        this.setTooltip(Blockly.MSG_OLED_CLEAR_SCREEN_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField(this.displayKind + " command")
@@ -2866,12 +2866,12 @@ Blockly.propc.epaper_clear_screen  = Blockly.propc.oled_clear_screen;
 
 Blockly.Blocks.epaper_update = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_UPDATE_TOOLTIP);
         if (this.type === 'epaper_update') {
             this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_UPDATE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField(this.displayKind + " update");
@@ -2895,7 +2895,6 @@ Blockly.propc.epaper_update = function () {
 
 Blockly.Blocks.oled_draw_circle = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_DRAW_CIRCLE_TOOLTIP);
         if (this.type === 'oled_draw_circle') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -2905,6 +2904,7 @@ Blockly.Blocks.oled_draw_circle = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_DRAW_CIRCLE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         // First x/y coordinates
         this.appendValueInput("POINT_X")
                 .setCheck("Number")
@@ -2984,7 +2984,6 @@ Blockly.propc.epaper_draw_circle =  Blockly.propc.oled_draw_circle
 
 Blockly.Blocks.oled_draw_line = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_DRAW_LINE_TOOLTIP);
         if (this.type === 'oled_draw_line') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -2994,6 +2993,7 @@ Blockly.Blocks.oled_draw_line = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_DRAW_LINE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         this.appendValueInput("X_ONE")
                 .setCheck('Number')
@@ -3067,7 +3067,6 @@ Blockly.propc.epaper_draw_line =  Blockly.propc.oled_draw_line;
 
 Blockly.Blocks.oled_draw_pixel = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_DRAW_PIXEL_TOOLTIP);
         if (this.type === 'oled_draw_pixel') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -3077,6 +3076,7 @@ Blockly.Blocks.oled_draw_pixel = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_DRAW_PIXEL_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         this.appendValueInput("X_AXIS")
                 .setCheck('Number')
@@ -3137,7 +3137,6 @@ Blockly.propc.epaper_draw_pixel =  Blockly.propc.oled_draw_pixel;
 
 Blockly.Blocks.oled_draw_triangle = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_DRAW_TRIANGLE_TOOLTIP);
         if (this.type === 'oled_draw_triangle') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -3147,6 +3146,7 @@ Blockly.Blocks.oled_draw_triangle = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_DRAW_TRIANGLE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         // First x/y coordinates
         this.appendValueInput("POINT_X0")
@@ -3246,7 +3246,6 @@ Blockly.propc.epaper_draw_triangle =  Blockly.propc.oled_draw_triangle;
 
 Blockly.Blocks.oled_draw_rectangle = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_DRAW_RECTANGLE_TOOLTIP);
         if (this.type === 'oled_draw_rectangle') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -3256,6 +3255,7 @@ Blockly.Blocks.oled_draw_rectangle = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_DRAW_RECTANGLE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.appendValueInput("POINT_X")
                 .setCheck("Number")
                 .appendField(this.displayKind + " draw rectangle at (x)");
@@ -3349,7 +3349,6 @@ Blockly.propc.epaper_draw_rectangle =  Blockly.propc.oled_draw_rectangle;
 
 Blockly.Blocks.oled_text_size = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_TEXT_SIZE_TOOLTIP);
         if (this.type === 'oled_text_size') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -3359,6 +3358,7 @@ Blockly.Blocks.oled_text_size = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_TEXT_SIZE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField(this.displayKind + " text size")
@@ -3393,7 +3393,6 @@ Blockly.propc.epaper_text_size =  Blockly.propc.oled_text_size;
 
 Blockly.Blocks.oled_text_color = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_TEXT_COLOR_TOOLTIP);
         if (this.type === 'oled_text_color') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -3403,6 +3402,7 @@ Blockly.Blocks.oled_text_color = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_TEXT_SIZE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         if (this.displayKind === 'OLED') {
             this.appendValueInput('FONT_COLOR')
@@ -3470,7 +3470,6 @@ Blockly.propc.epaper_text_color =  Blockly.propc.oled_text_color;
 
 Blockly.Blocks.oled_get_max_height = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_GET_MAX_HEIGHT_TOOLTIP);
         if (this.type.split('_')[0] === 'oled') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -3480,6 +3479,7 @@ Blockly.Blocks.oled_get_max_height = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_GET_MAX_HEIGHT_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField(this.displayKind + " max " + this.type.split('_')[3]);
@@ -3510,7 +3510,6 @@ Blockly.propc.epaper_get_max_width =  Blockly.propc.oled_get_max_height;
 
 Blockly.Blocks.oled_set_cursor = {
     init: function () {
-        this.setTooltip(Blockly.MSG_OLED_SET_CURSOR_TOOLTIP);
         if (this.type === 'oled_set_cursor') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -3520,6 +3519,7 @@ Blockly.Blocks.oled_set_cursor = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
+        this.setTooltip(Blockly.MSG_OLED_SET_CURSOR_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.appendValueInput('X_POS')
                 .setCheck('Number')
                 .appendField(this.displayKind + " set cursor to (x)");
@@ -3564,7 +3564,7 @@ Blockly.Blocks.oled_print_text = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
-        this.setTooltip(Blockly.MSG_OLED_PRINT_TEXT_TOOLTIP);
+        this.setTooltip(Blockly.MSG_OLED_PRINT_TEXT_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.appendValueInput('MESSAGE')
                 .setCheck('String')
                 .appendField(this.displayKind + " print text ");
@@ -3603,7 +3603,7 @@ Blockly.Blocks.oled_print_number = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
-        this.setTooltip(Blockly.MSG_OLED_PRINT_NUMBER_TOOLTIP);
+        this.setTooltip(Blockly.MSG_OLED_PRINT_NUMBER_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.appendValueInput('NUMIN')
                 .setCheck('Number')
                 .appendField(this.displayKind + " print number ");
@@ -3635,7 +3635,6 @@ Blockly.propc.epaper_print_number =  Blockly.propc.oled_print_number;
 
 Blockly.Blocks.oled_print_multiple = {
     init: function () {
-        var myTooltip = Blockly.MSG_OLED_PRINT_MULTIPLE_TOOLTIP;
         var myHelpUrl = Blockly.MSG_TERMINAL_HELPURL;
         this.myDevice = 'OLED';
         if (this.type === "heb_print_multiple") {
@@ -3646,6 +3645,7 @@ Blockly.Blocks.oled_print_multiple = {
             myHelpUrl = Blockly.MSG_BADGE_DISPLAY_HELPURL;
             this.myDevice = 'ePaper';
         }
+        var myTooltip = Blockly.MSG_OLED_PRINT_MULTIPLE_TOOLTIP.replace(/Display /, this.myDevice);
         this.setTooltip(myTooltip);
         this.setHelpUrl(myHelpUrl);
         this.setColour(colorPalette.getColor('protocols'));
@@ -3701,7 +3701,7 @@ Blockly.Blocks.oled_bitmap = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
-        this.setTooltip(Blockly.MSG_OLED_BITMAP_TOOLTIP);
+        this.setTooltip(Blockly.MSG_OLED_BITMAP_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField(this.displayKind + " draw BMP image")
