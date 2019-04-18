@@ -1096,6 +1096,7 @@ xmlToolbox += '        <category key="category_sensor-input_BME680" experimental
 xmlToolbox += '            <block type="bme680_init"></block>';
 xmlToolbox += '            <block type="bme680_read"></block>';
 xmlToolbox += '            <block type="bme680_get_value"></block>';
+xmlToolbox += '            <block type="bme680_heater"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '        <category key="category_sensor-input_colorpal" >';
 xmlToolbox += '            <block type="colorpal_enable"></block>';
@@ -1649,6 +1650,7 @@ xmlToolbox += '            <block type="scribbler_stop_servo"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '    </category>';
 xmlToolbox += '    <category key="category_system" exclude="s3," colour="320">';
+xmlToolbox += '        <block type="run_as_setup" experimental="true"></block>';
 xmlToolbox += '        <block type="custom_code_multiple"></block>';
 xmlToolbox += '        <block type="waitcnt">';
 xmlToolbox += '            <value name="TARGET">';

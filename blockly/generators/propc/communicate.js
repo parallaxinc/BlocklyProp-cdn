@@ -5944,25 +5944,29 @@ Blockly.Blocks.i2c_send = {
     init: function () {
         this.setTooltip(Blockly.MSG_I2C_SEND_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
+        this.appendDummyInput()
+                .appendField("i\u00B2c controller send");
         this.appendValueInput("DATA")
-                .appendField("i\u00B2c controller send")
+                .setAlign(Blockly.ALIGN_RIGHT)
+                .appendField("data")
                 .appendField(new Blockly.FieldNumber('2', null, null, 1), "COUNT")
-                .appendField("bytes of data");
+                .appendField(new Blockly.FieldDropdown([
+                        ["bytes MSB first", "-1"], 
+                        ["bytes LSB first", "1"]
+                    ]), "ORDER")
         this.appendValueInput("ADDR")
                 .setAlign(Blockly.ALIGN_RIGHT)
                 .setCheck('Number')
-                .appendField(new Blockly.FieldDropdown([["MSB", "1"], ["LSB", "-1"]]), "ORDER")
-                .appendField("first  to register");
+                .appendField(new Blockly.FieldDropdown([
+                    ["register length 1 byte", "1"],
+                    ["register length 2 bytes", "2"],
+                    ["register length 3 bytes", "3"],
+                    ["register length 4 bytes", "4"]
+                ]), "ADDRCOUNT");
         this.appendValueInput("DEVICE")
                 .setAlign(Blockly.ALIGN_RIGHT)
-                .appendField(new Blockly.FieldDropdown([
-                    ["length 1 byte", "1"],
-                    ["length 2 bytes", "2"],
-                    ["length 3 bytes", "3"],
-                    ["length 4 bytes", "4"]
-                ]), "ADDRCOUNT")
                 .setCheck('Number')
-                .appendField(" at device address");
+                .appendField("device address");
         this.appendDummyInput("PINS");
         this.setInputsInline(false);
         this.setPreviousStatement(true, "Block");
@@ -5980,7 +5984,7 @@ Blockly.Blocks.i2c_send = {
         }
         this.appendDummyInput('PINS')
                 .setAlign(Blockly.ALIGN_RIGHT)
-                .appendField("SDA")
+                .appendField("bus SDA")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list), function (pin) {
                         this.sourceBlock_.checkI2cPins(null, pin, null);
                 }), "SDA")
@@ -6103,6 +6107,15 @@ Blockly.propc.i2c_send = function () {
         if (connOutput && connOutput.toString().indexOf('String') > -1) {
             dType = 'String';
         }
+        if (connBlock.type === 'variables_get') {
+            var bType = connBlock.inputList['0'].fieldRow['0'].variable_.name;
+            bType = Blockly.propc.vartype_[Blockly.propc.variableDB_.getName(bType, Blockly.Variables.NAME_TYPE)];
+            if (bType) {
+                if (bType.indexOf('char') > -1) {
+                    dType = 'String';
+                }
+            }
+        }
     }
 
     if (dType === 'Number') {
@@ -6124,7 +6137,7 @@ Blockly.propc.i2c_send = function () {
 
     code += bufCode;
     code += 'i2c_out(i2c' + sda + ', ' + devc + ' & 0x7F, ' + addr;
-    code += ', ' + order.replace(/1/g,'') + adct + ', ' + val + ', ' + cnt + ');\n';
+    code += ', ' + adct + ', ' + val + ', ' + order.replace(/1/g,'') + cnt + ');\n';
 
     return code;
 };
@@ -6134,27 +6147,32 @@ Blockly.Blocks.i2c_receive = {
     init: function () {
         this.setTooltip(Blockly.MSG_I2C_RECEIVE_TOOLTIP);
         this.setColour(colorPalette.getColor('protocols'));
-        this.appendValueInput("ADDR")
-                .setCheck(null)
-                .appendField("i\u00B2c controller receive")
-                .appendField(new Blockly.FieldNumber('2', null, null, 1), "COUNT")
-                .appendField("bytes")
-                .appendField(new Blockly.FieldDropdown([["MSB", "1"], ["LSB", "-1"]]), "ORDER")
-                .appendField("first  from register");
-        this.appendValueInput("DEVICE")
-                .setAlign(Blockly.ALIGN_RIGHT)
-                .appendField(new Blockly.FieldDropdown([
-                    ["length 1 byte", "1"],
-                    ["length 2 bytes", "2"],
-                    ["length 3 bytes", "3"],
-                    ["length 4 bytes", "4"]
-                ]), "ADDRCOUNT")
-                .setCheck(null)
-                .appendField(" at device address");
+        this.appendDummyInput()
+                .appendField("i\u00B2c controller receive");
         this.appendDummyInput()
                 .setAlign(Blockly.ALIGN_RIGHT)
-                .appendField("as")
-                .appendField(new Blockly.FieldDropdown([["Decimal", "int"], ["String", "str"]]), "TYPE")
+                .appendField("data")
+                .appendField(new Blockly.FieldNumber('2', null, null, 1), "COUNT")
+                .appendField(new Blockly.FieldDropdown([
+                        ["bytes MSB first", "-1"], 
+                        ["bytes LSB first", "1"]
+                    ]), "ORDER")
+        this.appendValueInput("ADDR")
+                .setAlign(Blockly.ALIGN_RIGHT)
+                .setCheck('Number')
+                .appendField(new Blockly.FieldDropdown([
+                    ["register length 1 byte", "1"],
+                    ["register length 2 bytes", "2"],
+                    ["register length 3 bytes", "3"],
+                    ["register length 4 bytes", "4"]
+                ]), "ADDRCOUNT");
+        this.appendValueInput("DEVICE")
+                .setAlign(Blockly.ALIGN_RIGHT)
+                .setCheck('Number')
+                .appendField("device address");
+        this.appendDummyInput()
+                .setAlign(Blockly.ALIGN_RIGHT)
+                .appendField(new Blockly.FieldDropdown([["as Decimal", "int"], ["as String", "str"]]), "TYPE")
                 .appendField("store in")
                 .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_SET_ITEM), 'VAR');
         this.appendDummyInput('PINS');
@@ -6175,7 +6193,7 @@ Blockly.Blocks.i2c_receive = {
         }
         this.appendDummyInput('PINS')
                 .setAlign(Blockly.ALIGN_RIGHT)
-                .appendField("SDA")
+                .appendField("bus SDA")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list), function (pin) {
                         this.sourceBlock_.checkI2cPins(null, pin, null);
                 }), "SDA")
@@ -6259,7 +6277,7 @@ Blockly.propc.i2c_receive = function () {
     }
 
     code += 'i2c_in(i2c' + sda + ', ' + devc + ' & 0x7F, ' + addr;
-    code += ', ' + order.replace(/1/g,'') + adct + ', ' + val + ', ' + cnt + ');\n';
+    code += ', ' + adct + ', ' + val + ', ' + order.replace(/1/g,'') + cnt + ');\n';
     code += bufCode;
     return code;
 };

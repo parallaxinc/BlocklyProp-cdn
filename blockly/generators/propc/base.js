@@ -2677,3 +2677,25 @@ Blockly.propc.propc_file = function () {
     }
     return '// RAW PROPC CODE\n//{{||}}\n' + fnme + '//{{||}}\n' + code;
 };
+
+Blockly.Blocks.run_as_setup = {
+    helpUrl: Blockly.MSG_SYSTEM_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_SYSTEM_RUN_AS_SETUP_TOOLTIP);
+        this.setColour(colorPalette.getColor('system'));
+        this.appendDummyInput()
+                .appendField("Run as setup");
+        this.appendStatementInput("CODE")
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true);
+    }
+};
+
+Blockly.propc.run_as_setup = function() {
+    if (!this.disabled) {
+        var code = Blockly.propc.statementToCode(this, 'CODE');
+        var myId = 'runAsSetup_' + btoa(code).substring(0, 19);
+        Blockly.propc.setups_[myId] = code;
+    }
+    return '';
+};

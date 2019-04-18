@@ -677,6 +677,7 @@ var localSaveAs = function(filename, file_content) {
  * @param filenames
  * @param file_contents
  */
+/*
 var localSaveMultiplefiles = function(filenames, file_contents) {
     for (var idx = 0; idx < filenames.length; idx++) {
         // TODO: Switch this to ASYNC and add error reporting

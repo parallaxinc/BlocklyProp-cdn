@@ -2150,6 +2150,42 @@ Blockly.propc.bme680_read = function () {
     return code;
 };
 
+Blockly.Blocks.bme680_heater = {
+    helpUrl: Blockly.MSG_BME680_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_BME680_HEATER);
+        this.setColour(colorPalette.getColor('input'));
+        this.appendDummyInput()
+                .appendField("Air Quality heater")
+                .appendField(new Blockly.FieldDropdown([
+                    ["disable", "Disable"],
+                    ["enable", "Enable"]
+                ]), "HEAT_STATE");
+        this.setInputsInline(false);
+        this.setNextStatement(true, null);
+        this.setPreviousStatement(true, "Block");
+    },
+    onchange: function () {
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+        if (allBlocks.indexOf('Air Quality initialize') === -1)
+        {
+            this.setWarningText('WARNING: You must use an Air Quality\ninitialize block at the beginning of your program!');
+        } else {
+            this.setWarningText(null);
+        }
+    }
+};
+
+Blockly.propc.bme680_heater = function () {
+    var code = '';
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+    if (allBlocks.indexOf('Air Quality initialize') === -1) {
+        code += '// ERROR: Missing Air Quality initialize block!';
+    } else {
+        code += 'bme680_heater' + this.getFieldValue('HEAT_STATE') + '(gas_sensor);';
+    }
+    return code;
+};
 
 Blockly.Blocks.bme680_get_value = {
     helpUrl: Blockly.MSG_BME680_HELPURL,
