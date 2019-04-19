@@ -3459,8 +3459,8 @@ Blockly.propc.oled_text_color = function () {
             background_color = this.getFieldValue('BACKGROUND_COLOR_VALUE');
         }
         var code = '';
-        code += 'oledc_setTextColor(' + this.myType + ', ' + font_color;
-        code += 'oledc_setBgColor(' + this.myType + ', ' + background_color;
+        code += 'setTextColor(' + this.myType + ', ' + font_color + ');';
+        code += 'setBgColor(' + this.myType + ', ' + background_color + ');';
         return code;
     }
 };
