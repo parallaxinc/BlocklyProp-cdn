@@ -589,8 +589,12 @@ function uploadHandler(files) {
                 && xmlString.indexOf("<!--") === -1)
         {
             var uploadedChecksum = xmlString.substring((xmlString.length - 24), (xmlString.length - 12));
-            uploadedXML = xmlString.substring(xmlString.indexOf("<block"), (xmlString.length - 29));
-
+            var findBPCstart = '<block';
+            if (xmlString.indexOf("<variables>") > -1) {
+                findBPCstart = '<variables>';
+            }
+            uploadedXML = xmlString.substring(xmlString.indexOf(findBPCstart), (xmlString.length - 29));
+            
             var computedChecksum = hashCode(uploadedXML).toString();
             computedChecksum = '000000000000'.substring(computedChecksum.length, 12) + computedChecksum;
 
@@ -677,8 +681,59 @@ function uploadMergeCode(append) {
         var newCode = uploadedXML;
         newCode = newCode.substring(42, newCode.length);
         newCode = newCode.substring(0, (newCode.length - 6));
+        
+        // check for newer blockly XML code (contains a list of variables)
+        if (newCode.indexOf('<variables>') > -1) {
+            var findVarRegExp = /type="(\w*)" id="(.{20})">(\w+)</g;
+            var newBPCvars = [];
+            var oldBPCvars = [];
+    
+            var varCodeTemp = newCode.split('</variables>');
+            newCode = varCodeTemp[1];
+            // use a regex to match the id, name, and type of the varaibles in both the old and new code.
+            var tmpv = varCodeTemp[0].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
+                newBPCvars.push([m3, m2, m1]);  // name, id, type
+                return p;
+            });
+            varCodeTemp = projCode.split('</variables>');
+            projCode = varCodeTemp[1];
+            tmpv = varCodeTemp[0].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
+                oldBPCvars.push([m3, m2, m1]);  // name, id, type
+                return p;
+            });
 
-        projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+            for (var j = 0; j < oldBPCvars.length; j++) {
+                k = 0;
+                while (k < newBPCvars.length) {
+                    // see if var is a match
+                    if (newBPCvars[k][0] === oldBPCvars[j][0]) {
+                        // replace old variable IDs with new ones 
+                        var tmpr = new RegExp(newBPCvars[k][1], 'g');
+                        newCode.replace(tmpr, oldBPCvars[j][1]);
+                        // remove variable from original list now that it's merged 
+                        newBPCvars.splice(k,1);
+                    } else {
+                        k++;
+                    }
+                }
+            }
+
+            // rebuild vars from both new/old
+            oldBPCvars = oldBPCvars.concat(newBPCvars);
+            tmpv = '<variables>';
+            oldBPCvars.forEach(function(vi, j) {
+                tmpv += '<variable id="' + vi[1] + '" type="' + vi[2] + '">' + vi[0] + '</variable>';
+            });
+            tmpv += '</variables>';
+
+            // add everything back together
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
+            console.log(projectData['code']);
+
+        } else {
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+        }
+
         Blockly.mainWorkspace.clear();
         loadToolbox(projectData['code']);
         clearUploadInfo();
