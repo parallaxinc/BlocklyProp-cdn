@@ -72,7 +72,10 @@ var projectTypes = {
 
 
 /**
- *
+ * Simple Markdown Editor
+ * 
+ * https://simplemde.com/
+ * 
  * @type {null}
  */
 var simplemde = null;
@@ -82,6 +85,7 @@ var simplemde = null;
  *
  */
 $(document).ready(function () {
+    /* Create an editor session on the project form dscription field */
     simplemde = new SimpleMDE({
         element: document.getElementById("project-form-description"),
         hideIcons: ["link"],
@@ -91,6 +95,7 @@ $(document).ready(function () {
     cloneUrl = $('.clone-project').data('href');
     deleteUrl = $('.delete-project').data('href');
     linkShareUrl = $('#project-link-share').data('href');
+
 
     if (window.location.hash && window.location.hash !== "#") {
         loadProject(window.location.hash.substr(1));
@@ -193,6 +198,7 @@ function showProject(idProject) {
     $('.shared-project').addClass('hidden');
 
     loadProject(idProject);
+
     $("#project-table-container").collapse('hide');
     $("#project-form-container").collapse('show');
 }
@@ -203,18 +209,23 @@ function showProject(idProject) {
  * @param idProject
  */
 function loadProject(idProject) {
+    // Set a global project id
     window.idProject = idProject;
 
     var linkShareInput = $("#project-link-share");
     linkShareInput.tooltip('destroy');
     linkShareInput.val('');
+
+    // Turn off project link sharing
     $("#project-link-share-enable").prop('checked', false);
 
     // Get details
     $.get(baseUrl + "rest/shared/project/get/" + idProject, function (project) {
         if (project['yours']) {
+            // Unhide the share project control
             $('.your-project').removeClass('hidden');
 
+            // Enable the check box element if the provate project is shared
             if (project['share-key']) {
                 $("#project-link-share-enable").prop('checked', true);
                 linkShareInput.val(window.location.origin + linkShareUrl + idProject + "&key=" + project['share-key']);
@@ -228,6 +239,7 @@ function loadProject(idProject) {
             $('.not-your-project').removeClass('hidden');
             $("#project-form-user").val(project['user']);
         }
+
         $("#project-form-id").val(project['id']);
         $("#project-form-name").val(project['name']);
 
@@ -235,24 +247,30 @@ function loadProject(idProject) {
         if (!boardTranslation) {
             boardTranslation = boards['other'];
         }
+
         $("#project-form-board").val(boardTranslation);
         $("#project-form-created").val(project['created']);
         $("#project-form-modified").val(project['modified']);
+        
+        // Connect the project description field to the Simple Editor
         simplemde.value(project['description']);
         $("#project-description-html").html(project['description-html']);
+        
         if (project['private']) {
             $("#project-form-private").prop('checked', 'checked').parent().addClass('active');
         } else if (project['shared']) {
             $("#project-form-shared").prop('checked', 'checked').parent().addClass('active');
         } else {
             $("#project-form-private").prop('checked', 'checked').parent().addClass('active');
-            //$("#project-form-friends").prop('checked', 'checked').parent().addClass('active');
         }
 
-
+        /* Find the open a project link element */
         var openProjectLink = $("a.open-project-link");
+
         openProjectLink.removeClass("editor-c-link editor-spin-link");
         openProjectLink.attr("href", baseUrl + "editor/" + projectTypes[project['type']]['editor'] + "?project=" + project['id']);
+
+        /* Set project URIs to include the project ID */
         $('.clone-project').attr('href', cloneUrl + project['id']);
         $('.delete-project').attr('href', deleteUrl + project['id']);
         openProjectLink.addClass(projectTypes[project['type']]['class']);
