@@ -3941,7 +3941,7 @@ Blockly.Blocks.ws2812b_set = {
         if (event && projectData && projectData['board'] !== 'heb-wx') {
 
             // only fire when a block got deleted or created, the RGB_PIN field was changed
-            if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'RGB_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
+            if (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE || (event.name === 'RGB_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
                 var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
                 if (allBlocks.toString().indexOf('RGB-LED initialize') === -1)
                 {
@@ -6318,7 +6318,7 @@ Blockly.Blocks.i2c_mode = {
     },
     onchange: function (event) {
         // only fire when a block got deleted or created, the SCL field was changed
-        if (event && (event.oldXml || event.type === Blockly.Events.CREATE ||
+        if (event && (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE ||
                 event.name === 'SCL' || event.name === 'SDA' ||
                 event.blockId === this.id || this.warnFlag > 0)) {
             var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
