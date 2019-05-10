@@ -842,6 +842,8 @@ function clearUploadInfo() {
     document.getElementById("selectfile-verify-notvalid").style.display = "none";
     document.getElementById("selectfile-verify-valid").style.display = "none";
     document.getElementById("selectfile-verify-boardtype").style.display = "none";
+    document.getElementById("selectfile-replace").disabled = true;
+    document.getElementById("selectfile-append").disabled = true;
 }
 
 
@@ -872,7 +874,7 @@ function uploadMergeCode(append) {
             var varCodeTemp = newCode.split('</variables>');
             newCode = varCodeTemp[1];
             // use a regex to match the id, name, and type of the varaibles in both the old and new code.
-            var tmpv = varCodeTemp[0].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
+            var tmpv = varCodeTemp[0].split('<variables>')[1].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
                 newBPCvars.push([m3, m2, m1]);  // name, id, type
                 return p;
             });
@@ -882,35 +884,29 @@ function uploadMergeCode(append) {
                 oldBPCvars.push([m3, m2, m1]);  // name, id, type
                 return p;
             });
-
             for (var j = 0; j < oldBPCvars.length; j++) {
                 k = 0;
                 while (k < newBPCvars.length) {
                     // see if var is a match
                     if (newBPCvars[k][0] === oldBPCvars[j][0]) {
                         // replace old variable IDs with new ones 
-                        var tmpr = new RegExp(newBPCvars[k][1], 'g');
-                        newCode.replace(tmpr, oldBPCvars[j][1]);
-                        // remove variable from original list now that it's merged 
-                        newBPCvars.splice(k,1);
+                        var tmpr = newCode.split(newBPCvars[k][1]);
+                        newCode = tmpr.join(oldBPCvars[j][1]);
                     } else {
-                        k++;
+                        oldBPCvars.push(newBPCvars[k]);
                     }
+                    k++;
                 }
             }
 
             // rebuild vars from both new/old
-            oldBPCvars = oldBPCvars.concat(newBPCvars);
             tmpv = '<variables>';
             oldBPCvars.forEach(function(vi, j) {
                 tmpv += '<variable id="' + vi[1] + '" type="' + vi[2] + '">' + vi[0] + '</variable>';
             });
             tmpv += '</variables>';
-
             // add everything back together
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
-            console.log(projectData['code']);
-
         } else {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
         }
