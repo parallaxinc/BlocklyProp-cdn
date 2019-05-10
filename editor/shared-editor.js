@@ -9,13 +9,22 @@ var baseUrl = $("meta[name=base]").attr("content");
 
 var projectData = null;
 var ready = false;
+
+/*
+ * Boolean flag that idetifies if a project has been loaded into
+ * the editor.
+ */
 var projectLoaded = false;
+
 
 var idProject = 0;
 
 $(document).ready(function () {
+    // Expect to find the project payload in the data passed in from the browser
     projectData = window.data;
+
     showInfo(projectData);
+
     projectLoaded = true;
     if (ready) {
         window.frames["content_blocks"].setProfile(projectData['board']);
@@ -50,6 +59,10 @@ saveProject = function () {
     });
 };
 
+
+/*
+ * Handle the document.body onload() event
+ */
 blocklyReady = function () {
     if (projectLoaded) {
         window.frames["content_blocks"].setProfile(projectData['board']);
