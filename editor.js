@@ -104,6 +104,8 @@ var uploadedXML = '';
  *
  */
 $(document).ready(function () {
+    console.log("User authentication is: ", user_authenticated);
+
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
         $('.auth-false').css('display', 'none');
@@ -116,7 +118,11 @@ $(document).ready(function () {
         return baseUrl + cur;
     });
 
-    // set the URLs for all of the CDN-sourced images
+    /*
+     * Set the URLs for all of the CDN-sourced images
+     *
+     * TODO: Fix the <div> elements in the HTML
+     */
     var imgs = document.getElementsByTagName('img');
     for (var l = 0; l < imgs.length; l++) {
         imgs[l].src = cdnUrl + imgs[l].getAttribute('data-src');
@@ -176,6 +182,10 @@ $(document).ready(function () {
         }
 
     } else {
+        // We need to test for the case where we are creating a new local project
+        // and the project detail are being passed in the Request body
+        // TODO: Create a new project from details passed in from the new-project page
+        // ----------------------------------------------------------------------------
         $.get(baseUrl + 'rest/shared/project/editor/' + idProject, function(data) { setupWorkspace(data) })
             .fail(function () {
             // Failed to load project - this probably means that it belongs to another user and is not shared.
@@ -552,6 +562,8 @@ window.onbeforeunload = function () {
 /**
  *
  * @returns {boolean}
+ *
+ * TODO: We might get here if we failed to load a new project.
  */
 var checkLeave = function () {
     var currentXml = '';

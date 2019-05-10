@@ -140,16 +140,19 @@ const neDownloadFailed             = 102;
 
 
 $(document).ready(function () {
+    // Establish a connection with the BlocklyPRop client application
     find_client();
 });
 
 var find_client = function () {
+
     if (check_ws_socket_timeout) {
         //Clear timeout if it exists; without this, back-to-back find_client() calls seem to occur
         clearTimeout(check_ws_socket_timeout);
     }
     
     establish_socket();
+
     if (client_use_type !== 'ws') {
         // WebSocket'd launcher not found?  Try Http'd client
         check_client();
@@ -208,6 +211,19 @@ var set_ui_buttons = function (ui_btn_state) {
 };
 
 var check_client = function () {
+    /*
+     *  TESTING CORS ERROR ISSUE HERE
+     */
+    var http_headers = new Headers(
+        {
+            "Access-Control-Allow-Origin": "http://localhost:6009", // http://stackoverflow.com/a/28353443/1148249
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+            "Content-Type": "application/javascript",
+            "etag": new Date().getTime() // expire immediately
+        }
+    );
+
     $.get(client_url, function (data) {
         if (!client_available) {
             client_version = version_as_number((typeof data.version_str !== "undefined") ? data.version_str : data.version);
