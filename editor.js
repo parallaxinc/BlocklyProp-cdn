@@ -681,11 +681,15 @@ function uploadMergeCode(append) {
         }
 
         var newCode = uploadedXML;
-        newCode = newCode.substring(42, newCode.length);
+        if (newCode.indexOf('<variables>') > -1) {
+            newCode = newCode.substring(uploadedXML.indexOf('<block'), newCode.length);
+        } else {
+            newCode = newCode.substring(uploadedXML.indexOf('<variables>'), newCode.length);
+        }
         newCode = newCode.substring(0, (newCode.length - 6));
         
         // check for newer blockly XML code (contains a list of variables)
-        if (append && newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') > -1) {
+        if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') > -1) {
             var findVarRegExp = /type="(\w*)" id="(.{20})">(\w+)</g;
             var newBPCvars = [];
             var oldBPCvars = [];
@@ -725,7 +729,7 @@ function uploadMergeCode(append) {
             tmpv += '</variables>';
             // add everything back together
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
-        } else if (append && newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') === -1) {
+        } else if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') === -1) {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + newCode + projCode + '</xml>';
         } else {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
