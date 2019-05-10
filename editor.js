@@ -681,7 +681,7 @@ function uploadMergeCode(append) {
         }
 
         var newCode = uploadedXML;
-        if (newCode.indexOf('<variables>') > -1) {
+        if (newCode.indexOf('<variables>') === -1) {
             newCode = newCode.substring(uploadedXML.indexOf('<block'), newCode.length);
         } else {
             newCode = newCode.substring(uploadedXML.indexOf('<variables>'), newCode.length);
@@ -707,8 +707,11 @@ function uploadMergeCode(append) {
                 oldBPCvars.push([m3, m2, m1]);  // name, id, type
                 return p;
             });
-            for (var j = 0; j < oldBPCvars.length; j++) {
-                for (var k = 0; k < newBPCvars.length; k++) {
+            // record how many variables are in the original and new code
+            tmpv = [oldBPCvars.length, newBPCvars.length];
+            // iterate through the captured variables to detemine if any overlap
+            for (var j = 0; j < tmpv[0]; j++) {
+                for (var k = 0; k < tmpv[1]; k++) {
                     // see if var is a match
                     if (newBPCvars[k][0] === oldBPCvars[j][0]) {
                         // replace old variable IDs with new ones 
