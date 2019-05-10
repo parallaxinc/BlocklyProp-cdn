@@ -104,6 +104,8 @@ var uploadedXML = '';
  *
  */
 $(document).ready(function () {
+    console.log("User authentication is: ", user_authenticated);
+
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
         $('.auth-false').css('display', 'none');
@@ -116,7 +118,11 @@ $(document).ready(function () {
         return baseUrl + cur;
     });
 
-    // set the URLs for all of the CDN-sourced images
+    /*
+     * Set the URLs for all of the CDN-sourced images
+     *
+     * TODO: Fix the <div> elements in the HTML
+     */
     var imgs = document.getElementsByTagName('img');
     for (var l = 0; l < imgs.length; l++) {
         imgs[l].src = cdnUrl + imgs[l].getAttribute('data-src');
@@ -176,6 +182,10 @@ $(document).ready(function () {
         }
 
     } else {
+        // We need to test for the case where we are creating a new local project
+        // and the project detail are being passed in the Request body
+        // TODO: Create a new project from details passed in from the new-project page
+        // ----------------------------------------------------------------------------
         $.get(baseUrl + 'rest/shared/project/editor/' + idProject, function(data) { setupWorkspace(data) })
             .fail(function () {
             // Failed to load project - this probably means that it belongs to another user and is not shared.
@@ -552,6 +562,8 @@ window.onbeforeunload = function () {
 /**
  *
  * @returns {boolean}
+ *
+ * TODO: We might get here if we failed to load a new project.
  */
 var checkLeave = function () {
     var currentXml = '';
@@ -749,8 +761,12 @@ function uploadHandler(files) {
                 && xmlString.indexOf("<!--") === -1)
         {
             var uploadedChecksum = xmlString.substring((xmlString.length - 24), (xmlString.length - 12));
-            uploadedXML = xmlString.substring(xmlString.indexOf("<block"), (xmlString.length - 29));
-
+            var findBPCstart = '<block';
+            if (xmlString.indexOf("<variables>") > -1) {
+                findBPCstart = '<variables>';
+            }
+            uploadedXML = xmlString.substring(xmlString.indexOf(findBPCstart), (xmlString.length - 29));
+            
             var computedChecksum = hashCode(uploadedXML).toString();
             computedChecksum = '000000000000'.substring(computedChecksum.length, 12) + computedChecksum;
 
@@ -826,6 +842,8 @@ function clearUploadInfo() {
     document.getElementById("selectfile-verify-notvalid").style.display = "none";
     document.getElementById("selectfile-verify-valid").style.display = "none";
     document.getElementById("selectfile-verify-boardtype").style.display = "none";
+    document.getElementById("selectfile-replace").disabled = true;
+    document.getElementById("selectfile-append").disabled = true;
 }
 
 
@@ -846,8 +864,53 @@ function uploadMergeCode(append) {
         var newCode = uploadedXML;
         newCode = newCode.substring(42, newCode.length);
         newCode = newCode.substring(0, (newCode.length - 6));
+        
+        // check for newer blockly XML code (contains a list of variables)
+        if (newCode.indexOf('<variables>') > -1) {
+            var findVarRegExp = /type="(\w*)" id="(.{20})">(\w+)</g;
+            var newBPCvars = [];
+            var oldBPCvars = [];
+    
+            var varCodeTemp = newCode.split('</variables>');
+            newCode = varCodeTemp[1];
+            // use a regex to match the id, name, and type of the varaibles in both the old and new code.
+            var tmpv = varCodeTemp[0].split('<variables>')[1].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
+                newBPCvars.push([m3, m2, m1]);  // name, id, type
+                return p;
+            });
+            varCodeTemp = projCode.split('</variables>');
+            projCode = varCodeTemp[1];
+            tmpv = varCodeTemp[0].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
+                oldBPCvars.push([m3, m2, m1]);  // name, id, type
+                return p;
+            });
+            for (var j = 0; j < oldBPCvars.length; j++) {
+                k = 0;
+                while (k < newBPCvars.length) {
+                    // see if var is a match
+                    if (newBPCvars[k][0] === oldBPCvars[j][0]) {
+                        // replace old variable IDs with new ones 
+                        var tmpr = newCode.split(newBPCvars[k][1]);
+                        newCode = tmpr.join(oldBPCvars[j][1]);
+                    } else {
+                        oldBPCvars.push(newBPCvars[k]);
+                    }
+                    k++;
+                }
+            }
 
-        projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+            // rebuild vars from both new/old
+            tmpv = '<variables>';
+            oldBPCvars.forEach(function(vi, j) {
+                tmpv += '<variable id="' + vi[1] + '" type="' + vi[2] + '">' + vi[0] + '</variable>';
+            });
+            tmpv += '</variables>';
+            // add everything back together
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
+        } else {
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+        }
+
         Blockly.mainWorkspace.clear();
         loadToolbox(projectData['code']);
         clearUploadInfo();
