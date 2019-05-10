@@ -685,7 +685,7 @@ function uploadMergeCode(append) {
         newCode = newCode.substring(0, (newCode.length - 6));
         
         // check for newer blockly XML code (contains a list of variables)
-        if (newCode.indexOf('<variables>') > -1) {
+        if (append && newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') > -1) {
             var findVarRegExp = /type="(\w*)" id="(.{20})">(\w+)</g;
             var newBPCvars = [];
             var oldBPCvars = [];
@@ -704,17 +704,16 @@ function uploadMergeCode(append) {
                 return p;
             });
             for (var j = 0; j < oldBPCvars.length; j++) {
-                k = 0;
-                while (k < newBPCvars.length) {
+                for (var k = 0; k < newBPCvars.length; k++) {
                     // see if var is a match
                     if (newBPCvars[k][0] === oldBPCvars[j][0]) {
                         // replace old variable IDs with new ones 
                         var tmpr = newCode.split(newBPCvars[k][1]);
                         newCode = tmpr.join(oldBPCvars[j][1]);
                     } else {
+                        // add variable to list to be placed in blocklyprop xml variable defs
                         oldBPCvars.push(newBPCvars[k]);
                     }
-                    k++;
                 }
             }
 
@@ -726,6 +725,8 @@ function uploadMergeCode(append) {
             tmpv += '</variables>';
             // add everything back together
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
+        } else if (append && newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') === -1) {
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + newCode + projCode + '</xml>';
         } else {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
         }
