@@ -717,10 +717,16 @@ function uploadMergeCode(append) {
                         // replace old variable IDs with new ones 
                         var tmpr = newCode.split(newBPCvars[k][1]);
                         newCode = tmpr.join(oldBPCvars[j][1]);
-                    } else {
-                        // add variable to list to be placed in blocklyprop xml variable defs
-                        oldBPCvars.push(newBPCvars[k]);
+                        // null the ID to mark that it's a duplicate and 
+                        // should not be included in the combined list
+                        newBPCvars[k][1] = null;
                     }
+                }
+            }
+            for (k = 0; k < tmpv[1]; k++) {
+                if (newBPCvars[k][1]) {
+                    // Add var from uploaded xml to the project code
+                    oldBPCvars.push(newBPCvars[k]);
                 }
             }
 
