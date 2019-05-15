@@ -32,8 +32,7 @@ var projectTypes = {
 
 
 /**
- * SimpleMDE package for textarea editing
- * 
+ *
  * @type {null}
  */
 var simplemde = null;
@@ -50,14 +49,14 @@ var pd = {};
  *
  * @type {boolean}
  */
-var isOffline = $("meta[name='isOffline']").attr("content") == 'true' ? true : false;
+var isOffline = ($("meta[name=isOffline]").attr("content") === 'true') ? true : false;
 
 
-/*
- * Add some special sauce to the project creation page
+/**
+ *
  */
 $(document).ready(function () {
-    /*  Activate the tooltips ?     */
+    /*  Activate the tooltips      */
     $('[rel="tooltip"]').tooltip();
 
     simplemde = new SimpleMDE({
@@ -66,18 +65,8 @@ $(document).ready(function () {
         spellChecker: false
     });
 
-    /* Set the project language from the URL parameter 'lang'. If the 
-     * parameter is not provided, default to PROPC.
-     */
-    var language = getURLParameter('lang');
+    $('#project-type').val(getURLParameter('lang'));
 
-    if (language == null) {
-        language = "PROPC";
-    }
-
-    $('#project-type').val(language);
-
-/*
     $('[data-toggle="wizard-radio"]').click(function () {
         wizard = $(this).closest('.wizard-card');
         wizard.find('[data-toggle="wizard-radio"]').removeClass('active');
@@ -95,9 +84,7 @@ $(document).ready(function () {
             $(this).find('[type="checkbox"]').attr('checked', 'true');
         }
     });
-*/
 
-    // TODO: What is this?
     $height = $(document).height();
     $('.set-full-height').css('height', $height);
     
@@ -199,25 +186,13 @@ $('#finish').on('click', function () {
                 }
             });
         } else {
-            // Offline mode project persistance
             pd.board = formData['board-type'];
             pd.description = formData['project-description'];
             pd['name'] = formData['project-name'];
             pd['description-html'] = formData['project-description-html'];
 
-            /* Save the current project into a key/value pair persisted in
-             * the browser's local storage.
-             *
-             * This really should call something that persists the project
-             * to the user's local hard dirve. Also note that the key is
-             * hard-coded, which means only one project can be saved.
-             */
             window.localStorage.setItem('localProject', JSON.stringify(pd));
-
-
-            // Redirect the browser
-        	// window.location = '/blocklyc.html';
-            window.location.href = '/blocklyc.html?project=0';
+        	window.location = 'blocklyc.html';
         }
     }
 });
