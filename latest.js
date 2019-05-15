@@ -56,25 +56,8 @@ var projectBoard = {
 
 
 /**
- * Get a list of the five most recent projects and create an ordered list
- * expressed in HTML
+ * Get a list of projects and create an ordered list, expressed in HTML
  *
- *  Example row returned is:
- *       {
- *           "id": 2192,
- *           "name": "28504 - GPS Test",
- *           "description": "",
- *           "type": "PROPC",
- *           "board": "flip",
- *           "private": false,
- *           "shared": true,
- *           "created": "2019/04/10 12:25",
- *           "modified": "2019/05/01 12:42",
- *           "settings": null,
- *           "yours": false,
- *           "user": "VonSzarvas",
- *           "id-user": 131
- *       }
  */
 $.get("rest/shared/project/list?sort=modified&order=desc&limit=5&offset=0", function (data) {
     $.each(data['rows'], function (index, project) {
