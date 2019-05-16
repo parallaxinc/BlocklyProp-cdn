@@ -202,13 +202,23 @@ var profile = {
         saves_to: []
     }
 };
+
+/**
+ * Set the project profile based on the project board type
+ *
+ * @param profileName is the project board type
+ */
 function setProfile(profileName) {
+
+    // Set the default project profile to match the provided board type
     if (profile[profileName]) {
         profile["default"] = profile[profileName];
     } else {
+        // Unable to match the provided board type. Dummy down the interface
         profile["default"] = profile["other"];
     }
 
+    // Setting a default baud rate
     window.parent.setBaudrate(profile["default"]["baudrate"]);
 }
 

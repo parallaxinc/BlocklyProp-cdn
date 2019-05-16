@@ -25,7 +25,7 @@
 /**
  * Project language types
  *
- * @type {{PROPC: {editor: string, class: string}, SPIN: {editor: string, class: string}}}
+ * @type is an array of project language types
  */
 var projectTypes = {
     "PROPC": {
@@ -42,7 +42,7 @@ var projectTypes = {
 /**
  * Suppoted project board types
  *
- * @type {{"activity-board": string, s3: string, heb: string, "heb-wx": string, flip: string, other: string, propcfile: string}}
+ * @type is an array of project board types and their associated icons
  */
 var projectBoard = {
     "activity-board": "icon-board-ab",
@@ -54,26 +54,32 @@ var projectBoard = {
     "propcfile": "icon-board-propc"
 };
 
-
 /**
- * Get a list of projects and create an ordered list, expressed in HTML
- *
+ * Create a linked list of the five most recent projects.
+ * Each link will display the project name and the project onwner.
  */
 $.get("rest/shared/project/list?sort=modified&order=desc&limit=5&offset=0", function (data) {
+    // Loop through each row returned
     $.each(data['rows'], function (index, project) {
         console.log(project);
+
         var user = '';
+
+        // Set the user name for use in the anchor element below
         if (project['user']) {
             user = ' (' + project['user'] + ')';
         }
+
         var projectItem = $("<li/>", {
             "class": "project"
         });
+
         $("<a/>", {
             "class": "editor-view-link editor-icon " + projectBoard[project['board']],
             "href": "editor/" + projectTypes[project['type']]['editor'] + "?project=" + project['id'],
             "text": project['name'] + user
         }).appendTo(projectItem);
+
         $(".latest-projects").append(projectItem);
     });
 });
