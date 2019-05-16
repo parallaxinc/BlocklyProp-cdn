@@ -186,6 +186,8 @@ $('#finish').on('click', function () {
                 }
             });
         } else {
+            // Save the project details in the browser's local storage
+            // and let the editor figure it out.
             pd.board = formData['board-type'];
             pd.description = formData['project-description'];
             pd['name'] = formData['project-name'];
