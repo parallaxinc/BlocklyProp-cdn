@@ -141,6 +141,7 @@ $(document).ready(function () {
     $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
 
     idProject = getURLParameter('project');
+
     var projectlink = null;
     
     if (window.location.href.indexOf('projectlink') > -1) {
@@ -148,12 +149,17 @@ $(document).ready(function () {
         var projectRaw = atob($("meta[name=projectlink]").attr("content"));
         projectlink = JSON.parse(projectRaw);
         setupWorkspace(projectlink);
+
     } else if (!idProject && !isOffline) {
         window.location = baseUrl;
 
     } else if (!idProject && isOffline) {
         // TODO: Use the ping endpoint to see if we are offline.
+
+        // TODO: Offline must be true to get here. Why is it being set to true again?
         isOffline = true;
+
+        // Stop pinging
         clearInterval(pingInterval);
 
         // hide save interaction elements
@@ -164,6 +170,7 @@ $(document).ready(function () {
         $("#save_as_dialog_button").html('Continue');
         $(".save-as-close").addClass('hidden');
 
+
         $('#save-as-project-name').val('MyProject');
         $("#saveAsDialogSender").html('offline');
         $("#save-as-board-type").empty();
@@ -172,8 +179,11 @@ $(document).ready(function () {
         }
 
         if (getURLParameter('openFile') === "true" && isOffline) {
+            // Import a project .SVG file
             $('#upload-dialog').modal('show');
+
         } else if (window.localStorage.getItem('localProject')) {
+            // Look for a default project in the local browser store
             setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
             //window.localStorage.removeItem('localProject');
         } else {
@@ -194,23 +204,28 @@ $(document).ready(function () {
             });
         });
     }
-    
+
+    // Set up event handlers
     $('#save-project').on('click', function () {
-	if (isOffline) {
+        if (isOffline) {
             downloadCode();
         } else {
             saveProject();  
         }
     });
+
     $('#save-project-as').on('click', function () {
         saveAsDialog();
     });
+
     $('#download-project').on('click', function () {
         downloadCode();
     });
+
     $('#upload-project').on('click', function () {
         uploadCode();
     });
+
     $('#save-check-dialog').on('hidden.bs.modal', function () {
         timestampSaveTime(5, false);
     });
@@ -224,17 +239,29 @@ $(document).ready(function () {
 var setupWorkspace = function (data) {
     console.log(data);
     projectData = data;
+
+    // Update the UI with project related details
     showInfo(data);
 
+    // In the offline mode, there is no concept of project id.
+    // TODO: Resolve project id for offline mode to zero
+    // --------------------------------------------------------
     if (!idProject) {
         idProject = projectData['id'];
     }
-    
+
+    // Set various project settings based on the project board type
+    // NOTE: This function is in propc.js
     setProfile(projectData['board']);
+
+    // Determine if this is a pure C project
     if (projectData['board'] !== 'propcfile') {
         initToolbox(projectData['board'], []);
     } else {
+        // No, init the blockly interface
         init(Blockly);
+
+        // Create UI block content from project details
         renderContent('propc');
     }
 
@@ -300,19 +327,23 @@ var checkLastSavedTime = function () {
 
 
 /**
+ * Set the UI fields for the project name, project owner and project type icon
  *
- * @param data
+ * @param data is the project data structure
  */
 var showInfo = function (data) {
-    //console.log(data);
+    console.log(data);
+
+    // Display the prject name
     $(".project-name").text(data['name']);
 
     // Does the current user own the project?
     if (!data['yours']) {
-        // If not, display owner username [and hide save-as menu option - nevermind :) ]
+        // If not, display owner username
         $(".project-owner").text("(" + data['user'] + ")");
-        // $("#save-as-menu-item").css('display', 'none');
     }
+
+    // Create an array of board type icons
     var projectBoardIcon = {
         "activity-board": "images/board-icons/IconActivityBoard.png",
         "s3": "images/board-icons/IconS3.png",
@@ -323,6 +354,7 @@ var showInfo = function (data) {
         "propcfile": "images/board-icons/IconC.png"
     };
 
+    // Set the prject icon to the correct board type
     $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
 };
 
