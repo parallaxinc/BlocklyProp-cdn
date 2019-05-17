@@ -570,6 +570,33 @@ var set_port_list = function (data) {
         }));
         ports_available = false;
     }
-    ;
     select_com_port(selected_port);
 };
+
+/*
+var set_port_list = function (data) {
+    data = (data ? data : 'searching');
+    var selected_port = $("#comPort").attr("data-port");
+    $("#comPort").empty();
+    if (typeof (data) === 'object' && data.length) {
+        data.forEach(function (port) {
+            // THE TOP (HEADER) LIST ITEM.
+            var li = $('<li/>')
+            .appendTo('#comPort');
+
+            $('<a />')
+            .text(port.replace(/dev\//g,''))
+            .attr('href', '#')
+            .attr('onmouseup', '$(this).attr("data-port","' + port + '")')
+            .appendTo(li);     // ADD THE TOP LIST TO THE HEADER (<ul>).
+        });
+        ports_available = true;
+    } else {
+        $("#comPort").append($('<option>', {
+            text: (data === 'searching') ? 'Searching...' : 'No devices found'
+        }));
+        ports_available = false;
+    }
+    select_com_port(selected_port);
+};
+*/

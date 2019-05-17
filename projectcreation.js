@@ -216,8 +216,7 @@ $('#finish').on('click', function () {
 
 
             // Redirect the browser
-        	// window.location = '/blocklyc.html';
-            window.location.href = '/blocklyc.html?project=0';
+            window.location.href = '/blocklyc.html';
         }
     }
 });
