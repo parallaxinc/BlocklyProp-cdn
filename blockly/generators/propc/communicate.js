@@ -3941,7 +3941,7 @@ Blockly.Blocks.ws2812b_set = {
         if (event && projectData && projectData['board'] !== 'heb-wx') {
 
             // only fire when a block got deleted or created, the RGB_PIN field was changed
-            if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'RGB_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
+            if (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE || (event.name === 'RGB_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
                 var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
                 if (allBlocks.toString().indexOf('RGB-LED initialize') === -1)
                 {
@@ -5448,7 +5448,7 @@ Blockly.propc.wx_ip = function () {
         if (!this.disabled) {
             var func = 'char *wifi_ip_string(int __mode) {int __ip[4]; char __result = ';
             func += 'wifi_ip(__mode, __ip); char *ipStr; if(__result == \'E\') ';
-            func += '{ipStr = "Error          ";} else {sprint(ipStr, "%d.%d';
+            func += '{strcpy(ipStr, "Error          ");} else {sprint(ipStr, "%d.%d';
             func += '.%d.%d", __ip[0], __ip[1], __ip[2], __ip[3]);} return ipStr;}';
 
             Blockly.propc.methods_["ip_address_func"] = func;
@@ -6318,7 +6318,7 @@ Blockly.Blocks.i2c_mode = {
     },
     onchange: function (event) {
         // only fire when a block got deleted or created, the SCL field was changed
-        if (event && (event.oldXml || event.type === Blockly.Events.CREATE ||
+        if (event && (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE ||
                 event.name === 'SCL' || event.name === 'SDA' ||
                 event.blockId === this.id || this.warnFlag > 0)) {
             var allBlocks = Blockly.getMainWorkspace().getAllBlocks();

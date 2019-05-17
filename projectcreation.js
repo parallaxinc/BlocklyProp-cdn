@@ -207,7 +207,7 @@ $('#finish').on('click', function () {
 
             // Save the project details to the browser store & redirect the browser to the editor.
             window.localStorage.setItem('localProject', JSON.stringify(pd));
-        	window.location = 'blocklyc.html';
+        	window.location = 'blocklyc.html?openFile=true';
         }
     }
 });
