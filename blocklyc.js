@@ -244,6 +244,10 @@ var graph_data = {
 };
 
 
+// Flag offline docker mode
+var docker = $("meta[name=docker]").attr("content");
+
+
 /**
  * Minimum client/launcher version supporting base64-encoding
  */
@@ -657,30 +661,79 @@ function cloudCompile(text, action, successHandler) {
 
         // OFFLINE MODE
         if (isOffline) {
-            // Compiler optimization options:
-            // -O0 (None)
-            // -O1 (Mixed)
-            // -O2 (Speed)
-            // -Os (Size)
-            localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
-                if (data.error) {
+            if (docker) {
+                // Contact the local docker container running cloud compiler
+
+                // baseUrl = /blockly/
+                // action = 'compile'
+                // idProject = an integer project number
+                // data = {'code: propCode}
+                //propCode = "// ------ Libraries and Definitions ------↵#include "simpletools.h"↵↵↵↵// ------ Main Program ------↵int main() {↵↵  //↵↵}"
+                postUrl = 'http://localhost:5001/single/prop-c/' + action;
+                $.ajax({
+                    'method': 'POST',
+                    'url':  postUrl,
+                    'data': {"code": propcCode}
+                }).done(function (data) {
                     console.log(data);
-                    // Get message as a string, or blank if undefined
-                    alert("BlocklyProp was unable to compile your project:\n" + data['message'] 
-                        + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
-                } else {
-                    var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
-                    $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
-    console.log(data);                
-                    if (data.success && data.binary) {
-                        successHandler(data, terminalNeeded);
+
+                    // Check for an error response from the compiler
+                    if (! data || data["compiler-error"] != "") {
+                        // Get message as a string, or blank if undefined
+                        var message =  (typeof data["compiler-error"] === "string") ? data["compiler-error"] : "";
+                        alert("BlocklyProp was unable to compile your project:\n" + message
+                            + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                    } else {
+                        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+
+                        $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
+                        if (data.success) {
+                            successHandler(data, terminalNeeded);
+                        }
+
+                        // Scoll automatically to the bottom after new data is added
+                        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
                     }
-                    
-                    // Scoll automatically to the bottom after new data is added
-                    document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
-                }
-            });
-        } else {  // ONLINE MODE
+                }).fail(function (data) {
+                    // console.log(data);
+                    var message = (typeof data === "string") ? data : data.toString();
+                    alert("BlocklyProp was unable to compile your project:\n----------\n" + message
+                        + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                });
+
+            }
+            else {  // Use the webpack version
+                /*
+                 * Compiler optimization options:
+                 *
+                 *  -O0 (None)
+                 *  -O1 (Mixed)
+                 *  -O2 (Speed)
+                 *  -Os (Size)
+                 */
+
+                localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
+                    if (data.error) {
+                        console.log(data);
+                        // Get message as a string, or blank if undefined
+                        alert("BlocklyProp was unable to compile your project:\n" + data['message']
+                            + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                    } else {
+                        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+                        $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
+                        console.log(data);
+
+                        if (data.success && data.binary) {
+                            successHandler(data, terminalNeeded);
+                        }
+
+                        // Scoll automatically to the bottom after new data is added
+                        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
+                    }
+                });
+            }
+        }
+        else {  // ONLINE MODE
             $.ajax({
                 'method': 'POST',
                 'url': baseUrl + 'rest/compile/c/' + action + '?id=' + idProject,
