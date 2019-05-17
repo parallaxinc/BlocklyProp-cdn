@@ -312,7 +312,7 @@ Blockly.Blocks.colorpal_enable = {
     },
     onchange: function (event) {
         this.colorPalPin = this.getFieldValue('IO_PIN');
-        if (event && (event.oldXml || event.xml)) {  // only fire when a block got deleted or created
+        if (event && (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE)) {  // only fire when a block got deleted or created
             this.onPinSet(null);
         }
     },
@@ -432,7 +432,7 @@ Blockly.Blocks.colorpal_get_colors_raw = {
     onchange: function (event) {
         if (event) {
             // only fire when a block got deleted or created, the CP_PIN field was changed
-            if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'CP_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
+            if (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE || (event.name === 'CP_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
                 var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
                 if (allBlocks.toString().indexOf('ColorPal initialize') === -1)
                 {

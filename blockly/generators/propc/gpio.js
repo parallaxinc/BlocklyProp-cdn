@@ -1363,14 +1363,14 @@ Blockly.Blocks.sound_play = {
     },
     onchange: function (event) {
         if (!(projectData['board'] && (projectData['board'] === "heb" || projectData['board'] === "heb-wx"))) {
-        //if (event.oldXml || event.type === Blockly.Events.CREATE) {
-            var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
-            if (allBlocks.indexOf('sound initialize') === -1) {
-                this.setWarningText('WARNING: You must use a sound initialize\nblock at the beginning of your program!');
-            } else {
-                this.setWarningText(null);
+            if (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE) {
+                var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+                if (allBlocks.indexOf('sound initialize') === -1) {
+                    this.setWarningText('WARNING: You must use a sound initialize\nblock at the beginning of your program!');
+                } else {
+                    this.setWarningText(null);
+                }
             }
-        //}
         }
     }
 };
@@ -1431,6 +1431,16 @@ Blockly.Blocks.wav_play = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+    },
+    onchange: function (event) {
+        if (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE) {
+            var warnTxt = null;
+            var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+            if (allBlocks.indexOf('repeat') === -1 && allBlocks.indexOf('pause') === -1) {
+                warnTxt = 'This block MUST be used with other types of blocks, see Help.';
+            }
+            this.setWarningText(warnTxt);
+        }
     }
 };
 
@@ -1746,9 +1756,9 @@ Blockly.Blocks.sd_read = {
                 }), "MODE");
         this.setFieldValue(mode, "MODE");
     },
-    onchange: function () {
-        var warnTxt = null;
-        //if (event.oldXml || event.type === Blockly.Events.CREATE) {
+    onchange: function (event) {
+        if (event.type === Blockly.Events.BLOCK_DELETE || event.type === Blockly.Events.BLOCK_CREATE) {
+            var warnTxt = null;
             var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
             if (allBlocks.indexOf('SD file open') === -1) {
                 warnTxt = 'WARNING: You must use a SD file open block\nbefore reading, writing, or closing an SD file!';
@@ -1756,8 +1766,8 @@ Blockly.Blocks.sd_read = {
                     && projectData["board"] !== "activity-board") {
                 warnTxt = 'WARNING: You must use a SD initialize\nblock at the beginning of your program!';
             }
-        //}
-        this.setWarningText(warnTxt);
+            this.setWarningText(warnTxt);
+        }
     }
 };
 
