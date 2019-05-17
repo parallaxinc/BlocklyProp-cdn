@@ -862,11 +862,15 @@ function uploadMergeCode(append) {
         }
 
         var newCode = uploadedXML;
-        newCode = newCode.substring(42, newCode.length);
+        if (newCode.indexOf('<variables>') === -1) {
+            newCode = newCode.substring(uploadedXML.indexOf('<block'), newCode.length);
+        } else {
+            newCode = newCode.substring(uploadedXML.indexOf('<variables>'), newCode.length);
+        }
         newCode = newCode.substring(0, (newCode.length - 6));
         
         // check for newer blockly XML code (contains a list of variables)
-        if (newCode.indexOf('<variables>') > -1) {
+        if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') > -1) {
             var findVarRegExp = /type="(\w*)" id="(.{20})">(\w+)</g;
             var newBPCvars = [];
             var oldBPCvars = [];
@@ -884,18 +888,26 @@ function uploadMergeCode(append) {
                 oldBPCvars.push([m3, m2, m1]);  // name, id, type
                 return p;
             });
-            for (var j = 0; j < oldBPCvars.length; j++) {
-                k = 0;
-                while (k < newBPCvars.length) {
+            // record how many variables are in the original and new code
+            tmpv = [oldBPCvars.length, newBPCvars.length];
+            // iterate through the captured variables to detemine if any overlap
+            for (var j = 0; j < tmpv[0]; j++) {
+                for (var k = 0; k < tmpv[1]; k++) {
                     // see if var is a match
                     if (newBPCvars[k][0] === oldBPCvars[j][0]) {
                         // replace old variable IDs with new ones 
                         var tmpr = newCode.split(newBPCvars[k][1]);
                         newCode = tmpr.join(oldBPCvars[j][1]);
-                    } else {
-                        oldBPCvars.push(newBPCvars[k]);
+                        // null the ID to mark that it's a duplicate and 
+                        // should not be included in the combined list
+                        newBPCvars[k][1] = null;
                     }
-                    k++;
+                }
+            }
+            for (k = 0; k < tmpv[1]; k++) {
+                if (newBPCvars[k][1]) {
+                    // Add var from uploaded xml to the project code
+                    oldBPCvars.push(newBPCvars[k]);
                 }
             }
 
@@ -907,6 +919,8 @@ function uploadMergeCode(append) {
             tmpv += '</variables>';
             // add everything back together
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
+        } else if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') === -1) {
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + newCode + projCode + '</xml>';
         } else {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
         }
