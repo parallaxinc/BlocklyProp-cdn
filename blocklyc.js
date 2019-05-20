@@ -695,12 +695,12 @@ function cloudCompile(text, action, successHandler) {
                         document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
                     }
                 }).fail(function (data) {
-                    // console.log(data);
-                    var message = (typeof data === "string") ? data : data.toString();
-                    alert("BlocklyProp was unable to compile your project:\n----------\n" + message
-                        + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                    // Data appears to be an HTTP response object
+                    if (data) {
+                        let message = "Aw snap. A server error " + data.status + " has been detected.";
+                        $("#compile-console").val($("#compile-console").val() +  message);
+                    }
                 });
-
             }
             else {  // Use the webpack version
                 /*
@@ -723,6 +723,7 @@ function cloudCompile(text, action, successHandler) {
                         $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
                         console.log(data);
 
+                        // The success handler will transfer the binary data to the BP client
                         if (data.success && data.binary) {
                             successHandler(data, terminalNeeded);
                         }
