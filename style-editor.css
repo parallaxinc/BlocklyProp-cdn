@@ -293,6 +293,11 @@ nav .nav > li > a:first-child {
     padding-left: 0;
 }
 
+ul > hr {
+    line-height: 5px; 
+    margin: 5px;
+}
+
 .navbar-default .navbar-nav>.open>a, .navbar-default .navbar-nav>.open>a:focus, .navbar-default .navbar-nav>.open>a:hover, .nav .open>a, .nav .open>a:focus, .nav .open>a:hover {
     background-color: transparent;
 }
@@ -451,12 +456,15 @@ nav .nav > li > a:first-child {
 .indent-left {
     padding-left: 15px;
 }
+
+/*
 @media screen and (min-width: 0\0) {
     select {
         background: none;
         padding: 5px;
     }
 }
+*/
 
 #options-menu:hover {
     background-color: #eee;
