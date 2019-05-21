@@ -183,7 +183,17 @@ var version_as_number = function (rawVersion) {
 
 var set_ui_buttons = function (ui_btn_state) {
     if (ui_btn_state === 'available') {
-        $("#client-available").removeClass("hidden");
+        if (projectData['board'] === 's3') {
+            $('#prop-btn-ram').addClass('hidden');
+            $('#prop-btn-graph').addClass('hidden');
+            $('#client-available').addClass('hidden');
+            $('#client-available-short').removeClass('hidden');
+        } else {
+            $('#prop-btn-ram').removeClass('hidden');
+            $('#prop-btn-graph').removeClass('hidden');
+            $('#client-available').removeClass('hidden');
+            $('#client-available-short').addClass('hidden');
+        }
         $("#client-searching").addClass("hidden");
         $("#client-unavailable").addClass("hidden");
         $("#prop-btn-ram").removeClass("disabled");
@@ -191,16 +201,16 @@ var set_ui_buttons = function (ui_btn_state) {
         $("#prop-btn-term").removeClass("disabled");
         $("#prop-btn-graph").removeClass("disabled");
     } else {
+        $("#client-available").addClass("hidden");
+        $("#client-available-short").addClass("hidden");
         $("#prop-btn-ram").addClass("disabled");
         $("#prop-btn-eeprom").addClass("disabled");
         $("#prop-btn-term").addClass("disabled");
         $("#prop-btn-graph").addClass("disabled");
         if (ui_btn_state === 'searching') {
-            $("#client-available").addClass("hidden");
             $("#client-searching").removeClass("hidden");
             $("#client-unavailable").addClass("hidden");
         } else {
-            $("#client-available").addClass("hidden");
             $("#client-searching").addClass("hidden");
             $("#client-unavailable").removeClass("hidden");
         }
@@ -556,31 +566,3 @@ var set_port_list = function (data) {
     }
     select_com_port(selected_port);
 };
-
-/*
-var set_port_list = function (data) {
-    data = (data ? data : 'searching');
-    var selected_port = $("#comPort").attr("data-port");
-    $("#comPort").empty();
-    if (typeof (data) === 'object' && data.length) {
-        data.forEach(function (port) {
-            // THE TOP (HEADER) LIST ITEM.
-            var li = $('<li/>')
-            .appendTo('#comPort');
-
-            $('<a />')
-            .text(port.replace(/dev\//g,''))
-            .attr('href', '#')
-            .attr('onmouseup', '$(this).attr("data-port","' + port + '")')
-            .appendTo(li);     // ADD THE TOP LIST TO THE HEADER (<ul>).
-        });
-        ports_available = true;
-    } else {
-        $("#comPort").append($('<option>', {
-            text: (data === 'searching') ? 'Searching...' : 'No devices found'
-        }));
-        ports_available = false;
-    }
-    select_com_port(selected_port);
-};
-*/

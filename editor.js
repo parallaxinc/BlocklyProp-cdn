@@ -265,15 +265,7 @@ var setupWorkspace = function (data) {
         renderContent('propc');
     }
 
-    if (projectData['board'] === 's3') {
-        $('#prop-btn-ram').addClass('hidden');
-        $('#prop-btn-graph').addClass('hidden');
-        document.getElementById('client-available').innerHTML = document.getElementById('client-available-short').innerHTML;
-    } else {
-        $('#prop-btn-ram').removeClass('hidden');
-        $('#prop-btn-graph').removeClass('hidden');
-        document.getElementById('client-available').innerHTML = document.getElementById('client-available-long').innerHTML;
-    }
+
 
     if (projectData && projectData['yours'] === false) {
         $('#edit-project-details').html(page_text_label['editor_view-details'])
