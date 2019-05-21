@@ -2688,6 +2688,7 @@ Blockly.propc.xbee_scan_multiple = function () {
 // -------------- OLED Display blocks ------------------------------------------
 Blockly.Blocks.oled_initialize = {
     init: function () {
+        this.resetPinLabel = 'RES';
         if (this.type === 'oled_initialize') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -2696,6 +2697,7 @@ Blockly.Blocks.oled_initialize = {
             this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
+            this.resetPinLabel = 'RST';
         }
         this.setTooltip(Blockly.MSG_OLED_INITIALIZE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
@@ -2722,7 +2724,7 @@ Blockly.Blocks.oled_initialize = {
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "CS")
                 .appendField("D/C")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "DC")
-                .appendField("RES")
+                .appendField(this.resetPinLabel)
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "RES");
         if (this.myType === 'ePaper') {
             this.getInput('PINS')
