@@ -2083,12 +2083,12 @@ Blockly.Blocks.bme680_init = {
             this.removeInput('PINS');
         }
         this.appendDummyInput('PINS')
-                .appendField("Air Quality initialize SDO")
-                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SDO")
-                .appendField("CLK")
+                .appendField("Air Quality initialize CLK")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CLK")
                 .appendField("SDI")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SDI")
+                .appendField("SDO")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SDO")
                 .appendField("CS")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CS");
         for (var i = 0; i < 4; i++) {
@@ -2102,7 +2102,7 @@ Blockly.Blocks.bme680_init = {
 };
 
 Blockly.propc.bme680_init = function () {
-    var pin = [this.getFieldValue('PIN_SDO'), this.getFieldValue('PIN_CLK'), this.getFieldValue('PIN_SDI'), this.getFieldValue('PIN_CS')];
+    var pin = [this.getFieldValue('PIN_CLK'), this.getFieldValue('PIN_SDI'), this.getFieldValue('PIN_SDO'), this.getFieldValue('PIN_CS')];
     for (var i = 0; i < 3; i++) {
         if (profile.default.digital.toString().indexOf(pin[i] + ',' + pin[i]) === -1) {
             pin[i] = 'MY_' + pin[i];
@@ -2110,8 +2110,7 @@ Blockly.propc.bme680_init = function () {
     }
     if (!this.disabled) {
         Blockly.propc.definitions_["include_bme680"] = '#include "bme680.h"';
-        Blockly.propc.setups_["init_bme680"] = 'gas_sensor = bme680_openSPI(' + pin[0] + ', ' + pin[1] + ', ';
-        Blockly.propc.setups_["init_bme680"] += pin[2] + ', ' + pin[3] + ');\n';
+        Blockly.propc.setups_["init_bme680"] = 'gas_sensor = bme680_openSPI(' + pin.join(', ') + ');\n';
         Blockly.propc.global_vars_["device_bme680"] = 'bme680 *gas_sensor;\n';
     }
     return '';

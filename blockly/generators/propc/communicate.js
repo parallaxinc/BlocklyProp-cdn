@@ -2688,6 +2688,7 @@ Blockly.propc.xbee_scan_multiple = function () {
 // -------------- OLED Display blocks ------------------------------------------
 Blockly.Blocks.oled_initialize = {
     init: function () {
+        this.resetPinLabel = 'RES';
         if (this.type === 'oled_initialize') {
             this.myType = 'oledc';
             this.displayKind = 'OLED';
@@ -2696,6 +2697,7 @@ Blockly.Blocks.oled_initialize = {
             this.setHelpUrl(Blockly.MSG_EPAPER_HELPURL);
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
+            this.resetPinLabel = 'RST';
         }
         this.setTooltip(Blockly.MSG_OLED_INITIALIZE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
@@ -2722,7 +2724,7 @@ Blockly.Blocks.oled_initialize = {
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "CS")
                 .appendField("D/C")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "DC")
-                .appendField("RES")
+                .appendField(this.resetPinLabel)
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "RES");
         if (this.myType === 'ePaper') {
             this.getInput('PINS')
@@ -2962,7 +2964,7 @@ Blockly.propc.oled_draw_circle = function () {
             if (!this.disabled) { // Ensure header file is included
                 Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
             }
-            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE) || '0xFFFFFF';
             if (/0x[0-9A-Fa-f]{4}/.test(color)) {
                 color = color.substr(2,6);
             }
@@ -3048,7 +3050,7 @@ Blockly.propc.oled_draw_line = function () {
             if (!this.disabled) { // Ensure header file is included
                 Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
             }
-            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE) || '0xFFFFFF';
             if (/0x[0-9A-Fa-f]{4}/.test(color)) {
                 color = color.substr(2,6);
             }
@@ -3120,7 +3122,7 @@ Blockly.propc.oled_draw_pixel = function () {
             if (!this.disabled) { // Ensure header file is included
                 Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
             }
-            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE) || '0xFFFFFF';
             if (/0x[0-9A-Fa-f]{4}/.test(color)) {
                 color = color.substr(2,6);
             }
@@ -3220,7 +3222,7 @@ Blockly.propc.oled_draw_triangle = function () {
             if (!this.disabled) { // Ensure header file is included
                 Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
             }
-            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE) || '0xFFFFFF';
             if (/0x[0-9A-Fa-f]{4}/.test(color)) {
                 color = color.substr(2,6);
             }
@@ -3322,7 +3324,7 @@ Blockly.propc.oled_draw_rectangle = function () {
             if (!this.disabled) { // Ensure header file is included
                 Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
             }
-            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+            color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE) || '0xFFFFFF';
             if (/0x[0-9A-Fa-f]{4}/.test(color)) {
                 color = color.substr(2,6);
             }
@@ -3978,7 +3980,7 @@ Blockly.propc.ws2812b_set = function () {
     }
 
     var led = Blockly.propc.valueToCode(this, 'LED', Blockly.propc.ORDER_NONE);
-    var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+    var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE) || '0x555555' ;
 
     var p = '0';
     if (projectData && projectData['board'] === 'heb-wx') {
@@ -4039,7 +4041,7 @@ Blockly.propc.ws2812b_set_multiple = function () {
 
     var start = Blockly.propc.valueToCode(this, 'START', Blockly.propc.ORDER_NONE);
     var end = Blockly.propc.valueToCode(this, 'END', Blockly.propc.ORDER_NONE);
-    var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE);
+    var color = Blockly.propc.valueToCode(this, 'COLOR', Blockly.propc.ORDER_NONE) || '0x555555';
     var p = '0';
     if (projectData && projectData['board'] === 'heb-wx') {
         p = '';
