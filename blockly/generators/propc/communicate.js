@@ -2743,7 +2743,13 @@ Blockly.Blocks.oled_initialize = {
 
 Blockly.propc.oled_initialize = function () {
     if (!this.disbled) {
-        var pin = [this.getFieldValue('DIN'), this.getFieldValue('CLK'), this.getFieldValue('CS'), this.getFieldValue('DC'), this.getFieldValue('RES')];
+        var pin = [
+                this.getFieldValue('DIN'), 
+                this.getFieldValue('CLK'), 
+                this.getFieldValue('CS'), 
+                this.getFieldValue('DC'), 
+                this.getFieldValue('RES')
+        ];
         var devType = 'ssd1331';
         var devWidthHeight = ', 96, 64';
         if (this.myType === 'ePaper') {
@@ -2759,9 +2765,32 @@ Blockly.propc.oled_initialize = function () {
         if (!this.disabled) {
             Blockly.propc.global_vars_[this.myType + 'global'] = 'screen *' + this.myType + ';';
             Blockly.propc.definitions_[this.myType + 'tools'] = '#include "' + devType + '.h"';
-            Blockly.propc.setups_[this.myType] = this.myType + ' = ' + devType + '_init(' + pin.join(', ') + devWidthHeight + ');';
-            if (this.myType === 'oledc') {
-                Blockly.propc.setups_[this.myType + 'rotation'] = 'setDisplayRotation(oledc, 2);'
+
+            // Determine if this init block is inside of a function being called by a new processor block
+            var myRootBlock = this.getRootBlock();
+            var myRootBlockName = null;
+            var cogStartBlock = null;
+            if (myRootBlock.type === 'procedures_defnoreturn') {
+                myRootBlockName = Blockly.propc.variableDB_.getName(myRootBlock.
+                        getFieldValue('NAME'), Blockly.Procedures.NAME_TYPE);
+
+                for (var k = 0; k < Blockly.getMainWorkspace().getAllBlocks().length; k++) {
+                    var tempBlock = Blockly.getMainWorkspace().getAllBlocks()[k];
+                    
+                    if (tempBlock.type === 'procedures_callnoreturn' && tempBlock.getRootBlock().type === 'cog_new') {
+                        if (Blockly.propc.variableDB_.getName(((tempBlock.getFieldValue('NAME')).
+                                split('\u201C'))[1].slice(0, -1), Blockly.Procedures.NAME_TYPE) === myRootBlockName) {
+                            cogStartBlock = myRootBlockName;
+                        }
+                    }
+                }    
+            }
+
+            if (cogStartBlock) {
+                Blockly.propc.cog_setups_[this.myType] = [cogStartBlock, this.myType + ' = ' + 
+                        devType + '_init(' + pin.join(', ') + devWidthHeight + ');'];
+            } else {
+                Blockly.propc.setups_[this.myType] = this.myType + ' = ' + devType + '_init(' + pin.join(', ') + devWidthHeight + ');';
             }
         }
     }
@@ -4842,6 +4871,7 @@ Blockly.Blocks.wx_scan_string = {
         if (details['ACTION'] === 'POST')
             prefixVisible = true;
         this.getInput('PREFIX').setVisible(prefixVisible);
+        /*
         var data = this.getFieldValue('VARNAME');
         if(this.getInput('STORE')) {
             this.removeInput('STORE');
@@ -4852,6 +4882,7 @@ Blockly.Blocks.wx_scan_string = {
         this.appendDummyInput('STORE')
                 .appendField('store string in')
                 .appendField(new Blockly.FieldVariable(data), 'VARNAME');
+        */
     },
     onchange: function () {
         var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
@@ -5050,10 +5081,10 @@ Blockly.Blocks.wx_listen = {
                 .appendField("port")
                 .setCheck("Number");
         this.appendDummyInput('CONNVARS')
-                .appendField(new Blockly.FieldVariable('wxConnId1'), 'ID1')
-                .appendField(new Blockly.FieldVariable('wxConnId2'), 'ID2')
-                .appendField(new Blockly.FieldVariable('wxConnId3'), 'ID3')
-                .appendField(new Blockly.FieldVariable('wxConnId4'), 'ID4');
+                .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'ID1')
+                .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'ID2')
+                .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'ID3')
+                .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_GET_ITEM), 'ID4');
         this.getInput('PORT').setVisible(false);
         this.getInput('CONNVARS').setVisible(false);
         this.setInputsInline(true);
@@ -5071,26 +5102,30 @@ Blockly.Blocks.wx_listen = {
         this.setPrefix_({"ACTION": action});
     },
     setPrefix_: function (details) {
+        // It takes Blocky some time to set up new variables, so this waits to make sure they are ready.
+        setTimeout(function() {
+            if (!Blockly.getMainWorkspace().getVariable('wxHandle')) {
+                Blockly.getMainWorkspace().createVariable('wxHandle');
+            }
+            if (!Blockly.getMainWorkspace().getVariable('wxConnId1')) {
+                Blockly.getMainWorkspace().createVariable('wxConnId1');
+            }
+        }, 75);
         var prefixVisible = false;
-        if(this.getInput('CONNVARS')) {
-            this.removeInput('CONNVARS');
-        }
+        var tempIdVar = 'wxHandle';
         if (details['ACTION'] === 'TCP') {
             prefixVisible = true;
             this.setFieldValue('URL', 'LABEL');
-            this.setFieldValue('wxHandle', 'ID');
             this.setFieldValue('store handle in', 'TEXT');
         } else {
+            tempIdVar = 'wxConnId1';
             this.setFieldValue('path', 'LABEL');
-            this.setFieldValue('wxConnId1', 'ID');
             this.setFieldValue('store ID in', 'TEXT');
-            this.appendDummyInput('CONNVARS')
-                    .appendField(new Blockly.FieldVariable('wxConnId1'), 'ID1')
-                    .appendField(new Blockly.FieldVariable('wxConnId2'), 'ID2')
-                    .appendField(new Blockly.FieldVariable('wxConnId3'), 'ID3')
-                    .appendField(new Blockly.FieldVariable('wxConnId4'), 'ID4');
-            this.getInput('CONNVARS').setVisible(false);
         }
+        // Again, variables have to be completely set up and available, or these functions will throw errors.
+        setTimeout(function(a) {
+            a.setFieldValue(Blockly.getMainWorkspace().getVariable(tempIdVar).getId(), 'ID');
+        }, 125, this);
         this.getInput('PORT').setVisible(prefixVisible);
     },
     onchange: Blockly.Blocks['wx_scan_multiple'].onchange
@@ -5332,7 +5367,7 @@ Blockly.Blocks.wx_buffer = {
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
                 .appendField("WX buffer use variable")
-                .appendField(new Blockly.FieldVariable('wxBuffer'), "BUFFER")
+                .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_SET_ITEM), "BUFFER")
                 .appendField("set size to")
                 .appendField(new Blockly.FieldNumber('64', null, null, 1), "SIZE")
                 .appendField("characters");
@@ -5373,7 +5408,7 @@ Blockly.Blocks.wx_disconnect = {
                     this.sourceBlock_.setPrefix_({"ACTION": action});
                 }), 'PROTOCOL')
                 .appendField("ID", 'TEXT')
-                .appendField(new Blockly.FieldVariable('wxId'), 'ID');
+                .appendField(new Blockly.FieldVariable(Blockly.LANG_VARIABLES_SET_ITEM), 'ID');
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
@@ -5389,13 +5424,26 @@ Blockly.Blocks.wx_disconnect = {
         this.setPrefix_({"ACTION": action});
     },
     setPrefix_: function (details) {
+        // It takes Blocky some time to set up new variables, so this waits to make sure they are ready.
+        setTimeout(function() {
+            if (!Blockly.getMainWorkspace().getVariable('wxHandle')) {
+                Blockly.getMainWorkspace().createVariable('wxHandle');
+            }
+            if (!Blockly.getMainWorkspace().getVariable('wxId')) {
+                Blockly.getMainWorkspace().createVariable('wxId');
+            }
+        }, 75);
+        var tempIdVar = 'wxHandle';
         if (details['ACTION'] === 'TCP') {
-            this.setFieldValue('wxHandle', 'ID');
             this.setFieldValue('handle', 'TEXT');
         } else {
-            this.setFieldValue('wxId', 'ID');
+            var tempIdVar = 'wxId';
             this.setFieldValue('ID', 'TEXT');
         }
+        // Again, variables have to be completely set up and available, or these functions will throw errors.
+        setTimeout(function(a) {
+            a.setFieldValue(Blockly.getMainWorkspace().getVariable(tempIdVar).getId(), 'ID');
+        }, 125, this);
     },
     onchange: Blockly.Blocks['wx_scan_multiple'].onchange
 };
