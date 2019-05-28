@@ -6491,7 +6491,7 @@ Blockly.Blocks.string_scan_container = {
         this.appendStatementInput('STACK');
         this.appendDummyInput()
                 .appendField(new Blockly.FieldDropdown([
-                    ["from beginning", ""],
+                    ["from beginning", " "],
                     ["after text", "AfterStr"]
                     // ["starting at position", "AfterPos"]
                 ]), "SCAN_START");
@@ -6507,12 +6507,12 @@ Blockly.Blocks.string_scan_float = Blockly.Blocks.console_print_float;
 Blockly.Blocks.string_scan_char = Blockly.Blocks.console_print_char;
 
 Blockly.propc.string_scan_multiple = function () {
-    var str_from = Blockly.propc.valueToCode(this, 'SCAN_AFTER', Blockly.propc.ORDER_NONE) || '';
+    var str_from = (Blockly.propc.valueToCode(this, 'SCAN_AFTER', Blockly.propc.ORDER_NONE)).trim() || '';
     if (this.scanAfter && this.scanAfter.length > 3 && str_from) {
         str_from = str_from + ', ';
     }
     var code = 'sscan' + (str_from !== '' ? this.scanAfter : '');
-    code += '(' + this.getFieldValue('HANDLE') + ', ' + str_from + '"';
+    code += '(' + Blockly.propc.variableDB_.getName(this.getFieldValue('HANDLE'), Blockly.Variables.NAME_TYPE) + ', ' + str_from + '"';
     var varList = '';
     var code_add = '';
     var i = 0;
