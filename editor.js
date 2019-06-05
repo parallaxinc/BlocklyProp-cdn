@@ -154,6 +154,9 @@ $(document).ready(function () {
         window.location = baseUrl;
 
     } else if (!idProject && isOffline) {
+        // Disable the login link for the BP Client status area
+        document.getElementById('unauth-login-anchor').href='#';
+
         // TODO: Use the ping endpoint to see if we are offline.
 
         // TODO: Offline must be true to get here. Why is it being set to true again?
