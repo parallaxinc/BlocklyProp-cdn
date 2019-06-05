@@ -232,6 +232,12 @@ $(document).ready(function () {
     $('#save-check-dialog').on('hidden.bs.modal', function () {
         timestampSaveTime(5, false);
     });
+
+    $("#selectfile").focus(function () {
+        $('#selectfile-verify-notvalid').css('display', 'none');
+        $('#selectfile-verify-valid').css('display', 'none');
+        $('#selectfile-verify-boardtype').css('display', 'none');
+    });
 });
 
 
@@ -805,9 +811,9 @@ function uploadHandler(files) {
             }
             if (xmlValid) {
                 if (projectData && uploadBoardType !== projectData['board']) {
-                    document.getElementById("selectfile-verify-boardtype").style.display = "block";
+                    $('#selectfile-verify-boardtype').css('display', 'block');
                 } else {
-                    document.getElementById("selectfile-verify-boardtype").style.display = "none";
+                    $('#selectfile-verify-boardtype').css('display', 'none');
                 }
             }
             if (uploadedXML !== '') {
@@ -844,12 +850,12 @@ function uploadHandler(files) {
         }
 
         if (xmlValid === true) {
-            document.getElementById("selectfile-verify-valid").style.display = "block";
+            $('#selectfile-verify-valid').css('display', 'block');
             document.getElementById("selectfile-replace").disabled = false;
             document.getElementById("selectfile-append").disabled = false;
             uploadedXML = xmlString;
         } else {
-            document.getElementById("selectfile-verify-notvalid").style.display = "block";
+            $('#selectfile-verify-notvalid').css('display', 'block');
             document.getElementById("selectfile-replace").disabled = true;
             document.getElementById("selectfile-append").disabled = true;
             uploadedXML = '';
@@ -866,9 +872,9 @@ function clearUploadInfo() {
     // Reset all of the upload fields and containers
     uploadedXML = '';
     $('#selectfile').val('');
-    document.getElementById("selectfile-verify-notvalid").style.display = "none";
-    document.getElementById("selectfile-verify-valid").style.display = "none";
-    document.getElementById("selectfile-verify-boardtype").style.display = "none";
+    $('#selectfile-verify-notvalid').css('display', 'none');
+    $('#selectfile-verify-valid').css('display', 'none');
+    $('#selectfile-verify-boardtype').css('display', 'none');
     document.getElementById("selectfile-replace").disabled = true;
     document.getElementById("selectfile-append").disabled = true;
 }
