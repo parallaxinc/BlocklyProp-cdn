@@ -64,12 +64,12 @@ html, body {
     border-bottom: 2px solid rgba(104, 110, 116, 0.7);
 }
 
-#content_blocks {
+#content_blocks, #content {
+    height: calc(100vh - 67px) !important;
     background-color: #fff;
     margin: 0;
     padding:0;
     overflow: hidden;
-    height: 100%;
     width: 100%
 }
 
