@@ -1614,6 +1614,16 @@ Blockly.Blocks.cog_new = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+    },
+    onchange: function(event) {
+        if (event && (event.type === Blockly.Events.CHANGE || event.type === Blockly.Events.MOVE)) {
+            var repeatWarningText = null;
+            var myRootBlock = this.getRootBlock();
+            if (myRootBlock && myRootBlock.type.indexOf('repeat') > -1 ) {
+                repeatWarningText = 'Warning: This block can only start up to 7 additional cores - using this block in a repeat loop may cause unexpected errors!';
+            }
+            this.setWarningText(repeatWarningText);
+        }
     }
 };
 

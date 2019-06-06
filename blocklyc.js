@@ -87,11 +87,6 @@ var graph_temp_data = new Array;
 var graph_data_ready = false;
 
 
-// The IDE reports this as an unused variable
-// TODO: Verify that the 'graph_connection_string' variable is no longer required.
-// var graph_connection_string = '';
-
-
 /**
  * Graph data series start timestamp
  *
@@ -170,15 +165,6 @@ var graph_labels = null;
  * @type {any[]}
  */
 var graph_csv_data = new Array;
-
-
-// The IDE sees this as an unused variable
-// TODO: Verify that the 'console_header_arrived' variable is no longer required.
-var console_header_arrived = false;
-
-// The IDE sees this as an unused variable
-// TODO: Verify that the 'console_header' variable is no longer required.
-var console_header = null;
 
 
 /**
@@ -1329,6 +1315,7 @@ function graph_new_data(stream) {
         $("#graph-conn-info").html(stream);
 
     } else {
+        var ts = 0;
         for (k = 0; k < stream.length; k++) {
             if (stream[k] === '\n')
                 stream[k] = '\r';
@@ -1336,7 +1323,7 @@ function graph_new_data(stream) {
                 if (!graph_paused) {
                     graph_temp_data.push(graph_temp_string.split(','));
                     var row = graph_temp_data.length - 1;
-                    let ts = Number(graph_temp_data[row][0]) || 0;
+                    ts = Number(graph_temp_data[row][0]) || 0;
 
                     // convert to seconds:
                     // Uses Propeller system clock (CNT) left shifted by 16.
@@ -1392,13 +1379,12 @@ function graph_new_data(stream) {
                     if (graph_csv_data.length > 15000) {
                         graph_csv_data.shift();
                     }
-                    //$('.ct_line').css('stroke-width','1px'); // TODO: verify if this is even necessary
                 }
 
                 graph_temp_string = '';
             } else {
                 if (!graph_data_ready) {            // wait for a full set of data to
-                    if (stream[k] === '\r') {      // come in before graphing, ends up
+                    if (stream[k] === '\r') {       // come in before graphing, ends up
                         graph_data_ready = true;    // tossing the first point but prevents
                     }                               // garbage from mucking up the graph.
                 } else {
@@ -1488,17 +1474,12 @@ function downloadGraph() {
             svgxml = svgxml.replace(pattern, '');
 
             // TODO: Lint is complaining about the search values. Should they be enclosed in quotes?
-//            svgxml = svgxml.replace(/foreignObject/g, 'text');
-//            svgxml = svgxml.replace(/([<|</])a[0-9]+:/g, '$1');
-//            svgxml = svgxml.replace(/xmlns: /g, '');
-//            svgxml = svgxml.replace(/span/g, 'tspan');
-//            svgxml = svgxml.replace(/x="10" /g, 'x="40" ');
-
-            svgxml = svgxml.replace('/foreignObject/g', 'text');
-            svgxml = svgxml.replace('/([<|</])a[0-9]+:/g', '$1');
-            svgxml = svgxml.replace('/xmlns: /g', '');
-            svgxml = svgxml.replace('/span/g', 'tspan');
-            svgxml = svgxml.replace('/x="10" /g', 'x="40" ');
+            // No: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+            svgxml = svgxml.replace(/foreignObject/g, 'text');
+            svgxml = svgxml.replace(/([<|</])a[0-9]+:/g, '$1');
+            svgxml = svgxml.replace(/xmlns: /g, '');
+            svgxml = svgxml.replace(/span/g, 'tspan');
+            svgxml = svgxml.replace(/x="10" /g, 'x="40" ');
 
             svgxml = svgxml.substring(svgxml.indexOf('<svg'), svgxml.length - 6);
             var foundY = svgxml.indexOf(findY);
