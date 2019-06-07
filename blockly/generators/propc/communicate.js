@@ -2786,12 +2786,12 @@ Blockly.propc.oled_initialize = function () {
                 }    
             }
 
-            if (cogStartBlock) {
+            if (cogStartBlock && inDemo) {  // ONLY RUN IN DEMO - keep this experimental for now.
                 Blockly.propc.cog_setups_[this.myType] = [cogStartBlock, this.myType + ' = ' + 
                         devType + '_init(' + pin.join(', ') + devWidthHeight + ');'];
             } else {
                 Blockly.propc.setups_[this.myType] = this.myType + ' = ' + devType + '_init(' + pin.join(', ') + devWidthHeight + ');';
-            }
+            }         
         }
     }
     return '';
@@ -3433,7 +3433,7 @@ Blockly.Blocks.oled_text_color = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
-        this.setTooltip(Blockly.MSG_OLED_TEXT_SIZE_TOOLTIP.replace(/Display /, this.displayKind + ' '));
+        this.setTooltip(Blockly.MSG_OLED_TEXT_COLOR_TOOLTIP.replace(/Display /, this.displayKind + ' '));
         this.setColour(colorPalette.getColor('protocols'));
         if (this.displayKind === 'OLED') {
             this.appendValueInput('FONT_COLOR')
@@ -3510,10 +3510,16 @@ Blockly.Blocks.oled_get_max_height = {
             this.myType = 'ePaper';
             this.displayKind = 'ePaper';
         }
-        this.setTooltip(Blockly.MSG_OLED_GET_MAX_HEIGHT_TOOLTIP.replace(/Display /, this.displayKind + ' '));
+        if (this.type.split('_')[3] === 'height') {
+            this.setTooltip(Blockly.MSG_OLED_GET_MAX_HEIGHT_TOOLTIP.replace(/Display /, this.displayKind + ' '));
+            this.appendDummyInput()
+                .appendField(this.displayKind + ' max height');
+        } else {
+                this.setTooltip(Blockly.MSG_OLED_GET_MAX_WIDTH_TOOLTIP.replace(/Display /, this.displayKind + ' '));
+                this.appendDummyInput()
+                    .appendField(this.displayKind + ' max width');
+        } 
         this.setColour(colorPalette.getColor('protocols'));
-        this.appendDummyInput()
-                .appendField(this.displayKind + " max " + this.type.split('_')[3]);
         this.setPreviousStatement(false, null);
         this.setNextStatement(false, null);
         this.setOutput(true, "Number");
@@ -3666,18 +3672,18 @@ Blockly.propc.epaper_print_number =  Blockly.propc.oled_print_number;
 
 Blockly.Blocks.oled_print_multiple = {
     init: function () {
-        var myHelpUrl = Blockly.MSG_TERMINAL_HELPURL;
+        var myTooltip = Blockly.MSG_OLED_PRINT_MULTIPLE_TOOLTIP;
+        var myHelpUrl = Blockly.MSG_OLED_HELPURL;
         this.myDevice = 'OLED';
         if (this.type === "heb_print_multiple") {
             myTooltip = Blockly.MSG_HEB_PRINT_MULTIPLE_TOOLTIP;
             myHelpUrl = Blockly.MSG_BADGE_DISPLAY_HELPURL;
             this.myDevice = 'Display';
         } else if (this.type === 'epaper_print_multiple') {
-            myHelpUrl = Blockly.MSG_BADGE_DISPLAY_HELPURL;
+            myHelpUrl = Blockly.MSG_EPAPER_HELPURL;
             this.myDevice = 'ePaper';
         }
-        var myTooltip = Blockly.MSG_OLED_PRINT_MULTIPLE_TOOLTIP.replace(/Display /, this.myDevice);
-        this.setTooltip(myTooltip);
+        this.setTooltip(myTooltip.replace(/Display /, this.myDevice + ' '));
         this.setHelpUrl(myHelpUrl);
         this.setColour(colorPalette.getColor('protocols'));
         this.appendDummyInput()
