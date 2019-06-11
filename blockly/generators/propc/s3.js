@@ -556,8 +556,6 @@ Blockly.Blocks.scribbler_drive = {
 
 Blockly.propc.scribbler_drive = function () {
     var drive_direction = this.getFieldValue('DRIVE_DIRECTION');
-    console.log('drive direction:');
-    console.log(drive_direction.toString());
     var drive_angle = this.getFieldValue('DRIVE_ANGLE');
     var drive_speed = this.getFieldValue('DRIVE_SPEED');
     return 's3_simpleDrive(S3_' + drive_angle + ', ' + drive_direction.trim() + drive_speed + ');\n';

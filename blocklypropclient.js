@@ -391,7 +391,7 @@ function establish_socket() {
                  }, 10000);
                  */
 
-                console.log("Websocket client/launcher found - version " + ws_msg.version);                
+                if (getURLParameter('debug')) console.log("Websocket client/launcher found - version " + ws_msg.version);                
                 
                 client_use_type = 'ws';
                 client_available = true;

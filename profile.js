@@ -23,12 +23,14 @@
 
 // TODO: Please describe what this code is doing.
 $(document).ready(function () {
-    $.get('rest/profile/get/', function(res) {
-        console.log(res);
-    }).fail(function(res) {
-        console.log('user info failure:');
-        console.log(res);
-    });
+    if (getURLParameter('debug')) {
+        $.get('rest/profile/get/', function(res) {
+                console.log(res);
+            }).fail(function(res) {
+            console.log('user info failure:');
+            console.log(res);
+        });
+    }
     
     $('#loginform').ajaxForm({
 //        beforeSubmit: function (arr, $form, options) {

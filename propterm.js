@@ -223,8 +223,6 @@ $(document).ready(function () {
             processKey(keycode);
         }
 
-        //console.log('sending: ' + keycode);
-
         //Validate key
         var valid =
                 (keycode > 47 && keycode < 58) || // number keys
@@ -240,7 +238,6 @@ $(document).ready(function () {
     $("#serial_console").keypress(function (e) {
         //Emit key character
         processKey(e.charCode);
-        //console.log('sending: ' + charcode);
     });
 
     // Register a click event callback function
@@ -491,7 +488,6 @@ function updateTermBox(c) {
                     } else {
                         char = String.fromCharCode(c);
                     }
-                    //console.log(char);
                     if ((textContainer[cursorY] || '').length > cursorX) {
                         var the_line = textContainer[cursorY] || '';
                         textContainer[cursorY] = the_line.substr(0, cursorX) + char + the_line.substr(cursorX + 1);

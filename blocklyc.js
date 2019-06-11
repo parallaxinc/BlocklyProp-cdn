@@ -22,16 +22,6 @@
 
 
 /**
- *  TODO: What does this variable do?
- *
- * @type {{}}
- */
-var BlocklyProp = {};
-
-
-//var selected = 'blocks';
-
-/**
  * TODO: Identify the purpose of this variable
  *
  * @type {null}
@@ -148,7 +138,7 @@ var graph_interval_id = null;
  *
  * @type {number}
  */
-var fullCycleTime = 4294967296 / 80000000;
+const fullCycleTime = 4294967296 / 80000000;
 
 
 /**
@@ -253,165 +243,95 @@ const minVer = version_as_number(client_min_version);
  * 
  * @param {string} id ID of tab clicked.
  */
-function tabClick(id) {
-
-    const TABS_ = ['blocks', 'propc', 'xml'];
-
-    // If the XML tab was open, save and render the content.
-    /* if (document.getElementById('tab_xml').className == 'active') {
-     var xmlTextarea = document.getElementById('textarea_xml');
-     var xmlText = xmlTextarea.value;
-     var xmlDom = null;
-     try {
-     xmlDom = Blockly.Xml.textToDom(xmlText);
-     } catch (e) {
-     var q =
-     window.confirm('Error parsing XML:\n' + e + '\n\nAbandon changes?');
-     if (!q) {
-     // Leave the user on the XML tab.
-     return;
-     }
-     }
-     if (xmlDom) {
-     Blockly.mainWorkspace.clear();
-     Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xmlDom);
-     }
-     }*/
-
-    // Deselect all tabs and hide all panes.
-    // document.getElementById('menu-save-as-propc').style.display = 'none';
-
-    for (let x in TABS_) {
-        document.getElementById('content_' + TABS_[x]).style.display = 'none';
-    }
-
+function renderContent(id) {
     // Select the active tab.
     const selectedTab = id.replace('tab_', '');
-    const tbxs = document.getElementsByClassName('blocklyToolboxDiv');
-    const btns = document.getElementsByClassName("btn-view-code");
+    const isPropcOnlyProject = (projectData['board'] === 'propcfile');
+    const isDebug = getURLParameter('debug');
 
-    document.getElementById('btn-view-blocks').style.display = 'none';
-
-    if (document.getElementById('menu-save-as-propc')) {
-        document.getElementById('menu-save-as-propc').style.display = 'none';
+    if (isPropcOnlyProject) {
+        id = 'propc';
     }
 
-    // var i was a duplicate definition.
-    for (let i = 0; i < btns.length; i++) {
-        btns[i].style.display = 'none';
-    }
+    switch (selectedTab) {
+      case 'blocks':
+        $('.blocklyToolboxDiv').css('display', 'block')
 
-    if (projectData['board'] !== 'propcfile') {
-        // Reinstate keybindings from block workspace if this is not a code-only project.
-        if (Blockly.codeOnlyKeybind === true) {
-            Blockly.bindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
-            Blockly.codeOnlyKeybind = false;
-        }
+        $('#content_xml').css('display', 'none');
+        $('#content_propc').css('display', 'none');
+        $('#content_blocks').css('display', 'block');
 
-        if (id === 'tab_blocks') {
-            for (let i = 0; i < btns.length; i++) {
-                btns[i].style.display = 'inline-block';
-            }
-            for (let xt = 0; xt < tbxs.length; xt++) {
-                tbxs[xt].style.display = 'block';
-            }
-        } else {
-            for (let xt = 0; xt < tbxs.length; xt++) {
-                tbxs[xt].style.display = 'none';
-            }
-            document.getElementById('btn-view-blocks').style.display = 'inline-block';
+        $('#btn-view-xml').css('display', 'none');
+        $('#btn-view-propc').css('display', 'inline-block');
+        $('#btn-view-blocks').css('display', 'none');
 
-            if (document.getElementById('menu-save-as-propc')) {
-                document.getElementById('menu-save-as-propc').style.display = 'block';
-            }
-        }
-    } else {
-
-        // Remove keybindings from block workspace if this is a code-only project.
-        Blockly.unbindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
-        Blockly.codeOnlyKeybind = true;
-
-        if ($("meta[name=cdn]").attr("user-auth") === 'true') {
-            document.getElementById('prop-btn-graph').style.display = 'none';
-            document.getElementById('upload-project').style.display = 'none';
-        }
-
-        document.getElementById('prop-btn-pretty').style.display = 'inline-block';
-        document.getElementById('prop-btn-find-replace').style.display = 'inline-block';
-        document.getElementById('prop-btn-undo').style.display = 'inline-block';
-        document.getElementById('prop-btn-redo').style.display = 'inline-block';
-
-        $('.propc-only').removeClass('hidden');
-        //document.getElementById('download-project').style.display = 'none';
-    }
-
-    document.getElementById('content_' + selectedTab).style.display = 'block';
-
-    // Show the selected pane.
-    if (projectData['board'] === 'propcfile' && selectedTab === 'xml' && (getURLParameter('debug') || isOffline)) {
-        document.getElementById('btn-view-propc').style.display = 'inline-block';
-        document.getElementById('btn-view-xml').style.display = 'none';
-    } else if (projectData['board'] === 'propcfile' && selectedTab === 'propc' && (getURLParameter('debug') || isOffline)) {
-        document.getElementById('btn-view-xml').style.display = 'inline-block';
-        document.getElementById('btn-view-propc').style.display = 'none';
-    }
-    renderContent(selectedTab);
-}
-
-/**
- * Populate the currently selected pane with content generated from the blocks.
- *
- * @param pane
- */
-function renderContent(pane) {
-    // Initialize the pane.
-    if (pane === 'blocks' && projectData['board'] !== 'propcfile') {
-        if ((getURLParameter('debug') || isOffline) && codeXml.getValue().length > 40) {
-            let xmlDom = null;
-            xmlDom = Blockly.Xml.textToDom(codeXml.getValue());
-            Blockly.Xml.clearWorkspaceAndLoadFromXml(xmlDom, Blockly.mainWorkspace);
+        if ((isDebug || isOffline) && codeXml.getValue().length > 40) {
+            Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.Xml.textToDom(codeXml.getValue()), Blockly.mainWorkspace);
         } else {
             Blockly.mainWorkspace.render();
         }
+        break;
+      case 'propc':
+        $('.blocklyToolboxDiv').css('display', 'none')
 
-    } else if (pane === 'xml') {
-        let xmlDom = null;
-        let xmlText = '';
+        $('#content_xml').css('display', 'none');
+        $('#content_propc').css('display', 'block');
+        $('#content_blocks').css('display', 'none');
 
-        if (projectData['board'] === 'propcfile') {
-            xmlText = propcAsBlocksXml();
+        if (isDebug || isOffline) {
+            if (!isPropcOnlyProject) {
+                $('#btn-view-xml').css('display', 'inline-block');
+            } else {
+                $('#btn-view-xml').css('display', 'none');
+            }
+            $('#btn-view-blocks').css('display', 'none');
         } else {
-            xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-            xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+            $('#btn-view-xml').css('display', 'none');
+            $('#btn-view-blocks').css('display', 'inline-block');    
         }
+        $('#btn-view-propc').css('display', 'none');
+        if (!isPropcOnlyProject) {
+            let raw_c = prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
+            codePropC.setValue(raw_c);
+            codePropC.gotoLine(0);
+        } else {
+            if (!codePropC || codePropC.getValue() === '') {
+                codePropC.setValue(atob((projectData['code'].match(/<field name="CODE">(.*)<\/field>/) || ['', ''])[1] || ''));
+                codePropC.gotoLine(0);
+            }
+            if (codePropC.getValue() === '') {
+                let blankProjectCode = '// ------ Libraries and Definitions ------\n';
+                blankProjectCode += '#include "simpletools.h"\n\n\n';
+                blankProjectCode += '// ------ Global Variables and Objects ------\n\n\n';
+                blankProjectCode += '// ------ Main Program ------\n';
+                blankProjectCode += 'int main() {\n\n\nwhile (1) {\n\n\n}}';
+    
+                let raw_c = prettyCode(blankProjectCode);
+                codePropC.setValue(raw_c);
+                codePropC.gotoLine(0);
+            }   
+        }
+        break;
+      case 'xml':
+        $('.blocklyToolboxDiv').css('display', 'none')
+
+        $('#content_xml').css('display', 'block');
+        $('#content_propc').css('display', 'none');
+        $('#content_blocks').css('display', 'none');
+
+        $('#btn-view-xml').css('display', 'none');
+        $('#btn-view-propc').css('display', 'none');
+        $('#btn-view-blocks').css('display', 'inline-block');
 
         // Load project code
-        codeXml.setValue(xmlText);
+        codeXml.setValue(Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace)));
         codeXml.getSession().setUseWrapMode(true);
         codeXml.gotoLine(0);
 
-    } else if (pane === 'propc' && projectData['board'] !== 'propcfile') {
-        let raw_c = prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
-        codePropC.setValue(raw_c);
-        codePropC.gotoLine(0);
-
-    } else if (pane === 'propc') {
-        if (!codePropC || codePropC.getValue() === '') {
-            codePropC.setValue(atob((projectData['code'].match(/<field name="CODE">(.*)<\/field>/) || ['', ''])[1] || ''));
-            codePropC.gotoLine(0);
-        }
-        if (codePropC.getValue() === '') {
-            let blankProjectCode = '// ------ Libraries and Definitions ------\n';
-            blankProjectCode += '#include "simpletools.h"\n\n\n';
-            blankProjectCode += '// ------ Global Variables and Objects ------\n\n\n';
-            blankProjectCode += '// ------ Main Program ------\n';
-            blankProjectCode += 'int main() {\n\n\nwhile (1) {\n\n\n}}';
-
-            let raw_c = prettyCode(blankProjectCode);
-            codePropC.setValue(raw_c);
-            codePropC.gotoLine(0);
-        }   
+        break;
+                                
     }
+
 }
 
 
@@ -571,7 +491,7 @@ function init(blockly) {
                 },
                 readOnly: true
             });
-            tabClick('tab_propc');
+            renderContent('tab_propc');
         }
     }
 
@@ -657,7 +577,7 @@ function cloudCompile(text, action, successHandler) {
                 } else {
                     var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
                     $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
-    console.log(data);                
+                    if (getURLParameter('debug')) console.log(data);                
                     if (data.success && data.binary) {
                         successHandler(data, terminalNeeded);
                     }
@@ -1002,7 +922,7 @@ function graphing_console() {
             graph_reset();
             graph_temp_string = '';
             graph = new Chartist.Line('#serial_graphing', graph_data, graph_options);
-            console.log(graph_options);
+            if (getURLParameter('debug')) console.log(graph_options);
         } else {
             graph.update(graph_data, graph_options);
         }
