@@ -2083,7 +2083,7 @@ Blockly.Blocks.bme680_init = {
             this.removeInput('PINS');
         }
         this.appendDummyInput('PINS')
-                .appendField("Air Quality initialize CLK")
+                .appendField("Air Quality initialize SCK")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CLK")
                 .appendField("SDI")
                 .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SDI")
