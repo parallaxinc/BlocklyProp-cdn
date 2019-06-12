@@ -4190,17 +4190,11 @@ Blockly.Blocks.wx_init = {
 
 Blockly.propc.wx_init = function () {
     if (!this.diabled) {
-        var pin_do = '31';
-        var pin_di = '30';
-        var mode = 'WX_ALL_COM';
-
-        if (this.type === 'wx_init') {
-            pin_di = this.getFieldValue('DI');
-            pin_do = this.getFieldValue('DO');
-            if (pin_di === '30')
-                pin_do = '31';
-            mode = this.getFieldValue('MODE');
-        }
+        var pin_di = this.getFieldValue('DI') || '30';
+        var pin_do = this.getFieldValue('DO') || '31';
+        if (pin_di === '30')
+            pin_do = '31';
+        var mode = this.getFieldValue('MODE') || 'WX_ALL_COM';
 
         var code = '';
         code += 'wifi_start(' + pin_do + ', ' + pin_di + ', 115200, ' + mode + ');\n';
@@ -4688,17 +4682,11 @@ Blockly.Blocks.wx_init_adv = {
 
 Blockly.propc.wx_init_adv = function () {
     if (!this.disabled) {
-        var pin_do = '31';
-        var pin_di = '30';
-        var mode = 'WX_ALL_COM';
-
-        if (this.type === 'wx_init') {
-            pin_di = this.getFieldValue('DI');
-            pin_do = this.getFieldValue('DO');
-            if (pin_di === '30')
-                pin_do = '31';
-            mode = this.getFieldValue('MODE');
-        }
+        var pin_di = this.getFieldValue('DI') || '30';
+        var pin_do = this.getFieldValue('DO') || '31';
+        if (pin_di === '30')
+            pin_do = '31';
+        var mode = this.getFieldValue('MODE') || 'WX_ALL_COM';
 
         Blockly.propc.definitions_["wx_def"] = '#include "wifi.h"';
         Blockly.propc.setups_["wx_init"] = 'wifi_start(' + pin_do + ', ' + pin_di + ', 115200, ' + mode + ');';
@@ -5502,11 +5490,10 @@ Blockly.propc.wx_ip = function () {
     {
         var mode = this.getFieldValue('MODE');
         if (!this.disabled) {
-            Blockly.propc.global_vars_['wx_ip_buf'] = 'char ipStr[16];'
-            var func = 'char *wifi_ip_string(int __mode) {int __ip[4]; char __result = ';
+            var func = 'char *wifi_ip_string(int __mode) {char __ipStr[16]; int __ip[4]; char __result = ';
             func += 'wifi_ip(__mode, __ip); if(__result == \'E\') ';
-            func += '{strcpy(ipStr, "Error          ");} else {sprint(ipStr, "%d.%d';
-            func += '.%d.%d", __ip[0], __ip[1], __ip[2], __ip[3]);} return ipStr;}';
+            func += '{strcpy(__ipStr, "Error          ");} else {sprint(__ipStr, "%d.%d';
+            func += '.%d.%d", __ip[0], __ip[1], __ip[2], __ip[3]);} return __ipStr;}';
 
             Blockly.propc.methods_["ip_address_func"] = func;
             Blockly.propc.method_declarations_["ip_address_func"] = 'char *wifi_ip_string(int __mode);\n';
