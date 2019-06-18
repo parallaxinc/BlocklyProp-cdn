@@ -1,9 +1,43 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/*
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * qPortions Copyright 2014 Michel Lampo, Vale Tolpegin
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
+
+/**
+ * Create a string representation of an XML array that defines the menu system used
+ * in the editor page.
+ *
+ * @type {string}
+ *
+ * @description
+ *
+ * Block definitions may contain the 'experimental=true' attribute. This designates
+ * the menu item as 'not ready for production' and will be excluded from systems that
+ * are configured to disbale experimental code. See the configuration option 'experimental'
+ * for additional details.
+ *
+ * Note that the code below currently detects that the attribute
+ * exists and DOES NOT evaluate the value of the attribute.
+ */
 
 var xmlToolbox = '';
 xmlToolbox += '<xml id="toolbox">';
@@ -623,12 +657,181 @@ xmlToolbox += '                <value name="COLOR">';
 xmlToolbox += '                    <block type="color_picker"></block>';
 xmlToolbox += '                </value>';
 xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="oled_bitmap">';
+xmlToolbox += '                <value name="POS_X">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POS_Y">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
 xmlToolbox += '        </category>';
+
+xmlToolbox += '        <category key="category_communicate_epaper" exclude="heb,heb-wx,">';
+xmlToolbox += '            <block type="epaper_initialize"></block>';
+xmlToolbox += '            <block type="oled_font_loader"></block>';
+xmlToolbox += '            <block type="epaper_update"></block>';
+xmlToolbox += '            <block type="epaper_get_max_height"></block>';
+xmlToolbox += '            <block type="epaper_get_max_width"></block>';
+xmlToolbox += '            <block type="epaper_clear_screen"></block>';
+xmlToolbox += '            <block type="epaper_text_color"></block>';
+xmlToolbox += '            <block type="epaper_text_size"></block>';
+xmlToolbox += '            <block type="epaper_set_cursor">';
+xmlToolbox += '                <value name="X_POS">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="Y_POS">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="epaper_print_text">';
+xmlToolbox += '                <value name="MESSAGE">';
+xmlToolbox += '                    <block type="string_type_block"></block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="epaper_print_number">';
+xmlToolbox += '                <value name="NUMIN">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="epaper_print_multiple"></block>';
+xmlToolbox += '            <block type="epaper_draw_pixel">';
+xmlToolbox += '                <value name="X_AXIS">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="Y_AXIS">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="epaper_draw_line">';
+xmlToolbox += '                <value name="X_ONE">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="Y_ONE">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="X_TWO">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="Y_TWO">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="epaper_draw_triangle">';
+xmlToolbox += '                <value name="POINT_X0">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POINT_Y0">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POINT_X1">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POINT_Y1">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POINT_X2">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POINT_Y2">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="epaper_draw_rectangle">';
+xmlToolbox += '                <value name="POINT_X">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POINT_Y">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="RECT_WIDTH">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="RECT_HEIGHT">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="RECT_ROUND">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="epaper_draw_circle">';
+xmlToolbox += '                <value name="POINT_X">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POINT_Y">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="RADIUS">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '            <block type="epaper_bitmap">';
+xmlToolbox += '                <value name="POS_X">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '                <value name="POS_Y">';
+xmlToolbox += '                    <block type="math_number">';
+xmlToolbox += '                        <field name="NUM">0</field>';
+xmlToolbox += '                    </block>';
+xmlToolbox += '                </value>';
+xmlToolbox += '            </block>';
+xmlToolbox += '        </category>';
+
 xmlToolbox += '        <category key="category_communicate_protocols" exclude="heb,heb-wx,">';
 xmlToolbox += '            <block type="serial_open"></block>';
-//xmlToolbox += '            <!-- <block type="serial_tx"></block> -->';
 xmlToolbox += '            <block type="serial_send_text"></block>';
-//xmlToolbox += '            <!-- <block type="serial_rx"></block> -->';
 xmlToolbox += '            <block type="serial_status"></block>';
 xmlToolbox += '            <block type="serial_print_multiple"></block>';
 xmlToolbox += '            <block type="serial_receive_text"></block>';
@@ -923,6 +1126,12 @@ xmlToolbox += '        <category key="category_sensor-input_4x4-keypad" >';
 xmlToolbox += '            <block type="keypad_initialize"></block>';
 xmlToolbox += '            <block type="keypad_read"></block>';
 xmlToolbox += '        </category>';
+xmlToolbox += '        <category key="category_sensor-input_BME680">';
+xmlToolbox += '            <block type="bme680_init"></block>';
+xmlToolbox += '            <block type="bme680_read"></block>';
+xmlToolbox += '            <block type="bme680_get_value"></block>';
+xmlToolbox += '            <block type="bme680_heater"></block>';
+xmlToolbox += '        </category>';
 xmlToolbox += '        <category key="category_sensor-input_colorpal" >';
 xmlToolbox += '            <block type="colorpal_enable"></block>';
 xmlToolbox += '            <block type="colorpal_get_colors_raw"></block>';
@@ -1094,8 +1303,6 @@ xmlToolbox += '                        <field name="NUM">0</field>';
 xmlToolbox += '                    </block>';
 xmlToolbox += '                </value>';
 xmlToolbox += '            </block>';
-//xmlToolbox += '        </category>';
-//xmlToolbox += '        <category key="category_audio_sound" >';
 xmlToolbox += '            <block type="sound_init" include="activity-board,">';
 xmlToolbox += '                <field name="PINL">26</field>';
 xmlToolbox += '                <field name="PINR">27</field>';
@@ -1477,6 +1684,7 @@ xmlToolbox += '            <block type="scribbler_stop_servo"></block>';
 xmlToolbox += '        </category>';
 xmlToolbox += '    </category>';
 xmlToolbox += '    <category key="category_system" exclude="s3," colour="320">';
+xmlToolbox += '        <block type="run_as_setup" experimental="true"></block>';
 xmlToolbox += '        <block type="custom_code_multiple"></block>';
 xmlToolbox += '        <block type="waitcnt">';
 xmlToolbox += '            <value name="TARGET">';
@@ -1530,31 +1738,54 @@ function filterToolbox(profileName) {
         });
     }
 
-    // Convert the string to an XML object
+    // Convert the xmlToolBox string to an XML object
     parser = new DOMParser();
     xmlDoc = parser.parseFromString(xmlToolbox, "text/xml");
 
     // Loop through the specified tags and filter based on their attributes
     tagSearch = ['category', 'sep', 'block'];
+
+    // Toolbnox entries to be removed from the menu
     var toRemove = [];
 
+    //Scan the toolBox XML document for each search tag
     for (var j = 0; j < tagSearch.length; j++) {
 
         var xmlElem = xmlDoc.getElementsByTagName(tagSearch[j]);
 
         for (var t = 0; t < xmlElem.length; t++) {
 
+            // Get the current XML element
             var toolboxEntry = xmlElem[t];
 
+            // The include attribute defines specific supported board types
             var include = toolboxEntry.getAttribute('include');
+
+            // The exclude attribute defines board types that are specifically excluded
+            // from the block under consideration
             var exclude = toolboxEntry.getAttribute('exclude');
+
+            // The experimental attribute is used to decalre that the current menu item
+            // is considered experimental
             var experimental = toolboxEntry.getAttribute('experimental');
-            
+
+            // Place this entry on the removal list if the include attribute is
+            // defined and is does not match the board type that is currently
+            // defined for the project.
             if (include && include.indexOf(profileName + ',') === -1) {
                 toRemove.push(toolboxEntry);
-            } else if (exclude && exclude.indexOf(profileName + ',') > -1) {
+            }
+
+            // Place this entry on the removal list if the exclude attribute is
+            // defined and does match the board type that is currently defined
+            // for the project.
+            else if (exclude && exclude.indexOf(profileName + ',') > -1) {
                 toRemove.push(toolboxEntry);
-            } else if (experimental && inDemo !== 'demo') {
+            }
+
+            // if the XML element has an experimental attribute and the current
+            // environment is not the Demo system, exclude the menu entry
+            else if (experimental && inDemo !== 'demo') {
                 // Remove toolbox categories that are experimental if not in demo
                 toRemove.push(toolboxEntry);
             }

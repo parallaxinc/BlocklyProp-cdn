@@ -312,7 +312,7 @@ Blockly.Blocks.colorpal_enable = {
     },
     onchange: function (event) {
         this.colorPalPin = this.getFieldValue('IO_PIN');
-        if (event && (event.oldXml || event.xml)) {  // only fire when a block got deleted or created
+        if (event && (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE)) {  // only fire when a block got deleted or created
             this.onPinSet(null);
         }
     },
@@ -432,7 +432,7 @@ Blockly.Blocks.colorpal_get_colors_raw = {
     onchange: function (event) {
         if (event) {
             // only fire when a block got deleted or created, the CP_PIN field was changed
-            if (event.oldXml || event.type === Blockly.Events.CREATE || (event.name === 'CP_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
+            if (event.type == Blockly.Events.BLOCK_CREATE || event.type == Blockly.Events.BLOCK_DELETE || (event.name === 'CP_PIN' && event.blockId === this.id) || this.warnFlag > 0) {
                 var allBlocks = Blockly.getMainWorkspace().getAllBlocks();
                 if (allBlocks.toString().indexOf('ColorPal initialize') === -1)
                 {
@@ -986,8 +986,8 @@ Blockly.Blocks.lsm9ds1_init = {
     },
     updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
     setPinMenus: function (ov, nv) {
-        var mv = ['PIN_SCL', 'PIN_SCL', 'PIN_CSAG', 'PIN_CSM'];
-        var m = [this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_CSAG'), this.getFieldValue('PIN_CSM')];
+        var mv = ['PIN_SCL', 'PIN_SDIO', 'PIN_CSAG', 'PIN_CSM'];
+        var m = [this.getFieldValue('PIN_SCL'), this.getFieldValue('PIN_SDIO'), this.getFieldValue('PIN_CSAG'), this.getFieldValue('PIN_CSM')];
         if(this.getInput('PINS')) {
             this.removeInput('PINS');
         }
@@ -2060,4 +2060,230 @@ Blockly.propc.dht22_value = function () {
     }
     var action = this.getFieldValue('ACTION').split(',');
     return ['dht22_get' + action[0] + '(' + action[1] + ')', Blockly.propc.ORDER_ATOMIC];
+};
+
+
+// ------------------ BME680 Air Quality Sensor -----------------------------
+Blockly.Blocks.bme680_init = {
+    helpUrl: Blockly.MSG_BME680_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_BME680_INIT_TOOLTIP);
+        this.setColour(colorPalette.getColor('input'));
+        this.appendDummyInput('PINS');
+        this.setInputsInline(false);
+        this.setNextStatement(true, null);
+        this.setPreviousStatement(true, "Block");
+        this.updateConstMenu();
+    },
+    updateConstMenu: Blockly.Blocks['sound_impact_run'].updateConstMenu,
+    setPinMenus: function (ov, nv) {
+        var mv = ['PIN_CLK', 'PIN_SDI', 'PIN_SDO', 'PIN_CS'];
+        var m = [this.getFieldValue('PIN_CLK'), this.getFieldValue('PIN_SDI'), this.getFieldValue('PIN_SDO'), this.getFieldValue('PIN_CS')];
+        if(this.getInput('PINS')) {
+            this.removeInput('PINS');
+        }
+        this.appendDummyInput('PINS')
+                .appendField("Air Quality initialize SDO")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SDO")
+                .appendField("CLK")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CLK")
+                .appendField("SDI")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_SDI")
+                .appendField("CS")
+                .appendField(new Blockly.FieldDropdown(profile.default.digital.concat(this.v_list)), "PIN_CS");
+        for (var i = 0; i < 4; i++) {
+            if (m[i] && m[i] === ov && nv) {
+                this.setFieldValue(nv, mv[i]);
+            } else if (m[i]) {
+                this.setFieldValue(m[i], mv[i]);
+            }
+        }
+    }
+};
+
+Blockly.propc.bme680_init = function () {
+    var pin = [this.getFieldValue('PIN_SDO'), this.getFieldValue('PIN_CLK'), this.getFieldValue('PIN_SDI'), this.getFieldValue('PIN_CS')];
+    for (var i = 0; i < 3; i++) {
+        if (profile.default.digital.toString().indexOf(pin[i] + ',' + pin[i]) === -1) {
+            pin[i] = 'MY_' + pin[i];
+        }
+    }
+    if (!this.disabled) {
+        Blockly.propc.definitions_["include_bme680"] = '#include "bme680.h"';
+        Blockly.propc.setups_["init_bme680"] = 'gas_sensor = bme680_openSPI(' + pin[0] + ', ' + pin[1] + ', ';
+        Blockly.propc.setups_["init_bme680"] += pin[2] + ', ' + pin[3] + ');\n';
+        Blockly.propc.global_vars_["device_bme680"] = 'bme680 *gas_sensor;\n';
+    }
+    return '';
+};
+
+Blockly.Blocks.bme680_read = {
+    helpUrl: Blockly.MSG_BME680_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_BME680_READ_TOOLTIP);
+        this.setColour(colorPalette.getColor('input'));
+        this.appendDummyInput()
+                .appendField("Air Quality read");
+        this.setInputsInline(false);
+        this.setNextStatement(true, null);
+        this.setPreviousStatement(true, "Block");
+    },
+    onchange: function () {
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+        if (allBlocks.indexOf('Air Quality initialize') === -1)
+        {
+            this.setWarningText('WARNING: You must use an Air Quality\ninitialize block at the beginning of your program!');
+        } else {
+            this.setWarningText(null);
+        }
+    }
+};
+
+Blockly.propc.bme680_read = function () {
+    var code = '';
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+    if (allBlocks.indexOf('Air Quality initialize') === -1) {
+        code += '// ERROR: Missing Air Quality initialize block!';
+    } else {
+        code += 'bme680_readSensor(gas_sensor);';
+    }
+    return code;
+};
+
+Blockly.Blocks.bme680_heater = {
+    helpUrl: Blockly.MSG_BME680_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_BME680_HEATER);
+        this.setColour(colorPalette.getColor('input'));
+        this.appendDummyInput()
+                .appendField("Air Quality heater")
+                .appendField(new Blockly.FieldDropdown([
+                    ["disable", "Disable"],
+                    ["enable", "Enable"]
+                ]), "HEAT_STATE");
+        this.setInputsInline(false);
+        this.setNextStatement(true, null);
+        this.setPreviousStatement(true, "Block");
+    },
+    onchange: function () {
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+        if (allBlocks.indexOf('Air Quality initialize') === -1)
+        {
+            this.setWarningText('WARNING: You must use an Air Quality\ninitialize block at the beginning of your program!');
+        } else {
+            this.setWarningText(null);
+        }
+    }
+};
+
+Blockly.propc.bme680_heater = function () {
+    var code = '';
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+    if (allBlocks.indexOf('Air Quality initialize') === -1) {
+        code += '// ERROR: Missing Air Quality initialize block!';
+    } else {
+        code += 'bme680_heater' + this.getFieldValue('HEAT_STATE') + '(gas_sensor);';
+    }
+    return code;
+};
+
+Blockly.Blocks.bme680_get_value = {
+    helpUrl: Blockly.MSG_BME680_HELPURL,
+    init: function () {
+        this.measUnits = {
+            'temperature': [
+                ['in \u00b0C', 'CELSIUS'], 
+                ['in \u00b0F', 'FAHRENHEIT'], 
+                ['in Kelvin', 'KELVIN']
+            ],
+            'pressure': [
+                ['in pascals', 'PASCALS'],
+                ['in mmHg', 'MMHG'],
+                ['in inHg', 'INHG'],
+                ['in PSI', 'PSI']
+            ],
+            'humidity': [['in %', ' ']],
+            'gasResistance': [['in \u2126', ' ']],
+            'altitude': [
+                ['in meters', 'METERS'],
+                ['in feet', 'FEET']
+            ]
+        }
+        this.setTooltip(Blockly.MSG_BME680_GET_VALUE_TOOLTIP);
+        this.setColour(colorPalette.getColor('input'));
+        this.appendDummyInput()
+                .appendField("Air Quality")
+                .appendField(new Blockly.FieldDropdown([
+                    ["Temperature", "temperature"], 
+                    ["Pressure", "pressure"], 
+                    ["Altitude Estimate", "altitude"], 
+                    ["Gas Sensor Resistance", "gasResistance"], 
+                    ["Relative Humidity", "humidity"]
+                ], function(val) {this.sourceBlock_.setMeasUnit(val);}), "SENSOR");
+        this.appendDummyInput('UNITS')
+                .appendField(new Blockly.FieldDropdown(this.measUnits['temperature']), "UNIT");
+        this.appendDummyInput('MULTIPLIER')
+                .appendField(new Blockly.FieldDropdown([
+                    ["\u2715 1", " "], 
+                    ["\u2715 10", "*10.0"], 
+                    ["\u2715 100", "*100.0"], 
+                    ["\u2715 1000", "*1000.0"], 
+                    ["\u2715 10000", "*10000.0"]
+                ]), "MULT")
+        this.setInputsInline(true);
+        this.setNextStatement(false, null);
+        this.setPreviousStatement(false, null);
+        this.setOutput(true, 'Number')
+    },
+    setMeasUnit: function(val) {
+        this.removeInput('UNITS');
+        if (val === 'humidity') {
+            this.appendDummyInput('UNITS')
+                    .appendField('%');
+        } else if (val === 'gasResistance') {
+            this.appendDummyInput('UNITS')
+                    .appendField('\u2126');
+        } else {
+            this.appendDummyInput('UNITS')
+                    .appendField(new Blockly.FieldDropdown(this.measUnits[val]), "UNIT");
+        }
+        this.moveInputBefore('UNITS', 'MULTIPLIER');
+    },
+    mutationToDom: function () {
+        var container = document.createElement('mutation');
+        container.setAttribute('sensor', this.getFieldValue('SENSOR'));
+        return container;
+    },
+    domToMutation: function (container) {
+        var val = container.getAttribute('sensor');
+        if (val) {
+            this.setMeasUnit(val);
+        }
+    },
+    onchange: function () {
+        var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+        if (allBlocks.indexOf('Air Quality initialize') === -1)
+        {
+            this.setWarningText('WARNING: You must use an Air Quality\ninitialize block at the beginning of your program!');
+        } else {
+            this.setWarningText(null);
+        }
+    }
+};
+
+Blockly.propc.bme680_get_value = function () {
+    var code = '';
+    var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+    if (allBlocks.indexOf('Air Quality initialize') === -1) {
+        code += '// ERROR: Missing Air Quality initialize block!';
+    } else {
+        var sensor = this.getFieldValue('SENSOR');
+        var mult = this.getFieldValue('MULT') || '';
+        var unit = this.getFieldValue('UNIT') || '';
+        if (unit.length > 2) {
+            unit = ', ' + unit;
+        }
+        code += '(int)(bme680_' + sensor + '(gas_sensor' + unit + ')' + mult + ')';
+    }
+    return [code, Blockly.propc.ORDER_ATOMIC];
 };

@@ -1,22 +1,86 @@
+/*
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 // Node.js libraries
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { exec } = require('child_process');
 
-
+/**
+ *
+ * @type {string}
+ */
 var compiler_output = '';
+
+
+/**
+ *
+ * @type {Array}
+ */
 var library_order = [];
+
+
+/**
+ *
+ * @type {Array}
+ */
 var external_libraries = [];
+
+
+/**
+ *
+ * @type {{}}
+ */
 var external_libraries_info = {};
+
+
+/**
+ *
+ * @type {string}
+ */
 var source_directory = '';
 
+
+/**
+ *
+ * @type {{"c-libraries": string, "c-compiler": string}}
+ */
 var configs = {
     'c-libraries' : "",
     'c-compiler' : ""
 };
 
+
+/**
+ *
+ * @type {Date}
+ */
 var tt = new Date();
+
+
+/**
+ *
+ * @type {{shared: boolean, private: boolean, code: string, created: Date, "description-html": string, description: string, type: string, name: string, modified: Date, id: number, user: string, yours: boolean, board: string}}
+ */
 document.localProject = {
     'board': "activity-board",
     'code': "<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>",
@@ -31,21 +95,39 @@ document.localProject = {
     'type': "PROPC",
     'user': "offline",
     'yours': true,
-}
+};
 
+
+
+var c_qte = "'";
+
+/**
+ *
+ * @type {string[]}
+ */
 var c_cmp = ["/", "Users", os.userInfo().username, "Documents", "SimpleIDE", "Learn", "Simple Libraries"];
+
+
+/**
+ *
+ * @type {string[]}
+ */
 var c_pth = ["/", "Applications", "SimpleIDE.app", "Contents", "propeller-gcc", "bin", "propeller-elf-gcc"];
 
+
 if (navigator.browserSpecs.system === "Windows") {
+    c_qte = '"';
     c_pth = ["/", "Program Files (x86)", "SimpleIDE", "propeller-gcc", "bin", "propeller-elf-gcc"];
 }
 
 if ($("meta[name=c-libraries-path]").attr("content")) {
     c_cmp = $("meta[name=c-libraries-path]").attr("content").split('|');
 }
+
 if ($("meta[name=c-compiler-path]").attr("content")) {
     c_pth = $("meta[name=c-compiler-path]").attr("content").split('|');
 }
+
 
 for (var i = 0; i < c_cmp.length; i++) {
     configs['c-libraries'] = path.join(configs['c-libraries'], c_cmp[i]);
@@ -53,27 +135,6 @@ for (var i = 0; i < c_cmp.length; i++) {
 for (var i = 0; i < c_pth.length; i++) {
     configs['c-compiler'] = path.join(configs['c-compiler'], c_pth[i]);
 }
-
-console.log(c_cmp);
-console.log(c_pth);
-
-/*
-// FOR TESTING
-var propLoadApp = '/Applications/BlocklyPropClient.app/Contents/Resources/propeller-tools/mac/proploader -P';
-
-exec(propLoadApp, function(err, stdout, stderr) {
-    console.log('errors: ' + err);
-    console.log('stdout: ' + stdout);
-    console.log('stderr: ' + stderr);
-});
-*/
-
-/*
-var configs = {
-    'c-libraries': path.join("/", "Users", os.userInfo().username, "Documents", "SimpleIDE", "Learn", "Simple Libraries"),
-    'c-compiler': path.join("/", "Applications", "SimpleIDE.app", "Contents", "propeller-gcc", "bin", "propeller-elf-gcc")
-};
-*/
 
 var compile_actions = {
     "COMPILE": {"compile-options": [], "extension": ".elf", "return-binary": false},
@@ -100,11 +161,26 @@ function oswalk(dir, action) {
             });
         });
     });
-};
+}
 
+
+/**
+ *
+ * @type {{}}
+ */
 var lib_files = {};
+
+
+/**
+ *
+ * @type {{}}
+ */
 var lib_includes = {};
 
+
+/**
+ *
+ */
 oswalk(configs['c-libraries'], function(err, f) {
     if (err) {
         return err;
@@ -112,20 +188,34 @@ oswalk(configs['c-libraries'], function(err, f) {
 
     var pth = f.split(path.sep);
     var ext = pth[pth.length - 1].split('.');
+
     if ( ext[1] === 'h' || ext[1] === 'c' ) {
-        fn = pth.pop();
-        fp = pth.join('/');
-        lib_files[fn] = fp;
+        let fn = pth.pop();
+
+        // fp = pth.join('/');
+        // lib_files[fn] = fp;
+
+        lib_files[fn] = pth.join('/');
+
         if ( ext[1] === 'h') {
-            var data = fs.readFileSync(path.join(f), "utf8")
+            var data = fs.readFileSync(path.join(f), "utf8");
 	        lib_includes[fn] = parse_includes(data);
         }
     }
 });
 
 
+//FIXME: compiler says that this function is unreferenced
+/**
+ *
+ * @param action
+ * @param source_files
+ * @param app_filename
+ * @param lib_opt
+ * @param comp_opt
+ * @param callback
+ */
 function localCompile(action, source_files, app_filename, lib_opt, comp_opt, callback) {
-
     // create a temporary directory to store files
     source_directory = fs.mkdtempSync(path.join(os.tmpdir(), 'pgc-'));
 
@@ -156,7 +246,6 @@ function localCompile(action, source_files, app_filename, lib_opt, comp_opt, cal
         }
     }
 
-
     // C source files
     for (filename in source_files) {
         if (filename.endsWith(".c")) {
@@ -170,9 +259,7 @@ function localCompile(action, source_files, app_filename, lib_opt, comp_opt, cal
 	
             fs.writeFileSync(path.join(source_directory, filename), file_content);
 
-            c_file_data[filename] = {
-                'includes': parse_includes(file_content)
-            };
+            c_file_data[filename] = {'includes': parse_includes(file_content) };
 
             // Check header file exists
             h_filename = filename.slice(0, -1) + 'h';
@@ -184,7 +271,6 @@ function localCompile(action, source_files, app_filename, lib_opt, comp_opt, cal
         }
     }
 
-    compiler_output = '';
     library_order = [];
     external_libraries = [];
     external_libraries_info = {};
@@ -199,17 +285,7 @@ function localCompile(action, source_files, app_filename, lib_opt, comp_opt, cal
         find_dependencies(external_libraries[l]);
     }
 
-    if (external_libraries.length > 0) {
-        compiler_output += "Included libraries: " + external_libraries.join(', ') + "\n";
-    }
-
-    // TODO: determine if the following statement and executing_data need adjusting when multi-file projects are enabled
-    if (library_order.length > 0) {
-        compiler_output += "Library compile order: " + library_order.join(', ') + "\n";
-    }
-
-    success = true;
-/*
+    /*
     // TODO: Promisify to make sure this all executes?
     // Precompile libraries
     for (var l = 0; l < library_order.length; l++) {
@@ -218,38 +294,54 @@ function localCompile(action, source_files, app_filename, lib_opt, comp_opt, cal
         });
 
     }
-*/
+    */
 
-    if (success) {
-        compile_binary(source_directory, action, app_filename, library_order, external_libraries_info, comp_opt, function(output) {
-            return callback(output);
-        });
-    }
+    compile_binary(source_directory, action, app_filename, library_order, external_libraries_info, comp_opt, function(output) {
+        return callback(output);
+    });
 }
 
+
 // TODO: put this in all error handlers
+/**
+ *
+ * @param sd
+ */
 function cleanUpAll(sd) {
-    // delete the temp directory
-    deleteFolderRecursive(sd);  
-    
     // empty variables
-    compiler_output = '';
     library_order = [];
     external_libraries = [];
     external_libraries_info = {};
     source_directory = '';
+
+    // TODO: This appears to break in a WINDOWS environment...
+    // any folder generated by the app cannot be deleted until the app is closed.  
+    // By putting this in a delay, it prevents it from choking the app.
+
+    // delete the temp directory
+    setTimeout(function() {deleteFolderRecursive(sd)}, 60000);  
 }
 
-function determine_order(header_file, header_files, c_files) {
 
+/**
+ *
+ * @param header_file
+ * @param header_files
+ * @param c_files
+ */
+function determine_order(header_file, header_files, c_files) {
     if (library_order.toString().indexOf(header_file) === -1) {
+
         // TODO review to check what happens if no header supplied (if that is valid)
         if (header_files.toString().indexOf(header_file + '.h') > -1) {
             var includes = c_files[header_files[header_file + '.h']['c_filename']]['includes'];
+
             for (var include in includes) {
                 determine_order(include, header_files, c_files);
             }
+
             library_order.push(header_file);
+
         } else {
             if (external_libraries.toString().indexOf(header_file) === -1) {
                 external_libraries.push(header_file);
@@ -258,8 +350,12 @@ function determine_order(header_file, header_files, c_files) {
     }
 }
 
+
+/**
+ *
+ * @param library
+ */
 var find_dependencies = function(library) {
-  
     for (var files in lib_files) {
         if (files.indexOf(library + '.h') > -1) {
             if (lib_files[files].indexOf('/lib' + library) > -1) {
@@ -280,6 +376,16 @@ var find_dependencies = function(library) {
     }
 };
 
+
+/**
+ *
+ * @param working_directory
+ * @param source_file
+ * @param target_filename
+ * @param libraries
+ * @param lib_opt
+ * @param callback
+ */
 function compile_lib(working_directory, source_file, target_filename, libraries, lib_opt, callback) {
     var out_text = working_directory + ' -> Compiling ' + source_file + ' into ' + target_filename + '\n';
 
@@ -287,7 +393,8 @@ function compile_lib(working_directory, source_file, target_filename, libraries,
     out_text += executing_data.join(' ');
 
     // TODO: find a better way to handle spaces in the directory names
-    exec(executing_data.join(' ').replace(/\/Simple Libraries\//g, "/'Simple Libraries'/"), { 'cwd' : working_directory }, function(err, stdout, stderr) {
+    //exec(executing_data.join(' ').replace(/Simple Libraries/g, c_qte + 'Simple Libraries' + c_qte), { 'cwd' : working_directory }, function(err, stdout, stderr) {
+    exec(executing_data.join(' '), { 'cwd' : working_directory }, function(err, stdout, stderr) {
  
     // TODO: clean up callbacks - send object? Promisify? Both?       
         if (err) {
@@ -298,8 +405,6 @@ function compile_lib(working_directory, source_file, target_filename, libraries,
         }
 
         // TODO: handle compiler output...?
-
-        // the *entire* stdout and stderr (buffered)
         console.log(stdout);
         console.log(stderr);
 
@@ -308,93 +413,94 @@ function compile_lib(working_directory, source_file, target_filename, libraries,
     });   
 }
 
+
+/**
+ *
+ * @param working_directory
+ * @param action
+ * @param source_file
+ * @param binaries
+ * @param libraries
+ * @param comp_opt
+ * @param callback
+ */
 function compile_binary(working_directory, action, source_file, binaries, libraries, comp_opt, callback) {
-    
     var file_out = 'usr' + (Math.random().toString(36).substring(2, 10)) + 'pgc' + compile_actions[action.toUpperCase()]["extension"];
     var binary_file = path.join(working_directory, file_out);
     
-    var out_text = '';
+    var data = {
+        error:      null,
+        details:    null,
+        message:    '',
+        success:    false,
+        binary:     null,
+        extension:  compile_actions[action.toUpperCase()]["extension"]
+    }
 
+    // Prepare the string to be executed by the CLI
     executing_data = create_executing_data(path.join(source_directory, source_file), binary_file, binaries, libraries, comp_opt);  // build execution command
-    out_text += executing_data.join(' ');
-    
+
     // Create a new tempfile and open it for writing
     fs.open(binary_file, 'w+', (err, fd) => {
         
-        // create an arraybuffer
-        var u8buff = new Uint8Array;   
-        
         if (err) {
-            
             // node couldn't open a temp file
             cleanUpAll(source_directory);
-            var data = {
-                error:      err,
-                'message':  "Unable to open binary file.",
-                success:    false,
-                binary:     null,
-                extension:  null
-            }
+            data.error = err;
+            data.extension = null;
+            data.message = 'Unable to open binary file.';
             return callback(data);  
         }
         
-        // TODO: find a better way to handle spaces in the directory names
-        exec(executing_data.join(' ').replace(/\/Simple Libraries\//g, "/'Simple Libraries'/"), { 'cwd' : working_directory }, function(err, stdout, stderr) {
+        // Execute Prop-GCC with the appropriate arguments generated by function create_executing_data
+        exec(executing_data.join(' '), { 'cwd' : working_directory }, function(err, stdout, stderr) {
 
-            var data = {
-                error:      stderr,
-                details:    stdout,
-                message:    "Compiler not found.",
-                success:    false,
-                binary:     null,
-                extension:  null
-            }
+            data.error = stderr;
+            data.details = stdout;
+            data.message = 'Compile successful!';
 
             if (err) {
-
                 // node couldn't execute the command
-                cleanUpAll(source_directory);
 		        data.error = err;
-		        data['message'] = "Compiler Error: " + stdout + "\n\n" + stderr;
-   	            return callback(data);  
-            }
-
-            // the *entire* stdout and stderr (buffered)
-            data['message'] = "Compile successful!";
-            data.details = stdout;
-	        data.success = true;
-	        data.extension = compile_actions[action.toUpperCase()]["extension"];
-            
-            if (compile_actions[action.toUpperCase()]["return-binary"]) {
-                
-                // Read binary file into base64 string
-                fs.readFile(fd, function(err, u8buff) {
-
-                    if (err) {
-		                cleanUpAll(source_directory);
-			            data.error = err;
-			            data['message'] = "Unable to read compiled file: " + stdout + "\n\n" + stderr;
-   	                    return callback(data);  
-                    }
-
-		            data.binary = _arrayBufferToBase64( u8buff );
-
-                    // Return results
-                    cleanUpAll(source_directory);
-   	                return callback(data);  
-                });
-            } else {
-
-                // Return results
+                data.extension = null;
+		        data.message = 'Compiler Error!  Output: ' + stdout + '\n\nError: ' + stderr;
                 cleanUpAll(source_directory);
                 return callback(data);  
-            }  
+                   
+            } else if (compile_actions[action.toUpperCase()]["return-binary"]) {     
+                // Read binary file into base64 string
+                fs.readFile(fd, function(err, u8buff) {
+                    if (err) {
+                        data.error = err;
+                        data.extension = null;
+			            data.message = "Unable to read compiled file: " + stdout + "\n\n" + stderr;
+		                cleanUpAll(source_directory);
+                        return callback(data);  
+                           
+                    } else {
+
+                        data.success = true;
+                        data.binary = _arrayBufferToBase64( u8buff );
+                        cleanUpAll(source_directory);
+                        return callback(data);
+
+                    }
+                });
+            } else {
+                // Return results
+                data.success = true;
+                cleanUpAll(source_directory);
+                return callback(data);
+            }
         });
     });
 }
 
+/**
+ *
+ * @param pth
+ */
 function deleteFolderRecursive(pth) {
-
     // make sure it is our directory we are deleting
     if (fs.existsSync(pth) && pth.indexOf('pgc-') > -1) {
         fs.readdirSync(pth).forEach(function(fl, index) {
@@ -409,6 +515,13 @@ function deleteFolderRecursive(pth) {
     }
 };
 
+
+/**
+ *
+ * @param buffer
+ * @returns {string}
+ * @private
+ */
 function _arrayBufferToBase64( buffer ) {
     var binary = '';
     var bytes = new Uint8Array( buffer );
@@ -419,6 +532,12 @@ function _arrayBufferToBase64( buffer ) {
     return window.btoa( binary );
 }
 
+
+/**
+ *
+ * @param source_file
+ * @returns {Array}
+ */
 function parse_includes(source_file) {
     icl = [];
 
@@ -429,8 +548,23 @@ function parse_includes(source_file) {
     return icl;
 }
 
+
+/**
+ *
+ * @param lib_c_file_name
+ * @param binary_file
+ * @param descriptors
+ * @param lib_opt
+ * @returns {*[]|*}
+ */
 function create_lib_executing_data(lib_c_file_name, binary_file, descriptors, lib_opt) {
-    executable = configs['c-compiler'];
+    var p_dmk = configs['c-compiler'][0];                        // Scans file path and surrounds
+    var executable = configs['c-compiler'].split(p_dmk);         // Any folder/file names that have
+    for (var i = 0; i < executable.length; i++) {                // spaces with quotes
+        if (executable[i].indexOf(' ') > 0) {
+            executable[i] = c_qte + executable[i] + c_qte;
+        }
+    }
 
     executing_data = [executable];
     executing_data.push("-I");
@@ -438,6 +572,14 @@ function create_lib_executing_data(lib_c_file_name, binary_file, descriptors, li
     executing_data.push("-L");
     executing_data.push(".");
     for (var descriptor in descriptors) {
+        var lib_path = descriptors[descriptor].split(p_dmk);     // Scans the file path to see if
+        for (i = 0; i < lib_path.length; i++) {                  // any folders or files have
+            if (lib_path[i].indexOf(' ') > 0) {                  // spaces in their names, and if
+                lib_path[i] = c_qte + lib_path[i] + c_qte;       // so, surrounds them with quotes.
+            }
+        }
+        descriptors[descriptor] = lib_path.join(p_dmk);
+
         executing_data.push("-I");
         executing_data.push(descriptors[descriptor]);
         executing_data.push("-L");
@@ -455,15 +597,39 @@ function create_lib_executing_data(lib_c_file_name, binary_file, descriptors, li
     return executing_data;
 }
 
-function create_executing_data(main_c_file_name, binary_file, binaries, descriptors, comp_opt) {
-    executable = configs['c-compiler'];
 
-    executing_data = [executable];
+/**
+ *
+ * @param main_c_file_name
+ * @param binary_file
+ * @param binaries
+ * @param descriptors
+ * @param comp_opt
+ * @returns {*[]|*}
+ */
+function create_executing_data(main_c_file_name, binary_file, binaries, descriptors, comp_opt) {
+    var p_dmk = configs['c-compiler'][0];                        // Scans file path and surrounds
+    var executable = configs['c-compiler'].split(p_dmk);         // Any folder/file names that have
+    for (var i = 0; i < executable.length; i++) {                // spaces with quotes
+        if (executable[i].indexOf(' ') > 0) {
+            executable[i] = c_qte + executable[i] + c_qte;
+        }
+    }
+
+    executing_data = [executable.join(p_dmk)];
     executing_data.push("-I");
     executing_data.push(".");
     executing_data.push("-L");
     executing_data.push(".");
     for (var descriptor in descriptors) {
+        var lib_path = descriptors[descriptor].split(p_dmk);     // Scans the file path to see if
+        for (i = 0; i < lib_path.length; i++) {                  // any folders or files have
+            if (lib_path[i].indexOf(' ') > 0) {                  // spaces in their names, and if
+                lib_path[i] = c_qte + lib_path[i] + c_qte;       // so, surrounds them with quotes.
+            }
+        }
+        descriptors[descriptor] = lib_path.join(p_dmk);
+
         executing_data.push("-I");
         executing_data.push(descriptors[descriptor]);
         executing_data.push("-L");
@@ -494,14 +660,39 @@ function create_executing_data(main_c_file_name, binary_file, binaries, descript
 }
 
 
+// TODO/WIP - testing only - saving/loading with the chrome engine is a bit strange...
+/**
+ *
+ * @param filename
+ * @param file_content
+ */
 var localSaveAs = function(filename, file_content) {
     // TODO: Switch this to ASYNC and add error reporting
     fs.writeFileSync(filename, file_content);
 }
 
+
+/**
+ *
+ * @param filenames
+ * @param file_contents
+ */
+/*
 var localSaveMultiplefiles = function(filenames, file_contents) {
     for (var idx = 0; idx < filenames.length; idx++) {
         // TODO: Switch this to ASYNC and add error reporting
         fs.writeFileSync(filenames[idx], file_contents[idx]);
     }
 }
+*/
+
+/*
+// FOR TESTING
+var propLoadApp = '/Applications/BlocklyPropClient.app/Contents/Resources/propeller-tools/mac/proploader -P';
+
+exec(propLoadApp, function(err, stdout, stderr) {
+    console.log('errors: ' + err);
+    console.log('stdout: ' + stdout);
+    console.log('stderr: ' + stderr);
+});
+*/

@@ -537,7 +537,7 @@ Blockly.Blocks.scribbler_drive = {
     init: function () {
         this.appendDummyInput()
                 .appendField("drive")
-                .appendField(new Blockly.FieldDropdown([['forward', ''], ['backward', '-']]), 'DRIVE_DIRECTION')
+                .appendField(new Blockly.FieldDropdown([['forward', ' '], ['backward', '-']]), 'DRIVE_DIRECTION')
                 .appendField("and")
                 .appendField(new Blockly.FieldDropdown([['sharply to the left', 'SHARP_LEFT'], ['gently to the left', 'GENTLE_LEFT'], ['slightly to the left', 'SLIGHT_LEFT'], ['straight', 'STRAIGHT'], ['slightly to the right', 'SLIGHT_RIGHT'], ['gently to the right', 'GENTLE_RIGHT'], ['sharply to the right', 'SHARP_RIGHT']]), 'DRIVE_ANGLE')
                 .appendField("at")
@@ -548,21 +548,26 @@ Blockly.Blocks.scribbler_drive = {
         this.setColour(colorPalette.getColor('io'));
         this.setHelpUrl(Blockly.MSG_S3_SIMPLE_ACTIONS_HELPURL);
         this.setTooltip(Blockly.MSG_S3_SCRIBBLER_DRIVE_TOOLTIP);
+        if (this.getFieldValue('DRIVE_DIRECTION') && this.getFieldValue('DRIVE_DIRECTION').length < 1) {
+            this.setFieldValue(' ', 'DRIVE_DIRECTION');
+        }
     }
 };
 
 Blockly.propc.scribbler_drive = function () {
     var drive_direction = this.getFieldValue('DRIVE_DIRECTION');
+    console.log('drive direction:');
+    console.log(drive_direction.toString());
     var drive_angle = this.getFieldValue('DRIVE_ANGLE');
     var drive_speed = this.getFieldValue('DRIVE_SPEED');
-    return 's3_simpleDrive(S3_' + drive_angle + ', ' + drive_direction + drive_speed + ');\n';
+    return 's3_simpleDrive(S3_' + drive_angle + ', ' + drive_direction.trim() + drive_speed + ');\n';
 };
 
 Blockly.Blocks.scribbler_spin = {
     init: function () {
         this.appendDummyInput()
                 .appendField("rotate")
-                .appendField(new Blockly.FieldDropdown([['\u21BB', ''], ['\u21BA', '-']]), 'SPIN_DIRECTION')
+                .appendField(new Blockly.FieldDropdown([['\u21BB', ' '], ['\u21BA', '-']]), 'SPIN_DIRECTION')
                 .appendField("for")
                 .appendField(new Blockly.FieldAngle(90), "SPIN_ANGLE")
                 .appendField("at")
@@ -573,6 +578,9 @@ Blockly.Blocks.scribbler_spin = {
         this.setColour(colorPalette.getColor('io'));
         this.setHelpUrl(Blockly.MSG_S3_SIMPLE_ACTIONS_HELPURL);
         this.setTooltip(Blockly.MSG_S3_SCRIBBLER_SPIN_TOOLTIP);
+        if (this.getFieldValue('SPIN_DIRECTION') && this.getFieldValue('SPIN_DIRECTION').length < 1) {
+            this.setFieldValue(' ', 'SPIN_DIRECTION');
+        }
     }
 };
 
@@ -580,7 +588,7 @@ Blockly.propc.scribbler_spin = function () {
     var spin_direction = this.getFieldValue('SPIN_DIRECTION');
     var spin_angle = this.getFieldValue('SPIN_ANGLE');
     var spin_speed = this.getFieldValue('SPIN_SPEED');
-    return 's3_simpleSpin(' + spin_direction + spin_angle + ', ' + spin_speed + ', 0);\n';
+    return 's3_simpleSpin(' + spin_direction.trim() + spin_angle + ', ' + spin_speed + ', 0);\n';
 };
 
 Blockly.Blocks.scribbler_stop = {
@@ -728,7 +736,7 @@ Blockly.Blocks.move_motors_distance = {
                     ['tenths of an inch', ' * 10000 / 1933'],
                     ['centimeters', ' * 10000 / 491'],
                     ['millimeters', ' * 1000 / 491'],
-                    ['encoder counts', '']
+                    ['encoder counts', ' ']
                 ], function (unit) {
                     this.sourceBlock_.newUnit(unit);
                 }), 'MULTIPLIER');
@@ -756,6 +764,9 @@ Blockly.Blocks.move_motors_distance = {
         this.setColour(colorPalette.getColor('io'));
         this.setHelpUrl(Blockly.MSG_S3_MOTORS_HELPURL);
         this.setTooltip(Blockly.MSG_S3_MOVE_MOTORS_DISTANCE_TOOLTIP);
+        if (this.getFieldValue('MULTIPLIER') && this.getFieldValue('MULTIPLIER').length < 1) {
+            this.setFieldValue(' ', 'MULTIPLIER');
+        }
         this.newUnit(this.getFieldValue('MULTIPLIER'));
     },
     newUnit: function (unit) {
@@ -771,7 +782,7 @@ Blockly.Blocks.move_motors_distance = {
             rangeText = 'R,-1608,1608,0';
         } else if (unit === ' * 1000 / 491') {
             rangeText = 'R,-16088,16088,0';
-        } else if (unit === '') {
+        } else if (unit === ' ') {
             rangeText = 'R,-32767,32767,0';
         }
 
@@ -788,7 +799,7 @@ Blockly.Blocks.move_motors_distance = {
 };
 
 Blockly.propc.move_motors_distance = function () {
-    var distance_multiplier = this.getFieldValue('MULTIPLIER');
+    var distance_multiplier = this.getFieldValue('MULTIPLIER').trim();
     var left_distance = Blockly.propc.valueToCode(this, 'LEFT_MOTOR_DISTANCE', Blockly.propc.ORDER_ATOMIC) || '0';
     var right_distance = Blockly.propc.valueToCode(this, 'RIGHT_MOTOR_DISTANCE', Blockly.propc.ORDER_ATOMIC) || '0';
     var top_speed = Blockly.propc.valueToCode(this, 'MOTOR_SPEED', Blockly.propc.ORDER_ATOMIC) || '0';
@@ -822,7 +833,7 @@ Blockly.Blocks.move_motors_xy = {
                     ['tenths of an inch', ' * 10000 / 1933'],
                     ['centimeters', ' * 10000 / 491'],
                     ['millimeters', ' * 1000 / 491'],
-                    ['encoder counts', '']
+                    ['encoder counts', ' ']
                 ], function (unit) {
                     this.sourceBlock_.newUnit(unit);
                 }), 'MULTIPLIER');
@@ -834,6 +845,9 @@ Blockly.Blocks.move_motors_xy = {
         this.setNextStatement(true, null);
         this.setColour(colorPalette.getColor('io'));
         this.setHelpUrl(Blockly.MSG_S3_MOTORS_HELPURL);
+        if (this.getFieldValue('MULTIPLIER') && this.getFieldValue('MULTIPLIER').length < 1) {
+            this.setFieldValue(' ', 'MULTIPLIER');
+        }
         this.setTooltip(Blockly.MSG_S3_MOVE_MOTORS_XY_TOOLTIP);
     },
     newUnit: function (unit) {
@@ -849,7 +863,7 @@ Blockly.Blocks.move_motors_xy = {
             rangeText = 'R,-1608,1608,0';
         } else if (unit === ' * 1000 / 491') {
             rangeText = 'R,-16089,16089,0';
-        } else if (unit === '') {
+        } else if (unit === ' ') {
             rangeText = 'R,-32768,32767,0';
         }
 
@@ -866,7 +880,7 @@ Blockly.Blocks.move_motors_xy = {
 };
 
 Blockly.propc.move_motors_xy = function () {
-    var distance_multiplier = this.getFieldValue('MULTIPLIER');
+    var distance_multiplier = this.getFieldValue('MULTIPLIER').trim();
     var x_distance = Blockly.propc.valueToCode(this, 'X_DISTANCE', Blockly.propc.ORDER_ATOMIC) || '0';
     var y_distance = Blockly.propc.valueToCode(this, 'Y_DISTANCE', Blockly.propc.ORDER_ATOMIC) || '0';
     var top_speed = Blockly.propc.valueToCode(this, 'MOTOR_SPEED', Blockly.propc.ORDER_ATOMIC) || '0';
@@ -893,7 +907,7 @@ Blockly.Blocks.move_motors_angle = {
                     ['tenths of an inch of', ' * 10000 / 1933'],
                     ['centimeters of', ' * 10000 / 491'],
                     ['millimeters of', ' * 1000 / 491'],
-                    ['encoder counts of', '']
+                    ['encoder counts of', ' ']
                 ], function (unit) {
                     this.sourceBlock_.newUnit(unit);
                 }), 'RADIUS_MULTIPLIER');
@@ -911,6 +925,9 @@ Blockly.Blocks.move_motors_angle = {
         this.setColour(colorPalette.getColor('io'));
         this.setHelpUrl(Blockly.MSG_S3_MOTORS_HELPURL);
         this.setTooltip(Blockly.MSG_S3_MOVE_MOTORS_ANGLE_TOOLTIP);
+        if (this.getFieldValue('RADIUS_MULTIPLIER') && this.getFieldValue('RADIUS_MULTIPLIER').length < 1) {
+            this.setFieldValue(' ', 'RADIUS_MULTIPLIER');
+        }
     },
     newUnit: function (unit) {
         var thisConnection_ = this.getInput('ROTATE_RADIUS').connection;
@@ -923,7 +940,7 @@ Blockly.Blocks.move_motors_angle = {
             rangeText = 'R,-216,216,0';
         } else if (unit === ' * 1000 / 491') {
             rangeText = 'R,-2160,2160,0';
-        } else if (unit === '') {
+        } else if (unit === ' ') {
             rangeText = 'R,-4400,4400,0';
         }
 
@@ -936,11 +953,11 @@ Blockly.Blocks.move_motors_angle = {
 };
 
 Blockly.propc.move_motors_angle = function () {
-    var radius_multiplier = this.getFieldValue('RADIUS_MULTIPLIER');
+    var radius_multiplier = this.getFieldValue('RADIUS_MULTIPLIER').trim();
     var angle = Blockly.propc.valueToCode(this, 'ROTATE_ANGLE', Blockly.propc.ORDER_ATOMIC);
     var radius = Blockly.propc.valueToCode(this, 'ROTATE_RADIUS', Blockly.propc.ORDER_ATOMIC);
     var rotate_speed = Blockly.propc.valueToCode(this, 'ROTATE_SPEED', Blockly.propc.ORDER_ATOMIC);
-    return 's3_motorSetRotate(' + angle + ', ' + radius + radius_multiplier + ', ' + rotate_speed + ');\n';
+    return 's3_motorSetRotate(' + angle + ', ' + radius.trim() + radius_multiplier + ', ' + rotate_speed + ');\n';
 };
 
 Blockly.Blocks.play_polyphony = {

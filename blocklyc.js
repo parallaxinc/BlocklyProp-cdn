@@ -1,45 +1,215 @@
+
+/*
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+
+/**
+ *  TODO: What does this variable do?
+ *
+ * @type {{}}
+ */
 var BlocklyProp = {};
+
 
 //var selected = 'blocks';
 
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {null}
+ */
 var term = null;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {null}
+ */
 var graph = null;
 
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {null}
+ */
 var codePropC = null;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {null}
+ */
 var codeXml = null;
 
+
+/**
+ * Terminal baudrate setting
+ *
+ * @type {number}
+ */
 var baudrate = 115200;
 
+
+/**
+ * Graph temporary storage array
+ *
+ * @type {any[]}
+ */
 var graph_temp_data = new Array;
+
+
+/**
+ * Flag that indicates if the graph system is ready
+ *
+ * @type {boolean}
+ */
 var graph_data_ready = false;
 
-// The IDE reports this as an unused variable
-var graph_connection_string = '';
 
+// The IDE reports this as an unused variable
+// TODO: Verify that the 'graph_connection_string' variable is no longer required.
+// var graph_connection_string = '';
+
+
+/**
+ * Graph data series start timestamp
+ *
+ * @type {null}
+ */
 var graph_timestamp_start = null;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {number}
+ */
 var graph_timestamp_restart = 0;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {boolean}
+ */
 var graph_paused = false;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {boolean}
+ */
 var graph_start_playing = false;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {String}
+ */
 var graph_temp_string = new String;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {number}
+ */
 var graph_time_multiplier = 0;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {null}
+ */
 var graph_interval_id = null;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {number}
+ */
 var fullCycleTime = 4294967296 / 80000000;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {null}
+ */
 var graph_labels = null;
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {any[]}
+ */
 var graph_csv_data = new Array;
 
 
 // The IDE sees this as an unused variable
+// TODO: Verify that the 'console_header_arrived' variable is no longer required.
 var console_header_arrived = false;
 
 // The IDE sees this as an unused variable
+// TODO: Verify that the 'console_header' variable is no longer required.
 var console_header = null;
 
 
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {null}
+ */
 var active_connection = null;
 
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {string}
+ */
 var connString = '';
+
+
+/**
+ * TODO: Identify the purpose of this variable
+ *
+ * @type {boolean}
+ */
 var connStrYet = false;
 
+
+/**
+ * Graph system settings
+ *
+ * @type {{graph_type: string, fullWidth: boolean, showPoint: boolean, refreshRate: number, axisX: {onlyInteger: boolean, type: *}, sampleTotal: number}}
+ */
 var graph_options = {
     showPoint: false,
     fullWidth: true,
@@ -52,6 +222,12 @@ var graph_options = {
     graph_type: 'S'
 };
 
+
+/**
+ * Array to store source data for the graph system
+ *
+ * @type {{series: *[]}}
+ */
 var graph_data = {
     series: [// add more here for more possible lines...
         [],
@@ -67,14 +243,28 @@ var graph_data = {
     ]
 };
 
-// Minimum client/launcher version supporting base64-encoding
+
+// Flag offline docker mode
+var docker = $("meta[name=docker]").attr("content");
+
+
+/**
+ * Minimum client/launcher version supporting base64-encoding
+ */
 const minEnc64Ver = version_as_number('0.7.0');
 
-// Minimum client/launcher version supporting coded/verbose responses
+
+/**
+ *  Minimum client/launcher version supporting coded/verbose responses
+ */
 const minCodedVer = version_as_number('0.7.5');
 
-// Minimum client/launcher allowed for use with this system
+
+/**
+ * Minimum client/launcher allowed for use with this system
+ */
 const minVer = version_as_number(client_min_version);
+
 
 /**
  * Switch the visible pane when a tab is clicked.
@@ -186,7 +376,11 @@ function tabClick(id) {
     renderContent(selectedTab);
 }
 
-// Populate the currently selected pane with content generated from the blocks.
+/**
+ * Populate the currently selected pane with content generated from the blocks.
+ *
+ * @param pane
+ */
 function renderContent(pane) {
     // Initialize the pane.
     if (pane === 'blocks' && projectData['board'] !== 'propcfile') {
@@ -209,6 +403,7 @@ function renderContent(pane) {
             xmlText = Blockly.Xml.domToPrettyText(xmlDom);
         }
 
+        // Load project code
         codeXml.setValue(xmlText);
         codeXml.getSession().setUseWrapMode(true);
         codeXml.gotoLine(0);
@@ -237,6 +432,7 @@ function renderContent(pane) {
     }
 }
 
+
 /**
  * Formats code in editor and sets cursor to the line is was on
  * Used by the code formatter button in the editor UI
@@ -248,7 +444,8 @@ var formatWizard = function () {
     codePropC.setValue(prettyCode());
     codePropC.focus();
     codePropC.gotoLine(currentLine);
-}
+};
+
 
 /**
  * Pretty formatter for C code
@@ -273,6 +470,7 @@ var prettyCode = function (raw_code) {
             .replace(/\( & /g, "(&")
             .replace(/\( \* /g, "(*")
             .replace(/char \* /g, "char *")
+            .replace(/bme680 \* /g, "bme680 *")
             .replace(/serial \* /g, "serial *")
             .replace(/lcdParallel \* /g, "lcdParallel *")
             .replace(/colorPal \* /g, "colorPal *")
@@ -280,6 +478,7 @@ var prettyCode = function (raw_code) {
             .replace(/i2c \* /g, "i2c *")
             .replace(/talk \* /g, "talk *")
             .replace(/sound \* /g, "sound *")
+            .replace(/screen \* /g, "screen *")
             .replace(/FILE \* /g, "FILE* ")
 
             // improve the way functions and arrays are rendered
@@ -293,7 +492,6 @@ var prettyCode = function (raw_code) {
 };
 
 
-
 /**
  * Toggle the find-replace display style between 'block' and 'none'
  */
@@ -304,7 +502,6 @@ var findReplaceCode = function () {
         document.getElementById('find-replace').style.display = 'none';
     }
 };
-
 
 
 /**
@@ -350,7 +547,10 @@ var propcAsBlocksXml = function () {
 
 
 /**
- * Initialize Blockly.  Called on page load.
+ * Initialize Blockly
+ *
+ * Called on page load. Loads a Blockly project onto the editor pallet
+ *
  * @param {!Blockly} blockly Instance of Blockly from iframe.
  */
 function init(blockly) {
@@ -403,7 +603,7 @@ function init(blockly) {
     window.Blockly = blockly;
 
     if (projectData !== null) {
-        if (projectData['code'].length < 43) {
+        if ( ! projectData['code'] || projectData['code'].length < 43) {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
         }
         if (projectData['board'] !== 'propcfile') {
@@ -461,29 +661,80 @@ function cloudCompile(text, action, successHandler) {
 
         // OFFLINE MODE
         if (isOffline) {
-            // Compiler optimization options:
-            // -O0 (None)
-            // -O1 (Mixed)
-            // -O2 (Speed)
-            // -Os (Size)
-            localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
-                if (data.error) {
+            if (docker) {
+                // Contact the local docker container running cloud compiler
+
+                // baseUrl = /blockly/
+                // action = 'compile'
+                // idProject = an integer project number
+                // data = {'code: propCode}
+                //propCode = "// ------ Libraries and Definitions ------↵#include "simpletools.h"↵↵↵↵// ------ Main Program ------↵int main() {↵↵  //↵↵}"
+                postUrl = 'http://localhost:5001/single/prop-c/' + action;
+                $.ajax({
+                    'method': 'POST',
+                    'url':  postUrl,
+                    'data': {"code": propcCode}
+                }).done(function (data) {
                     console.log(data);
-                    // Get message as a string, or blank if undefined
-                    alert("BlocklyProp was unable to compile your project:\n" + data['message'] 
-                        + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
-                } else {
-                    var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
-                    $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
-                    if (data.success && data.binary) {
-                        successHandler(data, terminalNeeded);
+
+                    // Check for an error response from the compiler
+                    if (! data || data["compiler-error"] != "") {
+                        // Get message as a string, or blank if undefined
+                        let message =  (typeof data["compiler-error"] === "string") ? data["compiler-error"] : "";
+                        // Display the result in the compile console modal <div>
+                        $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
+                   } else {
+                        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+
+                        $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
+                        if (data.success) {
+                            successHandler(data, terminalNeeded);
+                        }
+
+                        // Scoll automatically to the bottom after new data is added
+                        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
                     }
-                    
-                    // Scoll automatically to the bottom after new data is added
-                    document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
-                }
-            });
-        } else {  // ONLINE MODE
+                }).fail(function (data) {
+                    // Data appears to be an HTTP response object
+                    if (data) {
+                        let message = "Aw snap. A server error " + data.status + " has been detected.";
+                        $("#compile-console").val($("#compile-console").val() +  message);
+                    }
+                });
+            }
+            else {  // Use the webpack version
+                /*
+                 * Compiler optimization options:
+                 *
+                 *  -O0 (None)
+                 *  -O1 (Mixed)
+                 *  -O2 (Speed)
+                 *  -Os (Size)
+                 */
+
+                localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
+                    if (data.error) {
+                        console.log(data);
+                        // Get message as a string, or blank if undefined
+                        alert("BlocklyProp was unable to compile your project:\n" + data['message']
+                            + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                    } else {
+                        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+                        $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
+                        console.log(data);
+
+                        // The success handler will transfer the binary data to the BP client
+                        if (data.success && data.binary) {
+                            successHandler(data, terminalNeeded);
+                        }
+
+                        // Scoll automatically to the bottom after new data is added
+                        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
+                    }
+                });
+            }
+        }
+        else {  // ONLINE MODE
             $.ajax({
                 'method': 'POST',
                 'url': baseUrl + 'rest/compile/c/' + action + '?id=' + idProject,
@@ -631,7 +882,7 @@ function loadInto(modal_message, compile_command, load_option, load_action) {
 
 
 /**
- *
+ * Serial console support
  */
 function serial_console() {
     var newTerminal = false;
@@ -752,6 +1003,10 @@ function serial_console() {
     $('#console-dialog').modal('show');
 }
 
+
+/**
+ * Graphing console
+ */
 function graphing_console() {
     var propcCode = Blockly.propc.workspaceToCode(Blockly.mainWorkspace);
 
@@ -913,6 +1168,18 @@ function graphing_console() {
     }
 }
 
+
+/**
+ * Graphing system control
+ *
+ * @param action
+ * Supported actions:
+ *     start
+ *     play
+ *     stop
+ *     pause
+ *     clear
+ */
 var graphStartStop = function (action) {
     if (action === 'start' || action === 'play') {
         graph_new_labels();
@@ -951,6 +1218,10 @@ var graphStartStop = function (action) {
     }
 };
 
+
+/**
+ * Update the list of serail ports available on the host machine
+ */
 var check_com_ports = function () {
     if (client_use_type !== 'ws') {
         if (client_url !== undefined) {
@@ -978,14 +1249,29 @@ var select_com_port = function (com_port) {
     }
 };
 
+
+
+/**
+ * Check for active com ports when the DOM processing has finished
+ */
 $(document).ready(function () {
     check_com_ports();
 });
 
+
+/**
+ * Return the select com port name
+ *
+ * @returns {jQuery}
+ */
 var getComPort = function () {
     return $('#comPort').find(":selected").text();
 };
 
+
+/**
+ * Save a project to the local file system
+ */
 function downloadPropC() {
     var propcCode = Blockly.propc.workspaceToCode(Blockly.mainWorkspace);
     var isEmptyProject = propcCode.indexOf("EMPTY_PROJECT") > -1;
@@ -1030,6 +1316,12 @@ function downloadPropC() {
     }
 }
 
+
+/**
+ * Graph the data represented in the stream parameter
+ *
+ * @param stream
+ */
 function graph_new_data(stream) {
 
     // Check for a failed connection:
@@ -1044,7 +1336,7 @@ function graph_new_data(stream) {
                 if (!graph_paused) {
                     graph_temp_data.push(graph_temp_string.split(','));
                     var row = graph_temp_data.length - 1;
-                    var ts = Number(graph_temp_data[row][0]) || 0;
+                    let ts = Number(graph_temp_data[row][0]) || 0;
 
                     // convert to seconds:
                     // Uses Propeller system clock (CNT) left shifted by 16.
@@ -1088,6 +1380,7 @@ function graph_new_data(stream) {
                                 x: graph_temp_data[row][0],
                                 y: graph_temp_data[row][j] || null
                             });
+                            $('.ct_line').css('stroke-width','2.5px');  // TODO: if this slows performance too much - explore changing the stylesheet (https://stackoverflow.com/questions/50036922/change-a-css-stylesheets-selectors-properties/50036923#50036923)
                             if (graph_temp_data[row][0] > graph_options.sampleTotal)
                                 graph_data.series[j - 2].shift();
                         }                        
@@ -1099,6 +1392,7 @@ function graph_new_data(stream) {
                     if (graph_csv_data.length > 15000) {
                         graph_csv_data.shift();
                     }
+                    //$('.ct_line').css('stroke-width','1px'); // TODO: verify if this is even necessary
                 }
 
                 graph_temp_string = '';
@@ -1118,6 +1412,10 @@ function graph_new_data(stream) {
     }
 }
 
+
+/**
+ * Reset the graphing system
+ */
 function graph_reset() {
     graph_temp_data.length = 0;
     graph_csv_data.length = 0;
@@ -1134,6 +1432,12 @@ function graph_reset() {
     graph_data_ready = false;
 }
 
+
+/**
+ * Draw graph
+ *
+ * @param setTo
+ */
 function graph_play(setTo) {
     if (document.getElementById('btn-graph-play')) {
         var play_state = document.getElementById('btn-graph-play').innerHTML;
@@ -1151,6 +1455,10 @@ function graph_play(setTo) {
     }
 }
 
+
+/**
+ * Save a graph to the local file system
+ */
 function downloadGraph() {
     utils.prompt("Download Graph Output - Filename:", 'Graph' + idProject, function (value) {
         if (value) {
@@ -1170,17 +1478,28 @@ function downloadGraph() {
                 };
             }());
 
+            // TODO: The chartStyle contains 16 CSS errors. These need to be addressed.
             var svgGraph = document.getElementById('serial_graphing'),
                     pattern = new RegExp('xmlns="http://www.w3.org/2000/xmlns/"', 'g'),
                     findY = 'class="ct-label ct-horizontal ct-end"',
                     chartStyle = '<style>.ct-perfect-fourth:after,.ct-square:after{content:"";clear:both}.ct-label{fill:rgba(0,0,0,.4);color:rgba(0,0,0,.4);font-size:.75rem;line-height:1}.ct-grid-background,.ct-line{fill:none}.ct-chart-line .ct-label{display:block;display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}.ct-chart-donut .ct-label,.ct-chart-pie .ct-label{dominant-baseline:central}.ct-label.ct-horizontal.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-label.ct-horizontal.ct-end{-webkit-box-align:flex-start;-webkit-align-items:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-label.ct-vertical.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-end;-webkit-justify-content:flex-end;-ms-flex-pack:flex-end;justify-content:flex-end;text-align:right;text-anchor:end}.ct-label.ct-vertical.ct-end{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-grid{stroke:rgba(0,0,0,.2);stroke-width:1px;stroke-dasharray:2px}.ct-point{stroke-width:10px;stroke-linecap:round}.ct-line{stroke-width:4px}.ct-area{stroke:none;fill-opacity:.1}.ct-series-a .ct-line,.ct-series-a .ct-point{stroke: #00f;}.ct-series-a .ct-area{fill:#d70206}.ct-series-b .ct-line,.ct-series-b .ct-point{stroke: #0bb;}.ct-series-b .ct-area{fill:#f05b4f}.ct-series-c .ct-line,.ct-series-c .ct-point{stroke: #0d0;}.ct-series-c .ct-area{fill:#f4c63d}.ct-series-d .ct-line,.ct-series-d .ct-point{stroke: #dd0;}.ct-series-d .ct-area{fill:#d17905}.ct-series-e .ct-line,.ct-series-e .ct-point{stroke-width: 1px;stroke: #f90;}.ct-series-e .ct-area{fill:#453d3f}.ct-series-f .ct-line,.ct-series-f .ct-point{stroke: #f00;}.ct-series-f .ct-area{fill:#59922b}.ct-series-g .ct-line,.ct-series-g .ct-point{stroke:#c0c}.ct-series-g .ct-area{fill:#0544d3}.ct-series-h .ct-line,.ct-series-h .ct-point{stroke:#000}.ct-series-h .ct-area{fill:#6b0392}.ct-series-i .ct-line,.ct-series-i .ct-point{stroke:#777}.ct-series-i .ct-area{fill:#f05b4f}.ct-square{display:block;position:relative;width:100%}.ct-square:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:100%}.ct-square:after{display:table}.ct-square>svg{display:block;position:absolute;top:0;left:0}.ct-perfect-fourth{display:block;position:relative;width:100%}.ct-perfect-fourth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:75%}.ct-perfect-fourth:after{display:table}.ct-perfect-fourth>svg{display:block;position:absolute;top:0;left:0}.ct-line {stroke-width: 1px;}.ct-point {stroke-width: 2px;}text{font-family:sans-serif;}</style>',
                     svgxml = new XMLSerializer().serializeToString(svgGraph);
+
             svgxml = svgxml.replace(pattern, '');
-            svgxml = svgxml.replace(/foreignObject/g, 'text');
-            svgxml = svgxml.replace(/([<|</])a[0-9]+:/g, '$1');
-            svgxml = svgxml.replace(/xmlns: /g, '');
-            svgxml = svgxml.replace(/span/g, 'tspan');
-            svgxml = svgxml.replace(/x="10" /g, 'x="40" ');
+
+            // TODO: Lint is complaining about the search values. Should they be enclosed in quotes?
+//            svgxml = svgxml.replace(/foreignObject/g, 'text');
+//            svgxml = svgxml.replace(/([<|</])a[0-9]+:/g, '$1');
+//            svgxml = svgxml.replace(/xmlns: /g, '');
+//            svgxml = svgxml.replace(/span/g, 'tspan');
+//            svgxml = svgxml.replace(/x="10" /g, 'x="40" ');
+
+            svgxml = svgxml.replace('/foreignObject/g', 'text');
+            svgxml = svgxml.replace('/([<|</])a[0-9]+:/g', '$1');
+            svgxml = svgxml.replace('/xmlns: /g', '');
+            svgxml = svgxml.replace('/span/g', 'tspan');
+            svgxml = svgxml.replace('/x="10" /g', 'x="40" ');
+
             svgxml = svgxml.substring(svgxml.indexOf('<svg'), svgxml.length - 6);
             var foundY = svgxml.indexOf(findY);
             var theY = parseFloat(svgxml.substring(svgxml.indexOf(' y="', foundY + 20) + 4, svgxml.indexOf('"', svgxml.indexOf(' y="', foundY + 20) + 4)));
@@ -1193,6 +1512,10 @@ function downloadGraph() {
     });
 }
 
+
+/**
+ * Download the graph as a csv file to the local file system
+ */
 function downloadCSV() {
     utils.prompt("Download Graph data as CSV - Filename:", 'graph_data' + idProject, function (value) {
         if (value) {
@@ -1219,6 +1542,10 @@ function downloadCSV() {
     });
 }
 
+
+/**
+ *
+ */
 function graph_new_labels() {
     var graph_csv_temp = '';
     var labelsvg = '<svg width="60" height="300">';
@@ -1245,6 +1572,10 @@ function graph_new_labels() {
     $('#serial_graphing_labels').html(labelsvg);
 }
 
+
+/**
+ *
+ */
 function graph_update_labels() {
     let row = graph_temp_data.length - 1;
     if (graph_temp_data[row]) {

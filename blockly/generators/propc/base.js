@@ -1,19 +1,24 @@
-/**
- * Visual Blocks Language
+/*
+ * Copyright (c) 2019 Parallax Inc.
  *
- * Copyright 2014 Michel Lampo, Vale Tolpegin
+ * qPortions Copyright 2014 Michel Lampo, Vale Tolpegin
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 /**
@@ -672,9 +677,19 @@ Blockly.Blocks.base_delay = {
         this.setNextStatement(true, null);
     }//,
     // For testing purposes - use the pause block to capture onchange events and report them to the console.
-    //onchange: function (event) {
-    //    console.log(event);
-    //}
+    /*
+    onchange: function (event) {
+        console.log(event.type);
+        var ws = this.workspace;
+        if (event.ids) {
+            for (var t = 0; t < event.ids.length; t++) {
+                console.log(ws.getBlockById(event.ids[t]).type);
+            }
+        } else if (event.blockId) {
+            console.log(ws.getBlockById(event.blockId).type)
+        }
+    }
+    */
 };
 
 Blockly.propc.base_delay = function () {
@@ -1168,7 +1183,11 @@ Blockly.propc.string_var_length = function () {
         if (this.optionList_[i] === 'con') {
             varPref = 'MY_';
         }
-        Blockly.propc.string_var_lengths.push([this.getFieldValue('VAR_NAME' + i.toString(10)), varPref + varLenValue]);
+        Blockly.propc.string_var_lengths.push([
+                Blockly.propc.variableDB_.getName(this.getFieldValue('VAR_NAME' + i.toString(10)), 
+                        Blockly.Variables.NAME_TYPE), 
+                varPref + varLenValue
+        ]);
         i++;
     }
     return '';
@@ -1271,7 +1290,7 @@ Blockly.Blocks.comment = {
 Blockly.propc.comment = function () {
     var text = this.getFieldValue("COMMENT_TEXT");
 
-    return '// ' + text + '\n';
+    return '// ' + text.replace(/,\s*$/g, '') + '\n';
 };
 
 /*
@@ -1354,6 +1373,7 @@ Blockly.Blocks.color_value_from = {
         this.setNextStatement(false, null);
     }
 };
+
 
 Blockly.propc.color_value_from = function () {
     Blockly.propc.definitions_["colormath"] = '#include "colormath.h"';
@@ -2656,4 +2676,26 @@ Blockly.propc.propc_file = function () {
         code = atob(code);
     }
     return '// RAW PROPC CODE\n//{{||}}\n' + fnme + '//{{||}}\n' + code;
+};
+
+Blockly.Blocks.run_as_setup = {
+    helpUrl: Blockly.MSG_SYSTEM_HELPURL,
+    init: function () {
+        this.setTooltip(Blockly.MSG_SYSTEM_RUN_AS_SETUP_TOOLTIP);
+        this.setColour(colorPalette.getColor('system'));
+        this.appendDummyInput()
+                .appendField("Run as setup");
+        this.appendStatementInput("CODE")
+        this.setPreviousStatement(true, "Block");
+        this.setNextStatement(true);
+    }
+};
+
+Blockly.propc.run_as_setup = function() {
+    if (!this.disabled) {
+        var code = Blockly.propc.statementToCode(this, 'CODE');
+        var myId = 'runAsSetup_' + btoa(code).substring(0, 19);
+        Blockly.propc.setups_[myId] = code;
+    }
+    return '';
 };

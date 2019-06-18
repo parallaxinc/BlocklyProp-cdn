@@ -1,26 +1,111 @@
+
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (c) 2019 Parallax Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the “Software”), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
+
+/** GLOBAL VARIABLES **/
+
+/**
+ *
+ * @type {*|jQuery}
+ */
 var baseUrl = $("meta[name=base]").attr("content");
-var cdnUrl = $("meta[name=cdn]").attr("content");   // TODO: this is used in the  blocklypropclient.js file, but that file is loaded first, so when JS is condensed, make sure this global is decalred at the top of the file
+
+
+/*
+* TODO: This is used in the  blocklypropclient.js file, but that file is loaded
+*  first, so when JS is condensed, make sure this global is decalred at the top
+*  of the file
+*/
+
+/**
+ *
+ * @type {*|jQuery}
+ */
+var cdnUrl = $("meta[name=cdn]").attr("content");
+
+
+/**
+ *
+ * @type {boolean}
+ */
 var user_authenticated = ($("meta[name=user-auth]").attr("content") === 'true') ? true : false;
+
+
+/**
+ *
+ * @type {boolean}
+ */
 var isOffline = ($("meta[name=isOffline]").attr("content") === 'true') ? true : false;
 
+
+//QUESTION: What does this do?
+/**
+ *
+ * @type {null}
+ */
 var projectData = null;
+
+
+/**
+ *
+ * @type {boolean}
+ */
 var ignoreSaveCheck = false;
 
+
+/**
+ *
+ * @type {number}
+ */
 var last_saved_timestamp = 0;
+
+
+/**
+ *
+ * @type {number}
+ */
 var last_saved_time = 0;
 
+
+/**
+ *
+ * @type {number}
+ */
 var idProject = 0;
 
+
+/**
+ *
+ * @type {string}
+ */
 var uploadedXML = '';
 
+
+/**
+ *
+ */
 $(document).ready(function () {
-    
+    console.log("User authentication is: ", user_authenticated);
+
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
         $('.auth-false').css('display', 'none');
@@ -33,7 +118,11 @@ $(document).ready(function () {
         return baseUrl + cur;
     });
 
-    // set the URLs for all of the CDN-sourced images
+    /*
+     * Set the URLs for all of the CDN-sourced images
+     *
+     * TODO: Fix the <div> elements in the HTML
+     */
     var imgs = document.getElementsByTagName('img');
     for (var l = 0; l < imgs.length; l++) {
         imgs[l].src = cdnUrl + imgs[l].getAttribute('data-src');
@@ -52,6 +141,7 @@ $(document).ready(function () {
     $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
 
     idProject = getURLParameter('project');
+
     var projectlink = null;
     
     if (window.location.href.indexOf('projectlink') > -1) {
@@ -59,12 +149,17 @@ $(document).ready(function () {
         var projectRaw = atob($("meta[name=projectlink]").attr("content"));
         projectlink = JSON.parse(projectRaw);
         setupWorkspace(projectlink);
+
     } else if (!idProject && !isOffline) {
         window.location = baseUrl;
 
     } else if (!idProject && isOffline) {
         // TODO: Use the ping endpoint to see if we are offline.
+
+        // TODO: Offline must be true to get here. Why is it being set to true again?
         isOffline = true;
+
+        // Stop pinging
         clearInterval(pingInterval);
 
         // hide save interaction elements
@@ -75,6 +170,7 @@ $(document).ready(function () {
         $("#save_as_dialog_button").html('Continue');
         $(".save-as-close").addClass('hidden');
 
+
         $('#save-as-project-name').val('MyProject');
         $("#saveAsDialogSender").html('offline');
         $("#save-as-board-type").empty();
@@ -83,8 +179,11 @@ $(document).ready(function () {
         }
 
         if (getURLParameter('openFile') === "true" && isOffline) {
+            // Import a project .SVG file
             $('#upload-dialog').modal('show');
+
         } else if (window.localStorage.getItem('localProject')) {
+            // Look for a default project in the local browser store
             setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
             //window.localStorage.removeItem('localProject');
         } else {
@@ -93,6 +192,10 @@ $(document).ready(function () {
         }
 
     } else {
+        // We need to test for the case where we are creating a new local project
+        // and the project detail are being passed in the Request body
+        // TODO: Create a new project from details passed in from the new-project page
+        // ----------------------------------------------------------------------------
         $.get(baseUrl + 'rest/shared/project/editor/' + idProject, function(data) { setupWorkspace(data) })
             .fail(function () {
             // Failed to load project - this probably means that it belongs to another user and is not shared.
@@ -101,42 +204,64 @@ $(document).ready(function () {
             });
         });
     }
-    
+
+    // Set up event handlers
     $('#save-project').on('click', function () {
-	if (isOffline) {
+        if (isOffline) {
             downloadCode();
         } else {
             saveProject();  
         }
     });
+
     $('#save-project-as').on('click', function () {
         saveAsDialog();
     });
+
     $('#download-project').on('click', function () {
         downloadCode();
     });
+
     $('#upload-project').on('click', function () {
         uploadCode();
     });
+
     $('#save-check-dialog').on('hidden.bs.modal', function () {
         timestampSaveTime(5, false);
     });
 });
 
+
+/**
+ *
+ * @param data
+ */
 var setupWorkspace = function (data) {
     console.log(data);
     projectData = data;
+
+    // Update the UI with project related details
     showInfo(data);
 
+    // In the offline mode, there is no concept of project id.
+    // TODO: Resolve project id for offline mode to zero
+    // --------------------------------------------------------
     if (!idProject) {
         idProject = projectData['id'];
     }
-    
+
+    // Set various project settings based on the project board type
+    // NOTE: This function is in propc.js
     setProfile(projectData['board']);
+
+    // Determine if this is a pure C project
     if (projectData['board'] !== 'propcfile') {
         initToolbox(projectData['board'], []);
     } else {
+        // No, init the blockly interface
         init(Blockly);
+
+        // Create UI block content from project details
         renderContent('propc');
     }
 
@@ -160,6 +285,12 @@ var setupWorkspace = function (data) {
     setInterval(checkLastSavedTime, 60000);
 }
 
+
+/**
+ *
+ * @param mins
+ * @param resetTimer
+ */
 var timestampSaveTime = function (mins, resetTimer) {
     // Mark the time when the project was opened, add 20 minutes to it.
     var d_save = new Date();
@@ -174,6 +305,10 @@ var timestampSaveTime = function (mins, resetTimer) {
     }
 };
 
+
+/**
+ *
+ */
 var checkLastSavedTime = function () {
     var d_now = new Date();
     var t_now = d_now.getTime();
@@ -190,16 +325,25 @@ var checkLastSavedTime = function () {
     }
 };
 
+
+/**
+ * Set the UI fields for the project name, project owner and project type icon
+ *
+ * @param data is the project data structure
+ */
 var showInfo = function (data) {
-    //console.log(data);
+    console.log(data);
+
+    // Display the prject name
     $(".project-name").text(data['name']);
 
     // Does the current user own the project?
     if (!data['yours']) {
-        // If not, display owner username [and hide save-as menu option - nevermind :) ]
+        // If not, display owner username
         $(".project-owner").text("(" + data['user'] + ")");
-        // $("#save-as-menu-item").css('display', 'none');
     }
+
+    // Create an array of board type icons
     var projectBoardIcon = {
         "activity-board": "images/board-icons/IconActivityBoard.png",
         "s3": "images/board-icons/IconS3.png",
@@ -210,9 +354,14 @@ var showInfo = function (data) {
         "propcfile": "images/board-icons/IconC.png"
     };
 
+    // Set the prject icon to the correct board type
     $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
 };
 
+
+/**
+ *
+ */
 var saveProject = function () {
     if (projectData['yours']) {
         var code = '';
@@ -280,8 +429,11 @@ var saveProject = function () {
     }
 };
 
-var saveAsDialog = function () {
 
+/**
+ *
+ */
+var saveAsDialog = function () {
     // Production still uses the uses the plain 'save-as' endpoint for now.
     if (inDemo !== 'demo') {     // if (1 === 1) {
 
@@ -334,6 +486,11 @@ var saveAsDialog = function () {
     }
 };
 
+
+/**
+ *
+ * @param requestor
+ */
 var checkBoardType = function (requestor) {
     if (requestor !== 'offline') {
         var current_type = projectData['board'];
@@ -347,6 +504,12 @@ var checkBoardType = function (requestor) {
     }
 };
 
+
+/**
+ * Save an existing project under a new project ID with the new project owner
+ *
+ * @param requestor
+ */
 var saveProjectAs = function (requestor) {
     // Retrieve the field values
     var p_type = $('#save-as-board-type').val();
@@ -398,6 +561,10 @@ var saveProjectAs = function (requestor) {
     }  
 };
 
+
+/**
+ *
+ */
 var editProjectDetails = function () {
     if(isOffline) {
         // Save the current code
@@ -411,12 +578,25 @@ var editProjectDetails = function () {
     }
 };
 
+
+/**
+ * Event handler for the OnBeforeUnload event
+ *
+ * @returns {string}
+ */
 window.onbeforeunload = function () {
     if (checkLeave() && !isOffline) {
         return Blockly.Msg.DIALOG_CHANGED_SINCE;
     }
 };
 
+
+/**
+ *
+ * @returns {boolean}
+ *
+ * TODO: We might get here if we failed to load a new project.
+ */
 var checkLeave = function () {
     var currentXml = '';
     var savedXml = projectData['code'];
@@ -443,10 +623,21 @@ var checkLeave = function () {
     }
 };
 
+
+/**
+ *
+ * @type {number}
+ */
 var pingInterval = setInterval(function () {
     $.get(baseUrl + 'ping');
 }, 60000);
 
+
+/**
+ *
+ * @param str
+ * @returns {number}
+ */
 function hashCode(str) {
     var hash = 0, i = 0, len = str.length;
     while (i < len) {
@@ -455,6 +646,10 @@ function hashCode(str) {
     return (hash + 2147483647) + 1;
 }
 
+
+/**
+ *
+ */
 function downloadCode() {
     var projXMLcode = '';
     
@@ -566,6 +761,10 @@ function downloadCode() {
     });
 }
 
+
+/**
+ *
+ */
 function uploadCode() {
     if (checkLeave() && !isOffline) {
         utils.showMessage(Blockly.Msg.DIALOG_UNSAVED_PROJECT, Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
@@ -574,6 +773,11 @@ function uploadCode() {
     }
 }
 
+
+/**
+ *
+ * @param files
+ */
 function uploadHandler(files) {
     var UploadReader = new FileReader();
     UploadReader.onload = function () {
@@ -589,8 +793,12 @@ function uploadHandler(files) {
                 && xmlString.indexOf("<!--") === -1)
         {
             var uploadedChecksum = xmlString.substring((xmlString.length - 24), (xmlString.length - 12));
-            uploadedXML = xmlString.substring(xmlString.indexOf("<block"), (xmlString.length - 29));
-
+            var findBPCstart = '<block';
+            if (xmlString.indexOf("<variables>") > -1) {
+                findBPCstart = '<variables>';
+            }
+            uploadedXML = xmlString.substring(xmlString.indexOf(findBPCstart), (xmlString.length - 29));
+            
             var computedChecksum = hashCode(uploadedXML).toString();
             computedChecksum = '000000000000'.substring(computedChecksum.length, 12) + computedChecksum;
 
@@ -655,6 +863,10 @@ function uploadHandler(files) {
     UploadReader.readAsText(files[0]);
 }
 
+
+/**
+ *
+ */
 function clearUploadInfo() {
     // Reset all of the upload fields and containers
     uploadedXML = '';
@@ -662,8 +874,15 @@ function clearUploadInfo() {
     document.getElementById("selectfile-verify-notvalid").style.display = "none";
     document.getElementById("selectfile-verify-valid").style.display = "none";
     document.getElementById("selectfile-verify-boardtype").style.display = "none";
+    document.getElementById("selectfile-replace").disabled = true;
+    document.getElementById("selectfile-append").disabled = true;
 }
 
+
+/**
+ *
+ * @param append
+ */
 function uploadMergeCode(append) {
     $('#upload-dialog').modal('hide');
     if (uploadedXML !== '') {
@@ -675,16 +894,80 @@ function uploadMergeCode(append) {
         }
 
         var newCode = uploadedXML;
-        newCode = newCode.substring(42, newCode.length);
+        if (newCode.indexOf('<variables>') === -1) {
+            newCode = newCode.substring(uploadedXML.indexOf('<block'), newCode.length);
+        } else {
+            newCode = newCode.substring(uploadedXML.indexOf('<variables>'), newCode.length);
+        }
         newCode = newCode.substring(0, (newCode.length - 6));
+        
+        // check for newer blockly XML code (contains a list of variables)
+        if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') > -1) {
+            var findVarRegExp = /type="(\w*)" id="(.{20})">(\w+)</g;
+            var newBPCvars = [];
+            var oldBPCvars = [];
+    
+            var varCodeTemp = newCode.split('</variables>');
+            newCode = varCodeTemp[1];
+            // use a regex to match the id, name, and type of the varaibles in both the old and new code.
+            var tmpv = varCodeTemp[0].split('<variables>')[1].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
+                newBPCvars.push([m3, m2, m1]);  // name, id, type
+                return p;
+            });
+            varCodeTemp = projCode.split('</variables>');
+            projCode = varCodeTemp[1];
+            tmpv = varCodeTemp[0].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
+                oldBPCvars.push([m3, m2, m1]);  // name, id, type
+                return p;
+            });
+            // record how many variables are in the original and new code
+            tmpv = [oldBPCvars.length, newBPCvars.length];
+            // iterate through the captured variables to detemine if any overlap
+            for (var j = 0; j < tmpv[0]; j++) {
+                for (var k = 0; k < tmpv[1]; k++) {
+                    // see if var is a match
+                    if (newBPCvars[k][0] === oldBPCvars[j][0]) {
+                        // replace old variable IDs with new ones 
+                        var tmpr = newCode.split(newBPCvars[k][1]);
+                        newCode = tmpr.join(oldBPCvars[j][1]);
+                        // null the ID to mark that it's a duplicate and 
+                        // should not be included in the combined list
+                        newBPCvars[k][1] = null;
+                    }
+                }
+            }
+            for (k = 0; k < tmpv[1]; k++) {
+                if (newBPCvars[k][1]) {
+                    // Add var from uploaded xml to the project code
+                    oldBPCvars.push(newBPCvars[k]);
+                }
+            }
 
-        projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+            // rebuild vars from both new/old
+            tmpv = '<variables>';
+            oldBPCvars.forEach(function(vi, j) {
+                tmpv += '<variable id="' + vi[1] + '" type="' + vi[2] + '">' + vi[0] + '</variable>';
+            });
+            tmpv += '</variables>';
+            // add everything back together
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
+        } else if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') === -1) {
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + newCode + projCode + '</xml>';
+        } else {
+            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+        }
+
         Blockly.mainWorkspace.clear();
         loadToolbox(projectData['code']);
         clearUploadInfo();
     }
 }
 
+
+/**
+ *
+ * @param profileName
+ */
 function initToolbox(profileName) {
 
     var ff = getURLParameter('font');
@@ -734,16 +1017,31 @@ function initToolbox(profileName) {
     Blockly.mainWorkspace.createVariable(Blockly.LANG_VARIABLES_GET_ITEM);
 }
 
+
+/**
+ *
+ * @param xmlText
+ */
 function loadToolbox(xmlText) {
     var xmlDom = Blockly.Xml.textToDom(xmlText);
     Blockly.Xml.domToWorkspace(xmlDom, Blockly.mainWorkspace);
 }
 
+
+/**
+ *
+ * @returns {string}
+ */
 function getXml() {
     var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
     return Blockly.Xml.domToText(xml);
 }
 
+
+/**
+ *
+ * @param o
+ */
 function showOS(o) {
     $("body").removeClass('Windows')
             .removeClass('MacOS')
@@ -752,6 +1050,13 @@ function showOS(o) {
     $("body").addClass(o);
 }
 
+
+/**
+ *
+ * @param o
+ * @param i
+ * @param t
+ */
 function showStep(o, i, t) {
     for (var j = 1; j <= t; j++) {
         $('#' + o + j.toString() + '-btn').addClass('btn-default').removeClass('btn-primary');
