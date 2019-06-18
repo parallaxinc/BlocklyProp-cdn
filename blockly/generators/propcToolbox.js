@@ -637,7 +637,7 @@ xmlToolbox += '                </value>';
 xmlToolbox += '            </block>';
 xmlToolbox += '        </category>';
 
-xmlToolbox += '        <category key="category_communicate_epaper" exclude="heb,heb-wx," experimental="true">';
+xmlToolbox += '        <category key="category_communicate_epaper" exclude="heb,heb-wx,">';
 xmlToolbox += '            <block type="epaper_initialize"></block>';
 xmlToolbox += '            <block type="oled_font_loader"></block>';
 xmlToolbox += '            <block type="epaper_update"></block>';
@@ -1092,7 +1092,7 @@ xmlToolbox += '        <category key="category_sensor-input_4x4-keypad" >';
 xmlToolbox += '            <block type="keypad_initialize"></block>';
 xmlToolbox += '            <block type="keypad_read"></block>';
 xmlToolbox += '        </category>';
-xmlToolbox += '        <category key="category_sensor-input_BME680" experimental="true">';
+xmlToolbox += '        <category key="category_sensor-input_BME680">';
 xmlToolbox += '            <block type="bme680_init"></block>';
 xmlToolbox += '            <block type="bme680_read"></block>';
 xmlToolbox += '            <block type="bme680_get_value"></block>';
