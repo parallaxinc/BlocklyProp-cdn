@@ -1290,7 +1290,7 @@ Blockly.Blocks.comment = {
 Blockly.propc.comment = function () {
     var text = this.getFieldValue("COMMENT_TEXT");
 
-    return '// ' + text.replace(/,\s*$/g, '') + '\n';
+    return '// ' + text.replace(/,+\s*$/g, '') + '\n';
 };
 
 /*
@@ -1614,6 +1614,16 @@ Blockly.Blocks.cog_new = {
         this.setInputsInline(true);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+    },
+    onchange: function(event) {
+        if (event && (event.type === Blockly.Events.CHANGE || event.type === Blockly.Events.MOVE)) {
+            var repeatWarningText = null;
+            var myRootBlock = this.getRootBlock();
+            if (myRootBlock && myRootBlock.type.indexOf('repeat') > -1 ) {
+                repeatWarningText = 'Warning: This block can only start up to 7 additional cores - using this block in a repeat loop may cause unexpected errors!';
+            }
+            this.setWarningText(repeatWarningText);
+        }
     }
 };
 
@@ -2459,7 +2469,6 @@ Blockly.Blocks.custom_code_multiple = {
         this.setInputsInline(false);
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true);
-        this.setFieldValue('FALSE', 'EDIT');
         this.hideInputs('FALSE');
     },
     buildFields: function() {
@@ -2517,7 +2526,6 @@ Blockly.Blocks.custom_code_multiple = {
     },
     mutationToDom: function () {
         var container = document.createElement('mutation');
-        //this.setFieldValue('FALSE', 'EDIT');
         for (var i = 1; i < 10; i++) {
             if (this.getInput('ARG' + i.toString(10))) {
                 var currentLabel = this.getFieldValue('LABEL_ARG' + i.toString(10));
@@ -2525,7 +2533,6 @@ Blockly.Blocks.custom_code_multiple = {
                 this.getField('LABEL_ARG' + i.toString(10)).setVisible(false);
             }
         }
-        //this.hideInputs('FALSE');
         var args = this.getFieldValue('ARG_COUNT') || '0';
         container.setAttribute('args', args);
         for (var tk = 1; tk < 10; tk++) {
@@ -2535,22 +2542,22 @@ Blockly.Blocks.custom_code_multiple = {
         }
         container.setAttribute('color', this.getFieldValue('COLOR'));
         container.setAttribute('type', this.getFieldValue('TYPE'));
+        container.setAttribute('edit', this.getFieldValue('EDIT'));
         return container;
     },
-    domToMutation: function (xmlElement) {
-        var args = xmlElement.getAttribute('args');
+    domToMutation: function (container) {
+        var args = container.getAttribute('args');
         this.setupInputs(args);
         for (var tk = 1; tk < 10; tk++) {
-            var mv = xmlElement.getAttribute('a' + tk.toString(10))
+            var mv = container.getAttribute('a' + tk.toString(10))
             if (this.getField('EDIT_ARG' + tk.toString(10)) && mv) {
                     this.setFieldValue(mv, 'EDIT_ARG' + tk.toString(10));
             }
         }
-        this.setFieldValue(xmlElement.getAttribute('color'), 'COLOR');
-        var outType = xmlElement.getAttribute('type');
+        this.setFieldValue(container.getAttribute('color'), 'COLOR');
+        var outType = container.getAttribute('type');
         this.setOutputType(outType);
-        this.setFieldValue('FALSE', 'EDIT');
-        this.hideInputs('FALSE');
+        this.hideInputs(container.getAttribute('edit') || 'FALSE');
     },
     setOutputType: function (outType) {
         if (outType === 'INL') {
