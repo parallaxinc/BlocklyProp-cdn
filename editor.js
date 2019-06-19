@@ -99,12 +99,67 @@ var idProject = 0;
  */
 var uploadedXML = '';
 
-
+/**  WIP/TODO: generate svg icons and inject them.  This keeps the HTML simple and clean.
+ *
+ * @type {object}
+ */
+/*
+bpIcons = {
+    warningCircle:     '<svg width="15" height="15"><path d="M7,8 L8,8 8,11 8,11 7,11 Z" style="stroke-width:1px;stroke:#8a6d3b;fill:none;"/><circle cx="7.5" cy="7.5" r="6" style="stroke-width:1.3px;stroke:#8a6d3b;fill:none;"/><circle cx="7.5" cy="5" r="1.25" style="stroke-width:0;fill:#8a6d3b;"/></svg>',
+    dangerTriangle:    '<svg width="15" height="15"><path d="M1,12 L2,13 13,13 14,12 8,2 7,2 1,12 Z M7.25,6 L7.75,6 7.5,9 Z" style="stroke-width:1.5px;stroke:#a94442;fill:none;"/><circle cx="7.5" cy="10.75" r="1" style="stroke-width:0;fill:#a94442;"/><circle cx="7.5" cy="5.5" r="1" style="stroke-width:0;fill:#a94442;"/></svg>',
+    checkMarkWhite:    '<svg width="14" height="15"><path d="M2.25,6 L5.5,9.25 12,2.5 13.5,4 5.5,12 1,7.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
+    checkMarkGreen:    '<svg width="14" height="15"><path d="M2.25,6 L5.5,9.25 12,2.5 13.5,4 5.5,12 1,7.5 Z" style="stroke:#3c763d;stroke-width:1;fill:#3c763d;"/></svg>',
+    downArrowWhite:    '<svg width="14" height="15"><path d="M5.5,0 L8.5,0 8.5,9 12.5,9 7,14.5 1.5,9 5.5,9 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
+    downArrowBoxWhite: '<svg width="14" height="15"><path d="M5.5,0 L8.5,0 8.5,6 12.5,6 7,11.5 1.5,6 5.5,6 Z M0.5,12 L13.5,12 13.5,14.5 0.5,14.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
+    terminalWhite:     '<svg width="14" height="15"><path d="M3,4.5 L10,4.5 M3,6.5 L6,6.5 M3,8.5 L8,8.5 M1,1 L13,1 13,14 1,14 1,1 M2,0 L12,0 M14,2 L14,13 M12,15 L2,15 M0,2 L0,13" style="stroke:#fff;stroke-width:1;fill:none;"/></svg>',
+    graphWhite:        '<svg width="13" height="14"><path d="M.5,0 L.5,13.5 L12.5,13.5 M3.5,0 L3.5,13.5 M6.5,0 L6.5,13.5 M9.5,0 L9.5,13.5 M12.5,0 L12.5,13.5 M.5,3.5 L12.5,3.5 M.5,7 L12.5,7 M.5,10.5 L12.5,10.5 M.5,.5 L12.5,.5" style="stroke:rgba(255,255,255,.6);stroke-width:1;fill:none;"/><path d="M0,13 L6,5 L9,8 L14,2" style="stroke:#fff;stroke-width:2;fill:none;"/></svg>',
+    searchWhite:       '<svg width="14" height="15"><path d="M1.5,13.25 L4.5,8.75" style="stroke:#fff;stroke-width:2px;fill:none;"/><circle cx="7" cy="5" r="3.5" style="stroke:#fff;stroke-width:1.5px;fill:none;"></circle></svg>',
+    magicWandWhite:    '<svg width="14" height="15"><path d="M1,10 L5,10 5,11 1,11 Z M2,12 L6,12 6,13 2,13 Z M1,14 5,14 5,15 1,15 Z M0.5,2.75 L2.5,0.6 5.5,3.5 3.5,5.5 Z M5,7 L7,4.75 14,12 12,14 Z M0,7 Q1.5,6.5 2,5 Q2.5,6.5 4,7 Q2.5,7.5 2,9 Q1.5,7.5 0,7 Z M7,3 Q9.5,2.5 10,0 Q10.5,2.5 13,3 Q10.5,3.5 10,6 Q9.5,3.5 7,3 Z" style="stroke-width:0;fill:#fff;"/></svg>',
+    undoWhite:         '<svg width="15" height="15"><path d="M3.5,6.5 L2.25,4.5 0.75,10.25 6,10.5 5,8.5 Q8.5,5.5 12,7 Q8,3.5 3.5,6.5 Z M11,11 L14.5,11 Q12.5,6 7,8.25 Q11,8 11,11 Z" style="stroke-width:0;fill:#fff;"/></svg>',
+    redoWhite:         '<svg width="15" height="15"><path d="M11.5,6.5 L12.75,4.5 14.25,10.25 9,10.5 10,8.5 Q6.5,5.5 3,7 Q7,3.5 11.5,6.5 Z M4,11 L0.5,11 Q2.5,6 8,8.25 Q4,8 4,11 Z" style="stroke-width:0;fill:#fff;"/></svg>',
+    eyeBlack:          '<svg width="14" height="15" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#000;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#000;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#000;stroke-width:1.5;fill:#000;"></circle></svg>',
+    eyeWhite:          '<svg width="14" height="15" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#fff;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#fff;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#fff;stroke-width:1.5;fill:#fff;"></circle></svg>'
+}
+*/
 /**
  *
  */
 $(document).ready(function () {
+    // Ensure blockly workspace takes the remainder of the window.
+    $(window).on('resize', function () {
+        var navHeight = $(window).height() - $('tr').first().outerHeight();
+        if (navHeight) {
+            $('#content_blocks, #content, .injectionDiv').height(navHeight);
+        }
+    });
+
     console.log("User authentication is: ", user_authenticated);
+
+    // Draw the custom icons into the specified <span> tags
+    //$('.bpIcon[data-icon]').each(function () { $(this).html(bpIcons[$(this).attr('data-icon')]); });
+
+    /* WIP/TODO: Move javascript that is inline in the HTML files to included scripts.  This keeps the HTML simple and clean.
+    // Attach events to nav/action menus/buttons
+    $('#prop-btn-comp').on('click',         function () {  compile();  });
+    $('#prop-btn-ram').on('click',          function () {  loadInto('Load into RAM', 'bin', 'CODE', 'RAM');  });
+    $('#prop-btn-eeprom').on('click',       function () {  loadInto('Load into EEPROM', 'eeprom', 'CODE', 'EEPROM');  });
+    $('#prop-btn-term').on('click',         function () {  serial_console();  });
+    $('#prop-btn-graph').on('click',        function () {  graphing_console();  });
+    $('#prop-btn-find-replace').on('click', function () {  findReplaceCode();  });
+    $('#prop-btn-pretty').on('click',       function () {  formatWizard();  });
+    $('#prop-btn-undo').on('click',         function () {  codePropC.undo();  });
+    $('#prop-btn-redo').on('click',         function () {  codePropC.redo();  });
+    $('#btn-view-propc').on('click',        function () {  tabClick('tab_propc');  });
+    $('#btn-view-blocks').on('click',       function () {  tabClick('tab_blocks');  });
+    $('#btn-view-xml').on('click',          function () {  tabClick('tab_xml');  });
+    $('#edit-project-details').on('click',  function () {  editProjectDetails();  });
+    $('#download-side').on('click',         function () {  downloadPropC();  });
+    $('#term-graph-setup').on('click',      function () {  configure_term_graph();  });
+    $('#client-setup').on('click',          function () {  configure_client();  });
+    //$('#').on('click', function () {    });
+    //$('#').on('click', function () {    });
+    //$('#').on('click', function () {    });
+    */
 
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
@@ -154,6 +209,9 @@ $(document).ready(function () {
         window.location = baseUrl;
 
     } else if (!idProject && isOffline) {
+        // Disable the login link for the BP Client status area
+        document.getElementById('unauth-login-anchor').href='#';
+
         // TODO: Use the ping endpoint to see if we are offline.
 
         // TODO: Offline must be true to get here. Why is it being set to true again?
@@ -229,6 +287,12 @@ $(document).ready(function () {
     $('#save-check-dialog').on('hidden.bs.modal', function () {
         timestampSaveTime(5, false);
     });
+
+    $("#selectfile").focus(function () {
+        $('#selectfile-verify-notvalid').css('display', 'none');
+        $('#selectfile-verify-valid').css('display', 'none');
+        $('#selectfile-verify-boardtype').css('display', 'none');
+    });
 });
 
 
@@ -265,15 +329,7 @@ var setupWorkspace = function (data) {
         renderContent('propc');
     }
 
-    if (projectData['board'] === 's3') {
-        $('#prop-btn-ram').addClass('hidden');
-        $('#prop-btn-graph').addClass('hidden');
-        document.getElementById('client-available').innerHTML = document.getElementById('client-available-short').innerHTML;
-    } else {
-        $('#prop-btn-ram').removeClass('hidden');
-        $('#prop-btn-graph').removeClass('hidden');
-        document.getElementById('client-available').innerHTML = document.getElementById('client-available-long').innerHTML;
-    }
+
 
     if (projectData && projectData['yours'] === false) {
         $('#edit-project-details').html(page_text_label['editor_view-details'])
@@ -810,9 +866,9 @@ function uploadHandler(files) {
             }
             if (xmlValid) {
                 if (projectData && uploadBoardType !== projectData['board']) {
-                    document.getElementById("selectfile-verify-boardtype").style.display = "block";
+                    $('#selectfile-verify-boardtype').css('display', 'block');
                 } else {
-                    document.getElementById("selectfile-verify-boardtype").style.display = "none";
+                    $('#selectfile-verify-boardtype').css('display', 'none');
                 }
             }
             if (uploadedXML !== '') {
@@ -849,12 +905,12 @@ function uploadHandler(files) {
         }
 
         if (xmlValid === true) {
-            document.getElementById("selectfile-verify-valid").style.display = "block";
+            $('#selectfile-verify-valid').css('display', 'block');
             document.getElementById("selectfile-replace").disabled = false;
             document.getElementById("selectfile-append").disabled = false;
             uploadedXML = xmlString;
         } else {
-            document.getElementById("selectfile-verify-notvalid").style.display = "block";
+            $('#selectfile-verify-notvalid').css('display', 'block');
             document.getElementById("selectfile-replace").disabled = true;
             document.getElementById("selectfile-append").disabled = true;
             uploadedXML = '';
@@ -871,9 +927,9 @@ function clearUploadInfo() {
     // Reset all of the upload fields and containers
     uploadedXML = '';
     $('#selectfile').val('');
-    document.getElementById("selectfile-verify-notvalid").style.display = "none";
-    document.getElementById("selectfile-verify-valid").style.display = "none";
-    document.getElementById("selectfile-verify-boardtype").style.display = "none";
+    $('#selectfile-verify-notvalid').css('display', 'none');
+    $('#selectfile-verify-valid').css('display', 'none');
+    $('#selectfile-verify-boardtype').css('display', 'none');
     document.getElementById("selectfile-replace").disabled = true;
     document.getElementById("selectfile-append").disabled = true;
 }
