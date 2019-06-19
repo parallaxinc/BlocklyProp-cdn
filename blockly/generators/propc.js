@@ -235,6 +235,7 @@ Blockly.propc.init = function (workspace) {
     Blockly.propc.method_declarations_ = {};
     Blockly.propc.global_vars_ = {};
     Blockly.propc.cog_methods_ = {};
+    Blockly.propc.cog_setups_ = {};
     // Create a list of stacks
     Blockly.propc.stacks_ = [];
     Blockly.propc.vartype_ = {};
@@ -326,7 +327,18 @@ Blockly.propc.finish = function (code) {
     }
 
 
+    console.log(Blockly.propc.methods_);
+    console.log(Blockly.propc.cog_setups_);
     for (var method in Blockly.propc.methods_) {
+        for (var cog_setup in Blockly.propc.cog_setups_) {
+            if (Blockly.propc.cog_setups_[cog_setup][0] === method) {
+                var cog_function_code = Blockly.propc.methods_[method];
+                var brace_position = cog_function_code.indexOf('{');
+                Blockly.propc.methods_[method] = cog_function_code.substring(0, brace_position + 1) + 
+                        Blockly.propc.cog_setups_[cog_setup][1] + 
+                        cog_function_code.substring(brace_position + 1, brace_position.length);
+            }
+        }
         methods.push(Blockly.propc.methods_[method]);
     }
 
@@ -373,7 +385,7 @@ Blockly.propc.finish = function (code) {
         }
 
         for (var method in Blockly.propc.cog_methods_) {
-            if (Blockly.propc.methods_[method].indexOf(definitions[def].replace(/[achintr]* (\w+)[\[\]0-9]*;/g, '$1')) > -1) {
+            if (Blockly.propc.methods_[method].indexOf(definitions[def].replace(/[charint]* (\w+)[\[\]0-9]*;/g, '$1')) > -1) {
                 function_vars.push(definitions[def]);
             }
         }
