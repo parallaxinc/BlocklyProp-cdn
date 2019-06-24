@@ -183,17 +183,21 @@ var version_as_number = function (rawVersion) {
 
 var set_ui_buttons = function (ui_btn_state) {
     if (ui_btn_state === 'available') {
-        if (projectData['board'] === 's3') {
-            $('#prop-btn-ram').addClass('hidden');
-            $('#prop-btn-graph').addClass('hidden');
-            $('#client-available').addClass('hidden');
-            $('#client-available-short').removeClass('hidden');
-        } else {
-            $('#prop-btn-ram').removeClass('hidden');
-            $('#prop-btn-graph').removeClass('hidden');
-            $('#client-available').removeClass('hidden');
-            $('#client-available-short').addClass('hidden');
-        }
+        $("#client-available").removeClass("hidden");
+
+        // TODO: The projectData variable does not exist in this context.
+//        if (projectData['board'] === 's3') {
+//            $('#prop-btn-ram').addClass('hidden');
+//            $('#prop-btn-graph').addClass('hidden');
+//            $('#client-available').addClass('hidden');
+//            $('#client-available-short').removeClass('hidden');
+//        } else {
+//            $('#prop-btn-ram').removeClass('hidden');
+//            $('#prop-btn-graph').removeClass('hidden');
+//            $('#client-available').removeClass('hidden');
+//            $('#client-available-short').addClass('hidden');
+//        }
+
         $("#client-searching").addClass("hidden");
         $("#client-unavailable").addClass("hidden");
         $("#prop-btn-ram").removeClass("disabled");
