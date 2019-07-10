@@ -183,7 +183,7 @@ var version_as_number = function (rawVersion) {
 
 var set_ui_buttons = function (ui_btn_state) {
     if (ui_btn_state === 'available') {
-        if (projectData['board'] === 's3') {
+        if (projectData && projectData['board'] === 's3') {
             $('#prop-btn-ram').addClass('hidden');
             $('#prop-btn-graph').addClass('hidden');
             $('#client-available').addClass('hidden');

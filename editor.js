@@ -103,8 +103,7 @@ var uploadedXML = '';
  *
  * @type {object}
  */
-/*
-*/bpIcons = {
+bpIcons = {
     warningCircle:       '<svg width="15" height="15"><path d="M7,8 L8,8 8,11 8,11 7,11 Z" style="stroke-width:1px;stroke:#8a6d3b;fill:none;"/><circle cx="7.5" cy="7.5" r="6" style="stroke-width:1.3px;stroke:#8a6d3b;fill:none;"/><circle cx="7.5" cy="5" r="1.25" style="stroke-width:0;fill:#8a6d3b;"/></svg>',
     dangerTriangleBlack: '<svg width="15" height="15"><path d="M1,12 L2,13 13,13 14,12 8,2 7,2 1,12 Z M7.25,6 L7.75,6 7.5,9 Z" style="stroke-width:1.5px;stroke:#000;fill:none;"/><circle cx="7.5" cy="10.75" r="1" style="stroke-width:0;fill:#000;"/><circle cx="7.5" cy="5.5" r="1" style="stroke-width:0;fill:#000;"/></svg>',
     dangerTriangle:      '<svg width="15" height="15"><path d="M1,12 L2,13 13,13 14,12 8,2 7,2 1,12 Z M7.25,6 L7.75,6 7.5,9 Z" style="stroke-width:1.5px;stroke:#a94442;fill:none;"/><circle cx="7.5" cy="10.75" r="1" style="stroke-width:0;fill:#a94442;"/><circle cx="7.5" cy="5.5" r="1" style="stroke-width:0;fill:#a94442;"/></svg>',
@@ -126,6 +125,38 @@ var uploadedXML = '';
     eraserWhite:         '<svg width="15" height="15"><path d="M2,12 A1.5,1.5 0 0 1 2,10 L10,2 14.5,6.5 7,14 M10,11 L5.5,6.5 M15,14 L4,14 2,12 M15,13.2 5,13.2" style="stroke:#fff;stroke-width:1;fill:none;"/><path d="M2,12 A1.5,1.5 0 0 1 2,10 L5.5,6.5 10,11 7,14 4,14 Z" style="stroke-width:0;fill:#fff;"/></svg>',
     cameraWhite:         '<svg width="14" height="15"><path d="M1.5,13.5 L.5,12.5 .5,5.5 1.5,4.5 2.5,4.5 4,3 7,3 8.5,4.5 12.5,4.5 13.5,5.5 13.5,12.5 12.5,13.5 Z M 2,9 A 4,4,0,0,0,10,9 A 4,4,0,0,0,2,9 Z M 4.5,9 A 1.5,1.5,0,0,0,7.5,9 A 1.5,1.5,0,0,0,4.5,9 Z M 10.5,6.5 A 1,1,0,0,0,13.5,6.5 A 1,1,0,0,0,10.5,6.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
 }
+
+/**
+ * Verify that the project name and board type fields have data
+ *
+ * @returns {boolean} True if form contains data, otherwise false
+ */
+function validateNewProjectForm() {
+    // this should only be used offline.
+    if (!isOffline) { 
+        return true; 
+    }
+
+    $(".proj").validate({
+        rules: {
+            'new-project-name': "required",
+            'new-project-board-type': "required"
+        },
+        messages: {
+            'new-project-name': "Please enter a project name",
+            'new-project-board-type': "Please select a board type"
+        }
+    });
+
+    // if form is invalid return false
+    if (!$(".proj").valid()) { 
+        return false; 
+    }
+    return true;
+}
+
+// TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
+// var simplemde = null;
 
 /**
  *
@@ -173,6 +204,7 @@ $(document).ready(function () {
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
     $('#save-btn').on('click',              function () {  saveProject();  });
+    $('#new-project-menu-item').on('click', function () {  clearNewProjectModal(); showNewProjectModal('open'); });// window.location = 'blocklyc.html?newProject=true'  });
     $('#btn-graph-play').on('click',        function () {  graph_play();  });
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
     $('#btn-graph-csv').on('click',         function () {  downloadCSV();  });
@@ -286,8 +318,9 @@ $(document).ready(function () {
             setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
             //window.localStorage.removeItem('localProject');
         } else {
-                // Open modal
-                $('#save-as-type-dialog').modal('show');
+            // TODO: why is this here?
+            // Open save-as modal
+            $('#save-as-type-dialog').modal('show');
         }
 
     } else {
@@ -303,8 +336,134 @@ $(document).ready(function () {
             });
         });
     }
+
+    // these are only set up for the offline editor
+    if (isOffline) {
+
+        // show the new project modal
+        showNewProjectModal();
+
+        // return to the splash screen if the user clicks the cancel button
+        $('#new-project-cancel').on('click', function() {
+
+            // if the project is being edited, clear the fields and close the modal
+            if ($('#open-modal-sender').html() === 'open') {
+
+                $('#new-project-board-dropdown').removeClass('hidden');
+                $('#edit-project-details-static').addClass('hidden');
+
+                $('#new-project-board-type').val('');
+                $('#edit-project-board-type').html('');
+                $('#edit-project-created-date').html('');
+                $('#edit-project-last-modified').html('');
+                $('#open-modal-sender').html('');
+
+                // simplemde.toTextArea();
+                // simplemde = null;
+                
+                $('#new-project-dialog').modal('hide');
+
+            } else {
+                // otherwise, return to the splash page
+                window.location = 'index.html';
+            }
+        });
+
+    } // isOffline
 });
 
+/**
+ *  Clears the fields in the new project modal.
+ * 
+ */
+var clearNewProjectModal = function() {
+    $('#new-project-name').val('');
+    $('#new-project-description').val('');
+    $('#new-project-dialog-title').html(page_text_label['editor_newproject_title']);
+}
+
+/**
+ *  Displays the new project modal.  Sets events and clears the fields.
+ * 
+ *  @param openModal force the modal to open when set to 'open'
+ */
+var showNewProjectModal = function(openModal) {
+    // clear out the board type dropdown menu
+    $("#new-project-board-type").empty();
+
+    // populate the board type dropdown menu with a header first,
+    $("#new-project-board-type")
+            .append($('<option />')
+            .val('')
+            .text(page_text_label['project_create_board_type_select'])
+            .attr('disabled','disabled')
+            .attr('selected','selected')
+    );
+
+    // If the editor is passed the 'newProject' parameter, open the modal
+    if (getURLParameter('newProject') || openModal === 'open') {
+        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
+        var projectTimestamp = new Date();
+        $('#edit-project-created-date').html(projectTimestamp);
+        $('#edit-project-last-modified').html(projectTimestamp);
+
+    }
+
+    // if the newProject modal was opened from the editor, flag it so if the user
+    // hits cancel they don't lose their work
+    if (openModal === 'open') {
+        $('#open-modal-sender').html('open');
+    }
+
+    // then populate the dropdown with the board types 
+    // defined in propc.js in the 'profile' object
+    // (except 'default', which is where the current project's type is stored)
+    for(var boardTypes in profile) {
+        if (boardTypes !== 'default') {
+            $("#new-project-board-type")
+                    .append($('<option />')
+                    .val(boardTypes)
+                    .text(profile[boardTypes].description));
+        }
+    }
+
+    // when the user clicks the 'Continue' button, validate the form
+    $('#new-project-continue').on('click', function () {
+        if (validateNewProjectForm()) {
+            var code = '';
+            if (projectData) {
+                if (projectData['board'] === 'propcfile') {
+                    code = propcAsBlocksXml();
+                } else {
+                    code = getXml();
+                }
+            } else {
+                code = '<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>';
+            }
+    
+            // save the form fields into the projectData object       
+            pd = {
+                'board': $('#new-project-board-type').val(),
+                'code': code,
+                'created': $('#edit-project-created-date').html(),
+                'description': $("#new-project-description").val(),        // simplemde.value(),
+                'description-html': $("#new-project-description").val(),   // simplemde.options.previewRender(simplemde.value()),
+                'id': 0,
+                'modified': $('#edit-project-created-date').html(),
+                'name': $('#new-project-name').val(),
+                'private': true,
+                'shared': false,
+                'type': "PROPC",
+                'user': "offline",
+                'yours': true,
+            }
+
+            // then load the toolbox using the projectData
+            window.localStorage.setItem('localProject', JSON.stringify(pd));
+            window.location = 'blocklyc.html';
+        }
+    });
+}
 
 /**
  *
@@ -638,8 +797,10 @@ var saveProjectAs = function (requestor) {
             'user': "offline",
             'yours': true,
         }
-        setupWorkspace(pd);
-        // TODO: reload the toolbox
+
+        //setupWorkspace(pd);
+        window.localStorage.setItem('localProject', JSON.stringify(pd));
+        window.location = 'blocklyc.html';
     }  
 };
 
@@ -650,11 +811,36 @@ var saveProjectAs = function (requestor) {
 var editProjectDetails = function () {
     if(isOffline) {
         // Save the current code
-        projectData['modified'] = new Date();
-        projectData['code'] = getXml();
+        projectData.modified = new Date();
+        if (projectData['board'] === 'propcfile') {
+            projectData.code = propcAsBlocksXml();
+        } else {
+            projectData.code = getXml();
+        }
 
         window.localStorage.setItem('localProject', JSON.stringify(projectData));
-        window.location = 'projectcreate.html?edit=true';
+        //window.location = 'projectcreate.html?edit=true';
+
+        $('#new-project-board-dropdown').addClass('hidden');
+        $('#edit-project-details-static').removeClass('hidden');
+        $('#new-project-dialog-title').html(page_text_label['editor_edit-details']);
+
+        $('#new-project-name').val(projectData.name);
+        $('#new-project-board-type').val(projectData.board);
+        $('#edit-project-board-type').html(profile.default.description);
+        $('#edit-project-created-date').html(projectData.created);
+        $('#edit-project-last-modified').html(projectData.modified);
+
+        // simplemde.value(projectData.description);
+        $("#new-project-description").val(projectData.description)
+
+        // Since this modal is being opened from the editor, flag it
+        // so that if the user cancels, they don't lose their work.
+        $('#open-modal-sender').html('open');
+
+        // show the modal
+        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
+
     } else {
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
     }

@@ -568,6 +568,26 @@ ul > hr {
     overflow-x: scroll;
 }
 
+/* Markdown editor */
+.CodeMirror, .CodeMirror-scroll {
+    min-height: 150px !important;
+    height: 150px;
+}
+
+.CodeMirror-fullscreen .CodeMirror, .CodeMirror-fullscreen .CodeMirror-scroll {
+    max-height: none;
+}
+
+div#project div.wizard-container {
+    padding-top: 70px;
+}
+
+.description-html {
+    padding: 10px;
+    margin: 10px;
+    background-color: #f5f5f5;
+}
+
 /* Graphing Output */
 
 .ct-series-a .ct-line {
