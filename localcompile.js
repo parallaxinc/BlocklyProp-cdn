@@ -405,8 +405,10 @@ function compile_lib(working_directory, source_file, target_filename, libraries,
         }
 
         // TODO: handle compiler output...?
-        console.log(stdout);
-        console.log(stderr);
+        if (getURLParameter('debug')) {
+            console.log(stdout);
+            console.log(stderr);
+        }
 
         cleanUpAll(source_directory);
         return callback([true, "Library compile successful\n", null]);
