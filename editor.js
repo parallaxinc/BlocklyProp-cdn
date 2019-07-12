@@ -286,7 +286,7 @@ $(document).ready(function () {
 
     } else if (!idProject && isOffline) {
         // Disable the login link for the BP Client status area
-        document.getElementById('unauth-login-anchor').href='#';
+        $('#unauth-login-anchor').attr('href', '#');
 
         // TODO: Use the ping endpoint to see if we are offline.
 
