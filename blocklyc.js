@@ -282,7 +282,7 @@ function renderContent(id) {
         $('#content_propc').css('display', 'block');
         $('#content_blocks').css('display', 'none');
 
-        if (isDebug || isOffline) {
+        if (isDebug || (isOffline && !docker)) {
             if (!isPropcOnlyProject) {
                 $('#btn-view-xml').css('display', 'inline-block');
             } else {

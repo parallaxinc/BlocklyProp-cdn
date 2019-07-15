@@ -241,9 +241,6 @@ $(document).ready(function () {
         $('#selectfile-verify-boardtype').css('display', 'none');
     });
 
-    //$('#').on('click', function () {    });
-
-
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
         $('.auth-false').css('display', 'none');
@@ -289,9 +286,6 @@ $(document).ready(function () {
         $('#unauth-login-anchor').attr('href', '#');
 
         // TODO: Use the ping endpoint to see if we are offline.
-
-        // TODO: Offline must be true to get here. Why is it being set to true again?
-        isOffline = true;
 
         // Stop pinging
         clearInterval(pingInterval);
@@ -435,7 +429,7 @@ var showNewProjectModal = function(openModal) {
         if (validateNewProjectForm()) {
             var code = '';
             // If editing details, preserve the code, otherwise start over
-            if (projectData && $('#new-project-dialog-title') === page_text_label['editor_edit-details']) {
+            if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
                 if (projectData['board'] === 'propcfile') {
                     code = propcAsBlocksXml();
                 } else {
@@ -918,6 +912,41 @@ function hashCode(str) {
     return (hash + 2147483647) + 1;
 }
 
+/**
+ * Encode a string to an XML-safe string by replacing unsafe characters with HTML entities
+ * @param str
+ * @returns {string}
+ */
+function encodeToValidXml(str) {
+    return (str
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\t/g, '&#x9;')
+        .replace(/\n/g, '&#xA;')
+        .replace(/\r/g, '&#xD;')
+    );
+}
+
+/**
+ * Decode a string from an XML-safe string by replacing HTML entities with their standard characters
+ * @param str
+ * @returns {string}
+ */
+function decodeFromValidXml(str) {
+    return (str
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, '\'')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&#x9;/g, '\t')
+        .replace(/&#xA;/g, '\n')
+        .replace(/&#xD;/g, '\r')
+    );
+}
 
 /**
  *
@@ -987,6 +1016,7 @@ function downloadCode() {
             }());
 
             // a header with the necessary svg XML header and style information to make the blocks render correctly
+            // TODO: make SVG valid.
             var SVGheader = '';
             SVGheader += '<svg blocklyprop="blocklypropproject" xmlns="http://www.w3.org/2000/svg" ';
             SVGheader += 'xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" ';
@@ -1006,13 +1036,17 @@ function downloadCode() {
             SVGheader += 'sans-serif; font-size: 10pt;}</style>';
 
             // a footer to generate a watermark with the project's information at the bottom-right corner of the SVG 
+            // and hold project metadata.
             var SVGfooter = '';
+            var dt = new Date();
             SVGfooter += '<rect x="100%" y="100%" rx="7" ry="7" width="218" height="84" style="fill:rgba(255,255,255,0.4);" transform="translate(-232,-100)" />';
             SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,-83)" style="font-weight:bold;">Parallax BlocklyProp Project</text>';
-            SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,-68)">User: ' + projectData['user'] + '</text>';
-            SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,-53)">Title: ' + projectData['name'] + '</text>';
+            SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,-68)">User: ' + encodeToValidXml(projectData['user']) + '</text>';
+            SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,-53)">Title: ' + encodeToValidXml(projectData['name']) + '</text>';
             SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,-38)">Project ID: ' + idProject + '</text>';
             SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,-23)">Device: ' + projectData['board'] + '</text>';
+            SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,-8)">Description: ' + encodeToValidXml(projectData['description']) + '</text>';
+            SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,13)" data-createdon="' + projectData['created'] + '" data-lastmodified="' + dt + '"></text>';
 
             // Check for any file extentions at the end of the submitted name, and truncate if any
             if (value.indexOf(".") !== -1)
@@ -1064,6 +1098,7 @@ function uploadHandler(files) {
                 && xmlString.indexOf("CDATA") === -1
                 && xmlString.indexOf("<!--") === -1)
         {
+            // TODO: instead of parsing by text indexOf's, use XML properly.
             var uploadedChecksum = xmlString.substring((xmlString.length - 24), (xmlString.length - 12));
             var findBPCstart = '<block';
             if (xmlString.indexOf("<variables>") > -1) {
@@ -1091,23 +1126,39 @@ function uploadHandler(files) {
                 uploadedXML = '<xml xmlns="http://www.w3.org/1999/xhtml">' + uploadedXML + '</xml>';
             };
 
+            // TODO: check to see if this is used when opened from the editor (and not the splash screen)
+            // maybe projectData.code.length < 43??? i.e. empty project? instead of the URL parameter...
     	    if (getURLParameter('openFile') === "true" && isOffline) {
                 var titleIndex = xmlString.indexOf('transform="translate(-225,-53)">Title: ');
                 var projectTitle = xmlString.substring((titleIndex + 39), xmlString.indexOf('</text>', (titleIndex + 40)));
-		        // TODO: set up board type, get other info...
-		        // name, html-description, description, boardtype
-                // set into local storage and reload window.
+                titleIndex = xmlString.indexOf('transform="translate(-225,-8)">Description: ');
+                var projectDesc = '';
+                if (titleIndex > -1) {
+                    projectDesc = xmlString.substring((titleIndex + 44), xmlString.indexOf('</text>', (titleIndex + 45)));
+                }
 
-	            var tt = new Date();
+
+                var tt = new Date();
+                titleIndex = xmlString.indexOf('data-createdon="');
+                var projectCreated = tt;
+                if (titleIndex > -1) {
+                    projectCreated = xmlString.substring((titleIndex + 16), xmlString.indexOf('"', (titleIndex + 17)));
+                }
+                titleIndex = xmlString.indexOf('data-lastmodified="');
+                var projectModified = tt;
+                if (titleIndex > -1) {
+                    projectModified = xmlString.substring((titleIndex + 19), xmlString.indexOf('"', (titleIndex + 20)));
+                }
+
 		        pd = {
             	    'board': uploadBoardType,
             	    'code': uploadedXML,
-            	    'created': tt,
-            	    'description': '',
+            	    'created': projectCreated,
+            	    'description': decodeFromValidXml(projectDesc),
             	    'description-html': '',
             	    'id': 0,
-            	    'modified': tt,
-            	    'name': projectTitle,
+            	    'modified': projectModified,
+            	    'name': decodeFromValidXml(projectTitle),
                     'private': true,
             	    'shared': false,
             	    'type': "PROPC",
