@@ -282,6 +282,9 @@ $(document).ready(function () {
         window.location = baseUrl;
 
     } else if (!idProject && isOffline) {
+        // Disable the login link for the BP Client status area
+        $('#unauth-login-anchor').attr('href', '#');
+
         // TODO: Use the ping endpoint to see if we are offline.
 
         // Stop pinging
@@ -425,7 +428,8 @@ var showNewProjectModal = function(openModal) {
     $('#new-project-continue').on('click', function () {
         if (validateNewProjectForm()) {
             var code = '';
-            if (projectData) {
+            // If editing details, preserve the code, otherwise start over
+            if (projectData && $('#new-project-dialog-title') === page_text_label['editor_edit-details']) {
                 if (projectData['board'] === 'propcfile') {
                     code = propcAsBlocksXml();
                 } else {

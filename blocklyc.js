@@ -220,6 +220,10 @@ var graph_data = {
 };
 
 
+// Flag offline docker mode
+var docker = $("meta[name=docker]").attr("content");
+
+
 /**
  * Minimum client/launcher version supporting base64-encoding
  */
@@ -563,30 +567,80 @@ function cloudCompile(text, action, successHandler) {
 
         // OFFLINE MODE
         if (isOffline) {
-            // Compiler optimization options:
-            // -O0 (None)
-            // -O1 (Mixed)
-            // -O2 (Speed)
-            // -Os (Size)
-            localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
-                if (data.error) {
+            if (docker) {
+                // Contact the local docker container running cloud compiler
+
+                // baseUrl = /blockly/
+                // action = 'compile'
+                // idProject = an integer project number
+                // data = {'code: propCode}
+                //propCode = "// ------ Libraries and Definitions ------↵#include "simpletools.h"↵↵↵↵// ------ Main Program ------↵int main() {↵↵  //↵↵}"
+                postUrl = 'http://localhost:5001/single/prop-c/' + action;
+                $.ajax({
+                    'method': 'POST',
+                    'url':  postUrl,
+                    'data': {"code": propcCode}
+                }).done(function (data) {
                     console.log(data);
-                    // Get message as a string, or blank if undefined
-                    alert("BlocklyProp was unable to compile your project:\n" + data['message'] 
-                        + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
-                } else {
-                    var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
-                    $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
-                    if (getURLParameter('debug')) console.log(data);                
-                    if (data.success && data.binary) {
-                        successHandler(data, terminalNeeded);
+
+                    // Check for an error response from the compiler
+                    if (! data || data["compiler-error"] != "") {
+                        // Get message as a string, or blank if undefined
+                        let message =  (typeof data["compiler-error"] === "string") ? data["compiler-error"] : "";
+                        // Display the result in the compile console modal <div>
+                        $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
+                   } else {
+                        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+
+                        $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
+                        if (data.success) {
+                            successHandler(data, terminalNeeded);
+                        }
+
+                        // Scoll automatically to the bottom after new data is added
+                        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
                     }
-                    
-                    // Scoll automatically to the bottom after new data is added
-                    document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
-                }
-            });
-        } else {  // ONLINE MODE
+                }).fail(function (data) {
+                    // Data appears to be an HTTP response object
+                    if (data) {
+                        let message = "Aw snap. A server error " + data.status + " has been detected.";
+                        $("#compile-console").val($("#compile-console").val() +  message);
+                    }
+                });
+            }
+            else {  // Use the webpack version
+                /*
+                 * Compiler optimization options:
+                 *
+                 *  -O0 (None)
+                 *  -O1 (Mixed)
+                 *  -O2 (Speed)
+                 *  -Os (Size)
+                 */
+
+                localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
+                    if (data.error) {
+                        console.log(data);
+                        // Get message as a string, or blank if undefined
+                        alert("BlocklyProp was unable to compile your project:\n" + data['message']
+                            + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                    } else {
+                        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+                        $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
+                        console.log(data);
+
+                        // The success handler will transfer the binary data to the BP client
+                        if (data.success && data.binary) {
+                            successHandler(data, terminalNeeded);
+                        }
+
+                        // Scoll automatically to the bottom after new data is added
+                        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
+                    }
+                });
+            }
+        }
+        else {  // ONLINE MODE
             $.ajax({
                 'method': 'POST',
                 'url': baseUrl + 'rest/compile/c/' + action + '?id=' + idProject,
@@ -1330,11 +1384,13 @@ function downloadGraph() {
                 };
             }());
 
+            // TODO: The chartStyle contains 16 CSS errors. These need to be addressed.
             var svgGraph = document.getElementById('serial_graphing'),
                     pattern = new RegExp('xmlns="http://www.w3.org/2000/xmlns/"', 'g'),
                     findY = 'class="ct-label ct-horizontal ct-end"',
                     chartStyle = '<style>.ct-perfect-fourth:after,.ct-square:after{content:"";clear:both}.ct-label{fill:rgba(0,0,0,.4);color:rgba(0,0,0,.4);font-size:.75rem;line-height:1}.ct-grid-background,.ct-line{fill:none}.ct-chart-line .ct-label{display:block;display:-webkit-box;display:-moz-box;display:-ms-flexbox;display:-webkit-flex;display:flex}.ct-chart-donut .ct-label,.ct-chart-pie .ct-label{dominant-baseline:central}.ct-label.ct-horizontal.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-label.ct-horizontal.ct-end{-webkit-box-align:flex-start;-webkit-align-items:flex-start;-ms-flex-align:flex-start;align-items:flex-start;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-label.ct-vertical.ct-start{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-end;-webkit-justify-content:flex-end;-ms-flex-pack:flex-end;justify-content:flex-end;text-align:right;text-anchor:end}.ct-label.ct-vertical.ct-end{-webkit-box-align:flex-end;-webkit-align-items:flex-end;-ms-flex-align:flex-end;align-items:flex-end;-webkit-box-pack:flex-start;-webkit-justify-content:flex-start;-ms-flex-pack:flex-start;justify-content:flex-start;text-align:left;text-anchor:start}.ct-grid{stroke:rgba(0,0,0,.2);stroke-width:1px;stroke-dasharray:2px}.ct-point{stroke-width:10px;stroke-linecap:round}.ct-line{stroke-width:4px}.ct-area{stroke:none;fill-opacity:.1}.ct-series-a .ct-line,.ct-series-a .ct-point{stroke: #00f;}.ct-series-a .ct-area{fill:#d70206}.ct-series-b .ct-line,.ct-series-b .ct-point{stroke: #0bb;}.ct-series-b .ct-area{fill:#f05b4f}.ct-series-c .ct-line,.ct-series-c .ct-point{stroke: #0d0;}.ct-series-c .ct-area{fill:#f4c63d}.ct-series-d .ct-line,.ct-series-d .ct-point{stroke: #dd0;}.ct-series-d .ct-area{fill:#d17905}.ct-series-e .ct-line,.ct-series-e .ct-point{stroke-width: 1px;stroke: #f90;}.ct-series-e .ct-area{fill:#453d3f}.ct-series-f .ct-line,.ct-series-f .ct-point{stroke: #f00;}.ct-series-f .ct-area{fill:#59922b}.ct-series-g .ct-line,.ct-series-g .ct-point{stroke:#c0c}.ct-series-g .ct-area{fill:#0544d3}.ct-series-h .ct-line,.ct-series-h .ct-point{stroke:#000}.ct-series-h .ct-area{fill:#6b0392}.ct-series-i .ct-line,.ct-series-i .ct-point{stroke:#777}.ct-series-i .ct-area{fill:#f05b4f}.ct-square{display:block;position:relative;width:100%}.ct-square:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:100%}.ct-square:after{display:table}.ct-square>svg{display:block;position:absolute;top:0;left:0}.ct-perfect-fourth{display:block;position:relative;width:100%}.ct-perfect-fourth:before{display:block;float:left;content:"";width:0;height:0;padding-bottom:75%}.ct-perfect-fourth:after{display:table}.ct-perfect-fourth>svg{display:block;position:absolute;top:0;left:0}.ct-line {stroke-width: 1px;}.ct-point {stroke-width: 2px;}text{font-family:sans-serif;}</style>',
                     svgxml = new XMLSerializer().serializeToString(svgGraph);
+
             svgxml = svgxml.replace(pattern, '');
 
             // TODO: Lint is complaining about the search values. Should they be enclosed in quotes?
