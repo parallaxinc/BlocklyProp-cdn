@@ -429,7 +429,7 @@ var showNewProjectModal = function(openModal) {
         if (validateNewProjectForm()) {
             var code = '';
             // If editing details, preserve the code, otherwise start over
-            if (projectData && $('#new-project-dialog-title') === page_text_label['editor_edit-details']) {
+            if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
                 if (projectData['board'] === 'propcfile') {
                     code = propcAsBlocksXml();
                 } else {
@@ -864,6 +864,11 @@ window.onbeforeunload = function () {
  * TODO: We might get here if we failed to load a new project.
  */
 var checkLeave = function () {
+    // Return if there is no project data
+    if (!projectData) {
+        return false;
+    }
+
     var currentXml = '';
     var savedXml = projectData['code'];
     if (ignoreSaveCheck) {
