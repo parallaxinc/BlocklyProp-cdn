@@ -460,6 +460,14 @@ var showNewProjectModal = function(openModal) {
             window.localStorage.setItem('localProject', JSON.stringify(pd));
             window.location = 'blocklyc.html';
         }
+        // Force the toolbox to render correctly
+        setTimeout(function () {
+            // find the height of just the blockly workspace by subtracting the height of the navigation bar
+            let navHeight = $(window).height() - $('tr').first().outerHeight();
+            if (navHeight) {
+                $('#content_blocks, #content, .injectionDiv').height(navHeight);
+            }
+        }, 100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary)
     });
 }
 
