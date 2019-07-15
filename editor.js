@@ -864,6 +864,11 @@ window.onbeforeunload = function () {
  * TODO: We might get here if we failed to load a new project.
  */
 var checkLeave = function () {
+    // Return if there is no project data
+    if (!projectData) {
+        return false;
+    }
+
     var currentXml = '';
     var savedXml = projectData['code'];
     if (ignoreSaveCheck) {
