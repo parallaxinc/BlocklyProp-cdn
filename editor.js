@@ -429,7 +429,7 @@ var showNewProjectModal = function(openModal) {
         if (validateNewProjectForm()) {
             var code = '';
             // If editing details, preserve the code, otherwise start over
-            if (projectData && $('#new-project-dialog-title') === page_text_label['editor_edit-details']) {
+            if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
                 if (projectData['board'] === 'propcfile') {
                     code = propcAsBlocksXml();
                 } else {
