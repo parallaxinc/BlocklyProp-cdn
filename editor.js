@@ -163,12 +163,32 @@ function validateNewProjectForm() {
  */
 $(document).ready(function () {
     // Ensure blockly workspace takes the remainder of the window.
-    $(window).on('resize', function () {
-        var navHeight = $(window).height() - $('tr').first().outerHeight();
-        if (navHeight) {
-            $('#content_blocks, #content, .injectionDiv').height(navHeight);
+    $(window).on('resize', function () { resetToolBoxSizing() });
+
+    // Insert the text strings (internationalization) once the page has loaded    
+    // insert into <span> tags
+    $(".keyed-lang-string").each(function () {
+        var span_tag = $(this);
+        
+        // Set the text of the label spans
+        var pageLabel = span_tag.attr('data-key');
+        if (pageLabel) {
+            if (span_tag.is('a')) {
+                span_tag.attr('href', page_text_label[pageLabel]);
+            } else if (span_tag.is('input')) {
+                span_tag.attr('value', page_text_label[pageLabel]);
+            } else {
+                span_tag.html(page_text_label[pageLabel]);
+            }
         }
     });
+    
+    // insert text strings (internationalization) into button/link tooltips
+    for (var i = 0; i < tooltip_text.length; i++) {
+        if (tooltip_text[i] && document.getElementById(tooltip_text[i][0])) {
+            $('#' + tooltip_text[i][0]).attr('title', tooltip_text[i][1]);
+        }
+    }
 
     if (getURLParameter('debug')) console.log("User authentication is: ", user_authenticated);
 
@@ -241,6 +261,35 @@ $(document).ready(function () {
         $('#selectfile-verify-boardtype').css('display', 'none');
     });
 
+    // set the upload modal's title to "import" if offline
+    if (isOffline) {
+         $('#upload-dialog-title').html(page_text_label['editor_import']);
+         $('#upload-project span').html(page_text_label['editor_import']);
+    }
+
+    // disable to upload dialog buttons until a valid file is uploaded
+    document.getElementById("selectfile-replace").disabled = true;
+    document.getElementById("selectfile-append").disabled = true;
+
+    // Reset the upload/import modal to its default state when closed
+    $('#upload-dialog').on('hidden.bs.modal', function () {
+        // reset the title of the modal
+        if (isOffline) {
+            $('upload-dialog-title').html(page_text_label['editor_import']);
+        } else {
+            $('upload-dialog-title').html(page_text_label['editor_upload']);
+        }
+
+        // hide "append" button
+        $('#selectfile-append').removeClass('hidden');
+
+        // change color of the "replace" button to blue and change text to "Open"
+        $('#selectfile-replace').removeClass('btn-primary').addClass('btn-danger').html(page_text_label['editor_button_replace']);
+
+        // reset the blockly toolbox sizing to ensure it renders correctly:
+        resetToolBoxSizing(100);
+    });
+
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
         $('.auth-false').css('display', 'none');
@@ -307,6 +356,16 @@ $(document).ready(function () {
         }
 
         if (getURLParameter('openFile') === "true" && isOffline) {
+            // set title to Open file
+            $('#upload-dialog-title').html(page_text_label['editor_open']);
+
+            // hide "append" button
+            $('#selectfile-append').addClass('hidden');
+
+            // change color of the "replace" button to blue and change text to "Open"
+            $('#selectfile-replace').removeClass('btn-danger').addClass('btn-primary');
+            $('#selectfile-replace').html(page_text_label['editor_button_open']);
+
             // Import a project .SVG file
             $('#upload-dialog').modal('show');
 
@@ -367,6 +426,9 @@ $(document).ready(function () {
         });
 
     } // isOffline
+
+    // Make sure the toolbox appears correctly, just for good measure.
+    resetToolBoxSizing(250);
 });
 
 /**
@@ -460,15 +522,30 @@ var showNewProjectModal = function(openModal) {
             window.localStorage.setItem('localProject', JSON.stringify(pd));
             window.location = 'blocklyc.html';
         }
+        resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary) 
+    });
+}
+
+/**
+ * Reset the sizing of blockly's toolbox and canvas.  This is a workaround to ensure that it renders correctly
+ * @param d milliseconds to delay the resizing, especially if used after a change in the window's location or a reload
+ */
+function resetToolBoxSizing(d) {
+    if (d) {
         // Force the toolbox to render correctly
         setTimeout(function () {
             // find the height of just the blockly workspace by subtracting the height of the navigation bar
             let navHeight = $(window).height() - $('tr').first().outerHeight();
             if (navHeight) {
-                $('#content_blocks, #content, .injectionDiv').height(navHeight);
+                $('#content_blocks, #content, .injectionDiv, .blocklyToolboxDiv').height(navHeight);
             }
-        }, 100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary)
-    });
+        }, d);
+    } else {
+        let navHeight = $(window).height() - $('tr').first().outerHeight();
+        if (navHeight) {
+            $('#content_blocks, #content, .injectionDiv, .blocklyToolboxDiv').height(navHeight);
+        }
+    }
 }
 
 /**
@@ -1179,8 +1256,9 @@ function uploadHandler(files) {
             	    'yours': true,
 		        }
 
-                window.localStorage.setItem('localProject', JSON.stringify(pd));
-		        window.location = 'blocklyc.html';
+                projectData = pd;
+                // window.localStorage.setItem('localProject', JSON.stringify(pd));
+		        // window.location = 'blocklyc.html';
 	        }
         }
 
@@ -1212,6 +1290,11 @@ function clearUploadInfo() {
     $('#selectfile-verify-boardtype').css('display', 'none');
     document.getElementById("selectfile-replace").disabled = true;
     document.getElementById("selectfile-append").disabled = true;
+
+    // when opening a file but the user cancels, return to the splash screen
+    if (isOffline && getURLParameter('openFile') === 'true') {
+        window.location = 'index.html';
+    }
 }
 
 
@@ -1220,6 +1303,12 @@ function clearUploadInfo() {
  * @param append
  */
 function uploadMergeCode(append) {
+    // when opening a file when directed from the splash screen in the offline app, load the selected project
+    if (!append && isOffline && getURLParameter('openFile') === 'true') {
+        window.localStorage.setItem('localProject', JSON.stringify(projectData));
+        window.location = 'blocklyc.html';
+    }
+
     $('#upload-dialog').modal('hide');
     if (uploadedXML !== '') {
         var projCode = '';
