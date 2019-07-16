@@ -786,6 +786,7 @@ page_text_label['confirm_request_title'] = "Email confirm request";
 page_text_label['confirm_requested'] = "Please check your email";
 page_text_label['editor_button_append'] = "Append";
 page_text_label['editor_button_cancel'] = "Cancel";
+page_text_label['editor_button_open'] = "Open";
 page_text_label['editor_button_close'] = "Close";
 page_text_label['editor_button_continue'] = "Continue";
 page_text_label['editor_button_replace'] = "Replace";
@@ -815,6 +816,8 @@ page_text_label['editor_replace_label'] = "Replace: ";
 page_text_label['editor_newproject_c'] = "Propeller C";
 page_text_label['editor_newproject_spin'] = "Scribbler Robot";
 page_text_label['editor_newproject_title'] = "New project";
+page_text_label['editor_open'] = "Open blocks file"
+page_text_label['editor_import'] = "Import blocks file"
 page_text_label['editor_project'] = "Project";
 page_text_label['editor_projects_title'] = "Projects";
 page_text_label['editor_run_compile'] = "Compile";
@@ -1079,33 +1082,6 @@ var tooltip_text = [
     ['project-form-edit-private', 'Hide project from other users']
 ];
 
-// Insert the text strings (internationalization) once the page has loaded
-$(document).ready(function () {
-    
-    // insert into <span> tags
-    $(".keyed-lang-string").each(function () {
-        var span_tag = $(this);
-        
-        // Set the text of the label spans
-        var pageLabel = span_tag.attr('data-key');
-        if (pageLabel) {
-            if (span_tag.is('a')) {
-                span_tag.attr('href', page_text_label[pageLabel]);
-            } else if (span_tag.is('input')) {
-                span_tag.attr('value', page_text_label[pageLabel]);
-            } else {
-                span_tag.html(page_text_label[pageLabel]);
-            }
-        }
-    });
-    
-    // insert into button/link tooltips
-    for (var i = 0; i < tooltip_text.length; i++) {
-        if (tooltip_text[i] && document.getElementById(tooltip_text[i][0])) {
-            $('#' + tooltip_text[i][0]).attr('title', tooltip_text[i][1]);
-        }
-    }
-});
 
 
 // If online, return the full help URL, if offline, open a modal
