@@ -537,13 +537,13 @@ function resetToolBoxSizing(d) {
             // find the height of just the blockly workspace by subtracting the height of the navigation bar
             let navHeight = $(window).height() - $('tr').first().outerHeight();
             if (navHeight) {
-                $('#content_blocks, #content, .injectionDiv, .blocklyToolboxDiv').height(navHeight);
+                $('#content_blocks, #content, .blocklySvg, .injectionDiv, .blocklyToolboxDiv').height(navHeight);
             }
         }, d);
     } else {
         let navHeight = $(window).height() - $('tr').first().outerHeight();
         if (navHeight) {
-            $('#content_blocks, #content, .injectionDiv, .blocklyToolboxDiv').height(navHeight);
+            $('#content_blocks, #content, .blocklySvg, .injectionDiv, .blocklyToolboxDiv').height(navHeight);
         }
     }
 }
