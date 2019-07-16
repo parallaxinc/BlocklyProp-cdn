@@ -575,7 +575,10 @@ function cloudCompile(text, action, successHandler) {
                 // idProject = an integer project number
                 // data = {'code: propCode}
                 //propCode = "// ------ Libraries and Definitions ------↵#include "simpletools.h"↵↵↵↵// ------ Main Program ------↵int main() {↵↵  //↵↵}"
-                postUrl = 'http://localhost:5001/single/prop-c/' + action;
+
+                // Compute the url based on where we are now
+                postUrl = window.location.protocol + '//' + window.location.hostname + ':5001/single/prop-c/' + action;
+
                 $.ajax({
                     'method': 'POST',
                     'url':  postUrl,
