@@ -736,7 +736,11 @@ toolbox_label['category_s3-hacker-port_sensors'] = "Sensors";
 toolbox_label['category_s3-hacker-port_pins'] = "Pins";
 toolbox_label['category_s3-hacker-port_servo'] = "Servo";
 
+/*
+ *  Embedded UI messages
+ */
 var page_text_label = [];
+
 page_text_label['back'] = "Back";
 page_text_label['browser_detection_ms_warning'] = "WARNING: You appear to be using MS Edge or Internet Explorer as your web browser.  BlocklyProp is not currently compatible with these browsers.  Please use Chrome or Firefox instead.";
 page_text_label['cancel'] = "Cancel";
@@ -784,6 +788,10 @@ page_text_label['confirm_request_email'] = "Email:";
 page_text_label['confirm_request_submit'] = "Request";
 page_text_label['confirm_request_title'] = "Email confirm request";
 page_text_label['confirm_requested'] = "Please check your email";
+
+/*
+ * Editor canvas messages
+ */
 page_text_label['editor_button_append'] = "Append";
 page_text_label['editor_button_cancel'] = "Cancel";
 page_text_label['editor_button_open'] = "Open";
@@ -848,9 +856,14 @@ page_text_label['editor_view_title'] = "View";
 page_text_label['editor_view_xml'] = "XML";
 page_text_label['error_generic'] = "A problem occurred";
 page_text_label['error_unknownemail'] = "Unknown email";
+
 page_text_label['footer_librarieslink'] = "External libraries";
 page_text_label['footer_licenselink'] = "License";
 page_text_label['footer_releases'] = "Releases";
+
+/*
+ * Help system links
+ */
 page_text_label['help_invalid-path'] = "Invalid help file";
 page_text_label['help_link_contest-ideas'] = "http://learn.parallax.com/educators/contest/home";
 page_text_label['help_link_educator-resources_activity-board'] = "http://learn.parallax.com";
@@ -864,6 +877,7 @@ page_text_label['help_link_tutorials_activity-board'] = "http://learn.parallax.c
 page_text_label['help_link_tutorials_activity-bot'] = "http://learn.parallax.com/tutorials/activitybot";
 page_text_label['help_link_tutorials_badge'] = "http://learn.parallax.com";
 page_text_label['help_link_tutorials_s3'] = "http://learn.parallax.com/tutorials/robot/scribbler-robot/scribbler-3";
+
 page_text_label['help_menu_blocklyprop'] = "BlocklyProp";
 page_text_label['help_menu_blocks'] = "Blocks";
 page_text_label['help_menu_languagereference'] = "Language reference";
@@ -884,6 +898,7 @@ page_text_label['help_title_activity-bot'] = "Activity Bot";
 page_text_label['help_title_badge'] = "Hackable Badge";
 page_text_label['help_title_flip'] = "Propeller FLiP";
 page_text_label['help_title_s3'] = "Scribbler Robot";
+
 page_text_label['home_c_project_newlink'] = "New";
 page_text_label['home_c_project_title'] = "C Project";
 page_text_label['home_latest_projects_title'] = "Latest projects";
@@ -1092,13 +1107,27 @@ var tooltip_text = [
  */
 Blockly.BlockSvg.prototype.showHelp_ = function () {
     var url = goog.isFunction(this.helpUrl) ? this.helpUrl() : this.helpUrl;
+
     if (!isOffline && url) {
+        // Display help in a new browser window
         window.open(url);
     } else if (url) {
+            // Temp fix - Solo-26
+         // Display help in a new browser window
+         window.open(url);
+
         // TODO: open modal/iframe with help content
-	var u = url.replace(/https:\/\/learn.parallax.com\//g, '');
-	u = 'cdn/help/' + u.replace(/\//g, '-') + '.html';
-	$('#help-content').html('<iframe src="' + u + '" style="height:600px; border:none;" />');
-	$('#help-dialog').modal('show');
+        // url = ""http://learn.parallax.com/ab-blocks/functions"
+
+        // Change protocol to HTTPS when accessing the learn site
+        // var u = url.replace(/https:\/\/learn.parallax.com\//g, '');
+
+        // Help is supposed to be in the /cdn/help folder. That does not
+            // yet exist.
+        u = 'cdn/help/' + u.replace(/\//g, '-') + '.html';
+
+        // Disable this until the help issue is addressed. Refeence issue Solo-26
+        //$('#help-content').html('<iframe src="' + u + '" style="height:600px; border:none;" />');
+	    //$('#help-dialog').modal('show');
     }
 };
