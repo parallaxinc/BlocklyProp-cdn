@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2019 Parallax Inc.
  *
@@ -31,10 +30,10 @@ var baseUrl = $("meta[name=base]").attr("content");
 
 
 /*
-* TODO: This is used in the  blocklypropclient.js file, but that file is loaded
-*  first, so when JS is condensed, make sure this global is decalred at the top
-*  of the file
-*/
+ * TODO: This is used in the  blocklypropclient.js file, but that file is loaded
+ *  first, so when JS is condensed, make sure this global is decalred at the top
+ *  of the file
+ */
 
 /**
  *
@@ -104,26 +103,26 @@ var uploadedXML = '';
  * @type {object}
  */
 bpIcons = {
-    warningCircle:       '<svg width="15" height="15"><path d="M7,8 L8,8 8,11 8,11 7,11 Z" style="stroke-width:1px;stroke:#8a6d3b;fill:none;"/><circle cx="7.5" cy="7.5" r="6" style="stroke-width:1.3px;stroke:#8a6d3b;fill:none;"/><circle cx="7.5" cy="5" r="1.25" style="stroke-width:0;fill:#8a6d3b;"/></svg>',
+    warningCircle: '<svg width="15" height="15"><path d="M7,8 L8,8 8,11 8,11 7,11 Z" style="stroke-width:1px;stroke:#8a6d3b;fill:none;"/><circle cx="7.5" cy="7.5" r="6" style="stroke-width:1.3px;stroke:#8a6d3b;fill:none;"/><circle cx="7.5" cy="5" r="1.25" style="stroke-width:0;fill:#8a6d3b;"/></svg>',
     dangerTriangleBlack: '<svg width="15" height="15"><path d="M1,12 L2,13 13,13 14,12 8,2 7,2 1,12 Z M7.25,6 L7.75,6 7.5,9 Z" style="stroke-width:1.5px;stroke:#000;fill:none;"/><circle cx="7.5" cy="10.75" r="1" style="stroke-width:0;fill:#000;"/><circle cx="7.5" cy="5.5" r="1" style="stroke-width:0;fill:#000;"/></svg>',
-    dangerTriangle:      '<svg width="15" height="15"><path d="M1,12 L2,13 13,13 14,12 8,2 7,2 1,12 Z M7.25,6 L7.75,6 7.5,9 Z" style="stroke-width:1.5px;stroke:#a94442;fill:none;"/><circle cx="7.5" cy="10.75" r="1" style="stroke-width:0;fill:#a94442;"/><circle cx="7.5" cy="5.5" r="1" style="stroke-width:0;fill:#a94442;"/></svg>',
-    checkMarkWhite:      '<svg width="14" height="15"><path d="M2.25,6 L5.5,9.25 12,2.5 13.5,4 5.5,12 1,7.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
-    checkMarkGreen:      '<svg width="14" height="15"><path d="M2.25,6 L5.5,9.25 12,2.5 13.5,4 5.5,12 1,7.5 Z" style="stroke:#3c763d;stroke-width:1;fill:#3c763d;"/></svg>',
-    downArrowWhite:      '<svg width="14" height="15"><path d="M5.5,0 L8.5,0 8.5,9 12.5,9 7,14.5 1.5,9 5.5,9 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
-    downArrowBoxWhite:   '<svg width="14" height="15"><path d="M5.5,0 L8.5,0 8.5,6 12.5,6 7,11.5 1.5,6 5.5,6 Z M0.5,12 L13.5,12 13.5,14.5 0.5,14.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
-    terminalWhite:       '<svg width="14" height="15"><path d="M3,4.5 L10,4.5 M3,6.5 L6,6.5 M3,8.5 L8,8.5 M1,1 L13,1 13,14 1,14 1,1 M2,0 L12,0 M14,2 L14,13 M12,15 L2,15 M0,2 L0,13" style="stroke:#fff;stroke-width:1;fill:none;"/></svg>',
-    graphWhite:          '<svg width="13" height="14"><path d="M.5,0 L.5,13.5 L12.5,13.5 M3.5,0 L3.5,13.5 M6.5,0 L6.5,13.5 M9.5,0 L9.5,13.5 M12.5,0 L12.5,13.5 M.5,3.5 L12.5,3.5 M.5,7 L12.5,7 M.5,10.5 L12.5,10.5 M.5,.5 L12.5,.5" style="stroke:rgba(255,255,255,.6);stroke-width:1;fill:none;"/><path d="M0,13 L6,5 L9,8 L14,2" style="stroke:#fff;stroke-width:2;fill:none;"/></svg>',
-    searchWhite:         '<svg width="14" height="15"><path d="M1.5,13.25 L4.5,8.75" style="stroke:#fff;stroke-width:2px;fill:none;"/><circle cx="7" cy="5" r="3.5" style="stroke:#fff;stroke-width:1.5px;fill:none;"></circle></svg>',
-    magicWandWhite:      '<svg width="14" height="15"><path d="M1,10 L5,10 5,11 1,11 Z M2,12 L6,12 6,13 2,13 Z M1,14 5,14 5,15 1,15 Z M0.5,2.75 L2.5,0.6 5.5,3.5 3.5,5.5 Z M5,7 L7,4.75 14,12 12,14 Z M0,7 Q1.5,6.5 2,5 Q2.5,6.5 4,7 Q2.5,7.5 2,9 Q1.5,7.5 0,7 Z M7,3 Q9.5,2.5 10,0 Q10.5,2.5 13,3 Q10.5,3.5 10,6 Q9.5,3.5 7,3 Z" style="stroke-width:0;fill:#fff;"/></svg>',
-    undoWhite:           '<svg width="15" height="15"><path d="M3.5,6.5 L2.25,4.5 0.75,10.25 6,10.5 5,8.5 Q8.5,5.5 12,7 Q8,3.5 3.5,6.5 Z M11,11 L14.5,11 Q12.5,6 7,8.25 Q11,8 11,11 Z" style="stroke-width:0;fill:#fff;"/></svg>',
-    redoWhite:           '<svg width="15" height="15"><path d="M11.5,6.5 L12.75,4.5 14.25,10.25 9,10.5 10,8.5 Q6.5,5.5 3,7 Q7,3.5 11.5,6.5 Z M4,11 L0.5,11 Q2.5,6 8,8.25 Q4,8 4,11 Z" style="stroke-width:0;fill:#fff;"/></svg>',
-    eyeBlack:            '<svg width="14" height="15" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#000;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#000;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#000;stroke-width:1.5;fill:#000;"></circle></svg>',
-    eyeWhite:            '<svg width="14" height="15" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#fff;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#fff;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#fff;stroke-width:1.5;fill:#fff;"></circle></svg>',
-    playWhite:           '<svg width="14" height="15"><path d="M4,3 L4,11 10,7 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
-    pauseWhite:          '<svg width="14" height="15"><path d="M5.5,2 L4,2 4,11 5.5,11 Z M8.5,2 L10,2 10,11 8.5,11 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
-    fileWhite:           '<svg width="14" height="15"><path d="M2,.5 L2,13.5 12,13.5 12,7.5 5.5,7.5 5.5,.5 Z M 8,1.5 L8,5 11,5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
-    eraserWhite:         '<svg width="15" height="15"><path d="M2,12 A1.5,1.5 0 0 1 2,10 L10,2 14.5,6.5 7,14 M10,11 L5.5,6.5 M15,14 L4,14 2,12 M15,13.2 5,13.2" style="stroke:#fff;stroke-width:1;fill:none;"/><path d="M2,12 A1.5,1.5 0 0 1 2,10 L5.5,6.5 10,11 7,14 4,14 Z" style="stroke-width:0;fill:#fff;"/></svg>',
-    cameraWhite:         '<svg width="14" height="15"><path d="M1.5,13.5 L.5,12.5 .5,5.5 1.5,4.5 2.5,4.5 4,3 7,3 8.5,4.5 12.5,4.5 13.5,5.5 13.5,12.5 12.5,13.5 Z M 2,9 A 4,4,0,0,0,10,9 A 4,4,0,0,0,2,9 Z M 4.5,9 A 1.5,1.5,0,0,0,7.5,9 A 1.5,1.5,0,0,0,4.5,9 Z M 10.5,6.5 A 1,1,0,0,0,13.5,6.5 A 1,1,0,0,0,10.5,6.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
+    dangerTriangle: '<svg width="15" height="15"><path d="M1,12 L2,13 13,13 14,12 8,2 7,2 1,12 Z M7.25,6 L7.75,6 7.5,9 Z" style="stroke-width:1.5px;stroke:#a94442;fill:none;"/><circle cx="7.5" cy="10.75" r="1" style="stroke-width:0;fill:#a94442;"/><circle cx="7.5" cy="5.5" r="1" style="stroke-width:0;fill:#a94442;"/></svg>',
+    checkMarkWhite: '<svg width="14" height="15"><path d="M2.25,6 L5.5,9.25 12,2.5 13.5,4 5.5,12 1,7.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
+    checkMarkGreen: '<svg width="14" height="15"><path d="M2.25,6 L5.5,9.25 12,2.5 13.5,4 5.5,12 1,7.5 Z" style="stroke:#3c763d;stroke-width:1;fill:#3c763d;"/></svg>',
+    downArrowWhite: '<svg width="14" height="15"><path d="M5.5,0 L8.5,0 8.5,9 12.5,9 7,14.5 1.5,9 5.5,9 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
+    downArrowBoxWhite: '<svg width="14" height="15"><path d="M5.5,0 L8.5,0 8.5,6 12.5,6 7,11.5 1.5,6 5.5,6 Z M0.5,12 L13.5,12 13.5,14.5 0.5,14.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
+    terminalWhite: '<svg width="14" height="15"><path d="M3,4.5 L10,4.5 M3,6.5 L6,6.5 M3,8.5 L8,8.5 M1,1 L13,1 13,14 1,14 1,1 M2,0 L12,0 M14,2 L14,13 M12,15 L2,15 M0,2 L0,13" style="stroke:#fff;stroke-width:1;fill:none;"/></svg>',
+    graphWhite: '<svg width="13" height="14"><path d="M.5,0 L.5,13.5 L12.5,13.5 M3.5,0 L3.5,13.5 M6.5,0 L6.5,13.5 M9.5,0 L9.5,13.5 M12.5,0 L12.5,13.5 M.5,3.5 L12.5,3.5 M.5,7 L12.5,7 M.5,10.5 L12.5,10.5 M.5,.5 L12.5,.5" style="stroke:rgba(255,255,255,.6);stroke-width:1;fill:none;"/><path d="M0,13 L6,5 L9,8 L14,2" style="stroke:#fff;stroke-width:2;fill:none;"/></svg>',
+    searchWhite: '<svg width="14" height="15"><path d="M1.5,13.25 L4.5,8.75" style="stroke:#fff;stroke-width:2px;fill:none;"/><circle cx="7" cy="5" r="3.5" style="stroke:#fff;stroke-width:1.5px;fill:none;"></circle></svg>',
+    magicWandWhite: '<svg width="14" height="15"><path d="M1,10 L5,10 5,11 1,11 Z M2,12 L6,12 6,13 2,13 Z M1,14 5,14 5,15 1,15 Z M0.5,2.75 L2.5,0.6 5.5,3.5 3.5,5.5 Z M5,7 L7,4.75 14,12 12,14 Z M0,7 Q1.5,6.5 2,5 Q2.5,6.5 4,7 Q2.5,7.5 2,9 Q1.5,7.5 0,7 Z M7,3 Q9.5,2.5 10,0 Q10.5,2.5 13,3 Q10.5,3.5 10,6 Q9.5,3.5 7,3 Z" style="stroke-width:0;fill:#fff;"/></svg>',
+    undoWhite: '<svg width="15" height="15"><path d="M3.5,6.5 L2.25,4.5 0.75,10.25 6,10.5 5,8.5 Q8.5,5.5 12,7 Q8,3.5 3.5,6.5 Z M11,11 L14.5,11 Q12.5,6 7,8.25 Q11,8 11,11 Z" style="stroke-width:0;fill:#fff;"/></svg>',
+    redoWhite: '<svg width="15" height="15"><path d="M11.5,6.5 L12.75,4.5 14.25,10.25 9,10.5 10,8.5 Q6.5,5.5 3,7 Q7,3.5 11.5,6.5 Z M4,11 L0.5,11 Q2.5,6 8,8.25 Q4,8 4,11 Z" style="stroke-width:0;fill:#fff;"/></svg>',
+    eyeBlack: '<svg width="14" height="15" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#000;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#000;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#000;stroke-width:1.5;fill:#000;"></circle></svg>',
+    eyeWhite: '<svg width="14" height="15" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#fff;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#fff;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#fff;stroke-width:1.5;fill:#fff;"></circle></svg>',
+    playWhite: '<svg width="14" height="15"><path d="M4,3 L4,11 10,7 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
+    pauseWhite: '<svg width="14" height="15"><path d="M5.5,2 L4,2 4,11 5.5,11 Z M8.5,2 L10,2 10,11 8.5,11 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
+    fileWhite: '<svg width="14" height="15"><path d="M2,.5 L2,13.5 12,13.5 12,7.5 5.5,7.5 5.5,.5 Z M 8,1.5 L8,5 11,5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
+    eraserWhite: '<svg width="15" height="15"><path d="M2,12 A1.5,1.5 0 0 1 2,10 L10,2 14.5,6.5 7,14 M10,11 L5.5,6.5 M15,14 L4,14 2,12 M15,13.2 5,13.2" style="stroke:#fff;stroke-width:1;fill:none;"/><path d="M2,12 A1.5,1.5 0 0 1 2,10 L5.5,6.5 10,11 7,14 4,14 Z" style="stroke-width:0;fill:#fff;"/></svg>',
+    cameraWhite: '<svg width="14" height="15"><path d="M1.5,13.5 L.5,12.5 .5,5.5 1.5,4.5 2.5,4.5 4,3 7,3 8.5,4.5 12.5,4.5 13.5,5.5 13.5,12.5 12.5,13.5 Z M 2,9 A 4,4,0,0,0,10,9 A 4,4,0,0,0,2,9 Z M 4.5,9 A 1.5,1.5,0,0,0,7.5,9 A 1.5,1.5,0,0,0,4.5,9 Z M 10.5,6.5 A 1,1,0,0,0,13.5,6.5 A 1,1,0,0,0,10.5,6.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
 }
 
 /**
@@ -133,8 +132,8 @@ bpIcons = {
  */
 function validateNewProjectForm() {
     // this should only be used offline.
-    if (!isOffline) { 
-        return true; 
+    if (!isOffline) {
+        return true;
     }
 
     $(".proj").validate({
@@ -149,8 +148,8 @@ function validateNewProjectForm() {
     });
 
     // if form is invalid return false
-    if (!$(".proj").valid()) { 
-        return false; 
+    if (!$(".proj").valid()) {
+        return false;
     }
     return true;
 }
@@ -163,13 +162,15 @@ function validateNewProjectForm() {
  */
 $(document).ready(function () {
     // Ensure blockly workspace takes the remainder of the window.
-    $(window).on('resize', function () { resetToolBoxSizing() });
+    $(window).on('resize', function () {
+        resetToolBoxSizing()
+    });
 
     // Insert the text strings (internationalization) once the page has loaded    
     // insert into <span> tags
     $(".keyed-lang-string").each(function () {
         var span_tag = $(this);
-        
+
         // Set the text of the label spans
         var pageLabel = span_tag.attr('data-key');
         if (pageLabel) {
@@ -182,7 +183,7 @@ $(document).ready(function () {
             }
         }
     });
-    
+
     // insert text strings (internationalization) into button/link tooltips
     for (var i = 0; i < tooltip_text.length; i++) {
         if (tooltip_text[i] && document.getElementById(tooltip_text[i][0])) {
@@ -193,67 +194,160 @@ $(document).ready(function () {
     if (getURLParameter('debug')) console.log("User authentication is: ", user_authenticated);
 
     // Draw the custom icons into the specified <span> tags
-    $('.bpIcon[data-icon]').each(function () { $(this).html(bpIcons[$(this).attr('data-icon')]); });
+    $('.bpIcon[data-icon]').each(function () {
+        $(this).html(bpIcons[$(this).attr('data-icon')]);
+    });
 
     /* WIP/TODO: Move javascript that is inline in the HTML files to included scripts.  This keeps the HTML simple and clean.
-    */
+     */
     // Set up event handlers - Attach events to nav/action menus/buttons
-    $('#prop-btn-comp').on('click',         function () {  compile();  });
-    $('#prop-btn-ram').on('click',          function () {  loadInto('Load into RAM', 'bin', 'CODE', 'RAM');  });
-    $('#prop-btn-eeprom').on('click',       function () {  loadInto('Load into EEPROM', 'eeprom', 'CODE', 'EEPROM');  });
-    $('#prop-btn-term').on('click',         function () {  serial_console();  });
-    $('#prop-btn-graph').on('click',        function () {  graphing_console();  });
-    $('#prop-btn-find-replace').on('click', function () {  findReplaceCode();  });
-    $('#prop-btn-pretty').on('click',       function () {  formatWizard();  });
-    $('#prop-btn-undo').on('click',         function () {  codePropC.undo();  });
-    $('#prop-btn-redo').on('click',         function () {  codePropC.redo();  });
-    $('#btn-view-propc').on('click',        function () {  renderContent('tab_propc');  });
-    $('#btn-view-blocks').on('click',       function () {  renderContent('tab_blocks');  });
-    $('#btn-view-xml').on('click',          function () {  renderContent('tab_xml');  });
-    $('#edit-project-details').on('click',  function () {  editProjectDetails();  });
-    $('#download-side').on('click',         function () {  downloadPropC();  });
-    $('#term-graph-setup').on('click',      function () {  configure_term_graph();  });
-    $('#client-setup').on('click',          function () {  configure_client();  });
-    $('#propc-find-btn').on('click',        function () {  codePropC.find(document.getElementById('propc-find').value, {}, true);  });
-    $('#propc-replace-btn').on('click',     function () {  codePropC.replace(document.getElementById('propc-replace').value, {needle: document.getElementById('propc-find').value}, true);  });
-    $('#find-replace-close').on('click',    function () {  findReplaceCode();  });
-    $('#upload-close').on('click',          function () {  clearUploadInfo();  });
+    $('#prop-btn-comp').on('click', function () {
+        compile();
+    });
+    $('#prop-btn-ram').on('click', function () {
+        loadInto('Load into RAM', 'bin', 'CODE', 'RAM');
+    });
+    $('#prop-btn-eeprom').on('click', function () {
+        loadInto('Load into EEPROM', 'eeprom', 'CODE', 'EEPROM');
+    });
+    $('#prop-btn-term').on('click', function () {
+        serial_console();
+    });
+    $('#prop-btn-graph').on('click', function () {
+        graphing_console();
+    });
+    $('#prop-btn-find-replace').on('click', function () {
+        findReplaceCode();
+    });
+    $('#prop-btn-pretty').on('click', function () {
+        formatWizard();
+    });
+    $('#prop-btn-undo').on('click', function () {
+        codePropC.undo();
+    });
+    $('#prop-btn-redo').on('click', function () {
+        codePropC.redo();
+    });
+    $('#btn-view-propc').on('click', function () {
+        renderContent('tab_propc');
+    });
+    $('#btn-view-blocks').on('click', function () {
+        renderContent('tab_blocks');
+    });
+    $('#btn-view-xml').on('click', function () {
+        renderContent('tab_xml');
+    });
+    $('#edit-project-details').on('click', function () {
+        editProjectDetails();
+    });
+    $('#download-side').on('click', function () {
+        downloadPropC();
+    });
+    $('#term-graph-setup').on('click', function () {
+        configure_term_graph();
+    });
+    $('#client-setup').on('click', function () {
+        configure_client();
+    });
+    $('#propc-find-btn').on('click', function () {
+        codePropC.find(document.getElementById('propc-find').value, {}, true);
+    });
+    $('#propc-replace-btn').on('click', function () {
+        codePropC.replace(document.getElementById('propc-replace').value, {
+            needle: document.getElementById('propc-find').value
+        }, true);
+    });
+    $('#find-replace-close').on('click', function () {
+        findReplaceCode();
+    });
+    $('#upload-close').on('click', function () {
+        clearUploadInfo();
+    });
     //$('#selectfile').on('change', {fileValue: this.files}, function (e) {  console.log(e.data.fileValue); uploadHandler(e.data.fileValue);  });
-    $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false);  });
-    $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
-    $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
-    $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
-    $('#save-btn').on('click',              function () {  saveProject();  });
-    $('#new-project-menu-item').on('click', function () {  clearNewProjectModal(); showNewProjectModal('open'); });// window.location = 'blocklyc.html?newProject=true'  });
-    $('#btn-graph-play').on('click',        function () {  graph_play();  });
-    $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
-    $('#btn-graph-csv').on('click',         function () {  downloadCSV();  });
-    $('#btn-graph-clear').on('click',       function () {  graphStartStop('clear');  });
-    $('#save-as-board-type').on('change',   function () {  checkBoardType($('#saveAsDialogSender').html());  });
-    $('#save-as-board-btn').on('click',     function () {  saveProjectAs();  });
+    $('#selectfile-replace').on('click', function () {
+        uploadMergeCode(false);
+    });
+    $('#selectfile-append').on('click', function () {
+        uploadMergeCode(true);
+    });
+    $('#selectfile-clear').on('click', function () {
+        clearUploadInfo();
+    });
+    $('#save-as-btn').on('click', function () {
+        saveAsDialog();
+    });
+    $('#save-btn').on('click', function () {
+        saveProject();
+    });
+    $('#new-project-menu-item').on('click', function () {
+        clearNewProjectModal();
+        showNewProjectModal('open');
+    }); // window.location = 'blocklyc.html?newProject=true'  });
+    $('#btn-graph-play').on('click', function () {
+        graph_play();
+    });
+    $('#btn-graph-snapshot').on('click', function () {
+        downloadGraph();
+    });
+    $('#btn-graph-csv').on('click', function () {
+        downloadCSV();
+    });
+    $('#btn-graph-clear').on('click', function () {
+        graphStartStop('clear');
+    });
+    $('#save-as-board-type').on('change', function () {
+        checkBoardType($('#saveAsDialogSender').html());
+    });
+    $('#save-as-board-btn').on('click', function () {
+        saveProjectAs();
+    });
     for (var k = 1; k < 4; k++) {
-        $('#mac' + k + '-btn').on('click',  function () {  showStep('mac', k, 4);  });
-        $('#win' + k + '-btn').on('click',  function () {  showStep('win', k, 3);  });
-        $('#chr' + k + '-btn').on('click',  function () {  showStep('chr', k, 3);  });
+        $('#mac' + k + '-btn').on('click', function () {
+            showStep('mac', k, 4);
+        });
+        $('#win' + k + '-btn').on('click', function () {
+            showStep('win', k, 3);
+        });
+        $('#chr' + k + '-btn').on('click', function () {
+            showStep('chr', k, 3);
+        });
     }
-    $('#mac4-btn').on('click',              function () {  showStep('mac', 4, 4);  });
-    $('.show-os-win').on('click',           function () {  showOS('Windows');  });
-    $('.show-os-mac').on('click',           function () {  showOS('MacOS');  });
-    $('.show-os-chr').on('click',           function () {  showOS('ChromeOS');  });
-    $('.show-os-lnx').on('click',           function () {  showOS('Linux');  });
+    $('#mac4-btn').on('click', function () {
+        showStep('mac', 4, 4);
+    });
+    $('.show-os-win').on('click', function () {
+        showOS('Windows');
+    });
+    $('.show-os-mac').on('click', function () {
+        showOS('MacOS');
+    });
+    $('.show-os-chr').on('click', function () {
+        showOS('ChromeOS');
+    });
+    $('.show-os-lnx').on('click', function () {
+        showOS('Linux');
+    });
 
     $('#save-project').on('click', function () {
         if (isOffline) {
             downloadCode();
         } else {
-            saveProject();  
+            saveProject();
         }
     });
 
-    $('#save-project-as').on('click',      function () {  saveAsDialog();  });
-    $('#download-project').on('click',     function () {  downloadCode();  });
-    $('#upload-project').on('click',       function () {  uploadCode();    });
-    $('#save-check-dialog').on('hidden.bs.modal', function () {  timestampSaveTime(5, false);  });
+    $('#save-project-as').on('click', function () {
+        saveAsDialog();
+    });
+    $('#download-project').on('click', function () {
+        downloadCode();
+    });
+    $('#upload-project').on('click', function () {
+        uploadCode();
+    });
+    $('#save-check-dialog').on('hidden.bs.modal', function () {
+        timestampSaveTime(5, false);
+    });
 
     $("#selectfile").focus(function () {
         $('#selectfile-verify-notvalid').css('display', 'none');
@@ -263,8 +357,8 @@ $(document).ready(function () {
 
     // set the upload modal's title to "import" if offline
     if (isOffline) {
-         $('#upload-dialog-title').html(page_text_label['editor_import']);
-         $('#upload-project span').html(page_text_label['editor_import']);
+        $('#upload-dialog-title').html(page_text_label['editor_import']);
+        $('#upload-project span').html(page_text_label['editor_import']);
     }
 
     // disable to upload dialog buttons until a valid file is uploaded
@@ -309,7 +403,9 @@ $(document).ready(function () {
         var img_tag = $(this);
         // Set the source of the image
         var img_source = img_tag.attr('data-src');
-        if (img_source) {  img_tag.attr('src', cdnUrl + img_source);  }
+        if (img_source) {
+            img_tag.attr('src', cdnUrl + img_source);
+        }
     });
 
     // Set the client download links
@@ -320,7 +416,7 @@ $(document).ready(function () {
     idProject = getURLParameter('project');
 
     var projectlink = null;
-    
+
     if (window.location.href.indexOf('projectlink') > -1) {
         //Decode and parse project data coming from a sharelink
         var projectRaw = atob($("meta[name=projectlink]").attr("content"));
@@ -341,7 +437,7 @@ $(document).ready(function () {
 
         // hide save interaction elements
         $('.online-only').addClass('hidden');
-	    $('.offline-only').removeClass('hidden');
+        $('.offline-only').removeClass('hidden');
 
         $("#save_as_dialog_title_text").html('Choose a project name and board type');
         $("#save_as_dialog_button").html('Continue');
@@ -384,13 +480,15 @@ $(document).ready(function () {
         // and the project detail are being passed in the Request body
         // TODO: Create a new project from details passed in from the new-project page
         // ----------------------------------------------------------------------------
-        $.get(baseUrl + 'rest/shared/project/editor/' + idProject, function(data) { setupWorkspace(data) })
+        $.get(baseUrl + 'rest/shared/project/editor/' + idProject, function (data) {
+                setupWorkspace(data)
+            })
             .fail(function () {
-            // Failed to load project - this probably means that it belongs to another user and is not shared.
-            utils.showMessage('Unable to Access Project', 'The BlocklyProp Editor was unable to access the project you requested.  If you are sure the project exists, you may need to contact the project\'s owner and ask them to share their project before you will be able to view it.', function () {
-                window.location = baseUrl;
+                // Failed to load project - this probably means that it belongs to another user and is not shared.
+                utils.showMessage('Unable to Access Project', 'The BlocklyProp Editor was unable to access the project you requested.  If you are sure the project exists, you may need to contact the project\'s owner and ask them to share their project before you will be able to view it.', function () {
+                    window.location = baseUrl;
+                });
             });
-        });
     }
 
     // these are only set up for the offline editor
@@ -400,7 +498,7 @@ $(document).ready(function () {
         showNewProjectModal();
 
         // return to the splash screen if the user clicks the cancel button
-        $('#new-project-cancel').on('click', function() {
+        $('#new-project-cancel').on('click', function () {
 
             // if the project is being edited, clear the fields and close the modal
             if ($('#open-modal-sender').html() === 'open') {
@@ -416,7 +514,7 @@ $(document).ready(function () {
 
                 // simplemde.toTextArea();
                 // simplemde = null;
-                
+
                 $('#new-project-dialog').modal('hide');
 
             } else {
@@ -435,7 +533,7 @@ $(document).ready(function () {
  *  Clears the fields in the new project modal.
  * 
  */
-var clearNewProjectModal = function() {
+var clearNewProjectModal = function () {
     $('#new-project-name').val('');
     $('#new-project-description').val('');
     $('#new-project-dialog-title').html(page_text_label['editor_newproject_title']);
@@ -446,22 +544,26 @@ var clearNewProjectModal = function() {
  * 
  *  @param openModal force the modal to open when set to 'open'
  */
-var showNewProjectModal = function(openModal) {
+var showNewProjectModal = function (openModal) {
     // clear out the board type dropdown menu
     $("#new-project-board-type").empty();
 
     // populate the board type dropdown menu with a header first,
     $("#new-project-board-type")
-            .append($('<option />')
+        .append($('<option />')
             .val('')
             .text(page_text_label['project_create_board_type_select'])
-            .attr('disabled','disabled')
-            .attr('selected','selected')
-    );
+            .attr('disabled', 'disabled')
+            .attr('selected', 'selected')
+        );
 
     // If the editor is passed the 'newProject' parameter, open the modal
     if (getURLParameter('newProject') || openModal === 'open') {
-        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
+        $('#new-project-dialog').modal({
+            show: true,
+            keyboard: false,
+            backdrop: 'static'
+        });
         var projectTimestamp = new Date();
         $('#edit-project-created-date').html(projectTimestamp);
         $('#edit-project-last-modified').html(projectTimestamp);
@@ -477,10 +579,10 @@ var showNewProjectModal = function(openModal) {
     // then populate the dropdown with the board types 
     // defined in propc.js in the 'profile' object
     // (except 'default', which is where the current project's type is stored)
-    for(var boardTypes in profile) {
+    for (var boardTypes in profile) {
         if (boardTypes !== 'default') {
             $("#new-project-board-type")
-                    .append($('<option />')
+                .append($('<option />')
                     .val(boardTypes)
                     .text(profile[boardTypes].description));
         }
@@ -500,14 +602,14 @@ var showNewProjectModal = function(openModal) {
             } else {
                 code = '<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>';
             }
-    
+
             // save the form fields into the projectData object       
             pd = {
                 'board': $('#new-project-board-type').val(),
                 'code': code,
                 'created': $('#edit-project-created-date').html(),
-                'description': $("#new-project-description").val(),        // simplemde.value(),
-                'description-html': $("#new-project-description").val(),   // simplemde.options.previewRender(simplemde.value()),
+                'description': $("#new-project-description").val(), // simplemde.value(),
+                'description-html': $("#new-project-description").val(), // simplemde.options.previewRender(simplemde.value()),
                 'id': 0,
                 'modified': $('#edit-project-created-date').html(),
                 'name': $('#new-project-name').val(),
@@ -612,7 +714,7 @@ var setupWorkspace = function (data) {
 
         // Show PropC editing UI elements
         $('.propc-only').removeClass('hidden');
-        
+
         // Create UI block content from project details
         renderContent('propc');
     }
@@ -780,7 +882,7 @@ var saveProject = function () {
  */
 var saveAsDialog = function () {
     // Production still uses the uses the plain 'save-as' endpoint for now.
-    if (inDemo !== 'demo') {     // if (1 === 1) {
+    if (inDemo !== 'demo') { // if (1 === 1) {
 
         // Old function - still in use because save-as+board type is not approved for use.
         utils.prompt("Save project as", projectData['name'], function (value) {
@@ -808,7 +910,7 @@ var saveAsDialog = function () {
                     if (isOffline) {
                         downloadCode();
                     } else {
-                        saveProject();  
+                        saveProject();
                     }
                 }
             }, 'Yes', 'No');
@@ -859,7 +961,7 @@ var saveProjectAs = function (requestor) {
     // Retrieve the field values
     var p_type = $('#save-as-board-type').val();
     var p_name = $('#save-as-project-name').val();
-    
+
     //get the project's XML code
     var code = '';
 
@@ -905,7 +1007,7 @@ var saveProjectAs = function (requestor) {
         //setupWorkspace(pd);
         window.localStorage.setItem('localProject', JSON.stringify(pd));
         window.location = 'blocklyc.html';
-    }  
+    }
 };
 
 
@@ -913,7 +1015,7 @@ var saveProjectAs = function (requestor) {
  *
  */
 var editProjectDetails = function () {
-    if(isOffline) {
+    if (isOffline) {
         // Save the current code
         projectData.modified = new Date();
         if (projectData['board'] === 'propcfile') {
@@ -943,7 +1045,11 @@ var editProjectDetails = function () {
         $('#open-modal-sender').html('open');
 
         // show the modal
-        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
+        $('#new-project-dialog').modal({
+            show: true,
+            keyboard: false,
+            backdrop: 'static'
+        });
 
     } else {
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
@@ -1016,7 +1122,9 @@ var pingInterval = setInterval(function () {
  * @returns {number}
  */
 function hashCode(str) {
-    var hash = 0, i = 0, len = str.length;
+    var hash = 0,
+        i = 0,
+        len = str.length;
     while (i < len) {
         hash = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
     }
@@ -1064,7 +1172,7 @@ function decodeFromValidXml(str) {
  */
 function downloadCode() {
     var projXMLcode = '';
-    
+
     if (projectData && projectData['board'] === 'propcfile') {
         projXMLcode = propcAsBlocksXml();
     } else {
@@ -1092,37 +1200,39 @@ function downloadCode() {
             var saveData = (function () {
                 // TODO: WIP - swapping out download for node.js/nwsaveas dialog option
                 //if (!isOffline) {
-                    var a = document.createElement("a");
-                    document.body.appendChild(a);
-                    a.style = "display: none";
-                    return function (data, fileName) {
-                        var blob = new Blob([data], {type: "octet/stream"});
-                        var url = window.URL.createObjectURL(blob);
-                        a.href = url;
-                        a.download = fileName;
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                    };
+                var a = document.createElement("a");
+                document.body.appendChild(a);
+                a.style = "display: none";
+                return function (data, fileName) {
+                    var blob = new Blob([data], {
+                        type: "octet/stream"
+                    });
+                    var url = window.URL.createObjectURL(blob);
+                    a.href = url;
+                    a.download = fileName;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                };
                 //} else {
-                    /*
-                    var a = document.createElement("input");
-                    a.type = "file";
-                    a.name = "member" + i;
+                /*
+                var a = document.createElement("input");
+                a.type = "file";
+                a.name = "member" + i;
 
-                    document.body.appendChild(a);
-                    a.style = "display: none";
-                    return function (data, fileName) {
-                        var att = document.createAttribute("nwsaveas");
-                        att.value = fileName;
-                        a.setAttributeNode(att);
-                        a.addEventListener("change", function() {
-                            var filePath = this.value;
-                            console.log("Saving to: " + filePath);
-                            localSaveAs(filePath, data);
-                        });
-                        a.click();
-                    };
-                    */ 
+                document.body.appendChild(a);
+                a.style = "display: none";
+                return function (data, fileName) {
+                    var att = document.createAttribute("nwsaveas");
+                    att.value = fileName;
+                    a.setAttributeNode(att);
+                    a.addEventListener("change", function() {
+                        var filePath = this.value;
+                        console.log("Saving to: " + filePath);
+                        localSaveAs(filePath, data);
+                    });
+                    a.click();
+                };
+                */
                 //}
             }());
 
@@ -1203,12 +1313,11 @@ function uploadHandler(files) {
         var uploadBoardType = '';
 
         //validate file, screen for potentially malicious code.
-        if (files[0].type === 'image/svg+xml'
-                && xmlString.indexOf("<svg blocklyprop=\"blocklypropproject\"") === 0
-                && xmlString.indexOf("<!ENTITY") === -1
-                && xmlString.indexOf("CDATA") === -1
-                && xmlString.indexOf("<!--") === -1)
-        {
+        if (files[0].type === 'image/svg+xml' &&
+            xmlString.indexOf("<svg blocklyprop=\"blocklypropproject\"") === 0 &&
+            xmlString.indexOf("<!ENTITY") === -1 &&
+            xmlString.indexOf("CDATA") === -1 &&
+            xmlString.indexOf("<!--") === -1) {
             // TODO: instead of parsing by text indexOf's, use XML properly.
             var uploadedChecksum = xmlString.substring((xmlString.length - 24), (xmlString.length - 12));
             var findBPCstart = '<block';
@@ -1216,7 +1325,7 @@ function uploadHandler(files) {
                 findBPCstart = '<variables>';
             }
             uploadedXML = xmlString.substring(xmlString.indexOf(findBPCstart), (xmlString.length - 29));
-            
+
             var computedChecksum = hashCode(uploadedXML).toString();
             computedChecksum = '000000000000'.substring(computedChecksum.length, 12) + computedChecksum;
 
@@ -1239,7 +1348,7 @@ function uploadHandler(files) {
 
             // TODO: check to see if this is used when opened from the editor (and not the splash screen)
             // maybe projectData.code.length < 43??? i.e. empty project? instead of the URL parameter...
-    	    if (getURLParameter('openFile') === "true" && isOffline) {
+            if (getURLParameter('openFile') === "true" && isOffline) {
                 var titleIndex = xmlString.indexOf('transform="translate(-225,-53)">Title: ');
                 var projectTitle = xmlString.substring((titleIndex + 39), xmlString.indexOf('</text>', (titleIndex + 40)));
                 titleIndex = xmlString.indexOf('transform="translate(-225,-8)">Description: ');
@@ -1261,26 +1370,26 @@ function uploadHandler(files) {
                     projectModified = xmlString.substring((titleIndex + 19), xmlString.indexOf('"', (titleIndex + 20)));
                 }
 
-		        pd = {
-            	    'board': uploadBoardType,
-            	    'code': uploadedXML,
-            	    'created': projectCreated,
-            	    'description': decodeFromValidXml(projectDesc),
-            	    'description-html': '',
-            	    'id': 0,
-            	    'modified': projectModified,
-            	    'name': decodeFromValidXml(projectTitle),
+                pd = {
+                    'board': uploadBoardType,
+                    'code': uploadedXML,
+                    'created': projectCreated,
+                    'description': decodeFromValidXml(projectDesc),
+                    'description-html': '',
+                    'id': 0,
+                    'modified': projectModified,
+                    'name': decodeFromValidXml(projectTitle),
                     'private': true,
-            	    'shared': false,
-            	    'type': "PROPC",
-            	    'user': "offline",
-            	    'yours': true,
-		        }
+                    'shared': false,
+                    'type': "PROPC",
+                    'user': "offline",
+                    'yours': true,
+                }
 
                 projectData = pd;
                 // window.localStorage.setItem('localProject', JSON.stringify(pd));
-		        // window.location = 'blocklyc.html';
-	        }
+                // window.location = 'blocklyc.html';
+            }
         }
 
         if (xmlValid === true) {
@@ -1346,24 +1455,24 @@ function uploadMergeCode(append) {
             newCode = newCode.substring(uploadedXML.indexOf('<variables>'), newCode.length);
         }
         newCode = newCode.substring(0, (newCode.length - 6));
-        
+
         // check for newer blockly XML code (contains a list of variables)
         if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') > -1) {
             var findVarRegExp = /type="(\w*)" id="(.{20})">(\w+)</g;
             var newBPCvars = [];
             var oldBPCvars = [];
-    
+
             var varCodeTemp = newCode.split('</variables>');
             newCode = varCodeTemp[1];
             // use a regex to match the id, name, and type of the varaibles in both the old and new code.
-            var tmpv = varCodeTemp[0].split('<variables>')[1].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
-                newBPCvars.push([m3, m2, m1]);  // name, id, type
+            var tmpv = varCodeTemp[0].split('<variables>')[1].replace(findVarRegExp, function (p, m1, m2, m3) { // type, id, name
+                newBPCvars.push([m3, m2, m1]); // name, id, type
                 return p;
             });
             varCodeTemp = projCode.split('</variables>');
             projCode = varCodeTemp[1];
-            tmpv = varCodeTemp[0].replace(findVarRegExp, function(p, m1, m2, m3) {  // type, id, name
-                oldBPCvars.push([m3, m2, m1]);  // name, id, type
+            tmpv = varCodeTemp[0].replace(findVarRegExp, function (p, m1, m2, m3) { // type, id, name
+                oldBPCvars.push([m3, m2, m1]); // name, id, type
                 return p;
             });
             // record how many variables are in the original and new code
@@ -1391,7 +1500,7 @@ function uploadMergeCode(append) {
 
             // rebuild vars from both new/old
             tmpv = '<variables>';
-            oldBPCvars.forEach(function(vi, j) {
+            oldBPCvars.forEach(function (vi, j) {
                 tmpv += '<variable id="' + vi[1] + '" type="' + vi[2] + '">' + vi[0] + '</variable>';
             });
             tmpv += '</variables>';
@@ -1417,12 +1526,12 @@ function uploadMergeCode(append) {
 function initToolbox(profileName) {
 
     var ff = getURLParameter('font');
-    
-    if(ff) {
+
+    if (ff) {
         // Replace font family in Blockly's inline CSS
         for (var f = 0; f < Blockly.Css.CONTENT.length; f++) {
             Blockly.Css.CONTENT[f] = Blockly.Css.CONTENT[f].replace(/Arial, /g, '').replace(/sans-serif;/g, "'" + ff + "', sans-serif;");
-        }   
+        }
 
         $('html, body').css('font-family', "'" + ff + "', sans-serif");
         $('.blocklyWidgetDiv .goog-menuitem-content').css('font', "'normal 14px '" + ff + "', sans-serif !important'"); //    font: normal 14px Arimo, sans-serif !important;
@@ -1430,9 +1539,9 @@ function initToolbox(profileName) {
     } else {
         for (var f = 0; f < Blockly.Css.CONTENT.length; f++) {
             Blockly.Css.CONTENT[f] = Blockly.Css.CONTENT[f].replace(/Arial, /g, '').replace(/sans-serif;/g, "Arimo, sans-serif;");
-        }   
+        }
     }
-    
+
     Blockly.inject('content_blocks', {
         toolbox: filterToolbox(profileName),
         trashcan: true,
@@ -1490,9 +1599,9 @@ function getXml() {
  */
 function showOS(o) {
     $("body").removeClass('Windows')
-            .removeClass('MacOS')
-            .removeClass('Linux')
-            .removeClass('ChromeOS');
+        .removeClass('MacOS')
+        .removeClass('Linux')
+        .removeClass('ChromeOS');
     $("body").addClass(o);
 }
 
