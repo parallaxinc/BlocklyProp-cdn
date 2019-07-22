@@ -548,7 +548,9 @@ function resetToolBoxSizing(d) {
                 blocklyDiv[i].style.height = navHeight + 'px';
             }
 
-            Blockly.svgResize(Blockly.mainWorkspace);
+            if (Blockly.mainWorkspace) {
+                Blockly.svgResize(Blockly.mainWorkspace);
+            }
         }, d);
     } else {
         // find the height of just the blockly workspace by subtracting the height of the navigation bar
@@ -564,8 +566,10 @@ function resetToolBoxSizing(d) {
             blocklyDiv[i].style.height = navHeight + 'px';
         }
 
-        Blockly.svgResize(Blockly.mainWorkspace);
-    }
+        if (Blockly.mainWorkspace) {
+            Blockly.svgResize(Blockly.mainWorkspace);
+        }
+}
 }
 
 /**
