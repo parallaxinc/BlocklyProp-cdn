@@ -259,15 +259,15 @@ function renderContent(id) {
 
     switch (selectedTab) {
       case 'blocks':
-        $('.blocklyToolboxDiv').css('display', 'block')
+        $('.blocklyToolboxDiv').removeClass('hidden')
 
-        $('#content_xml').css('display', 'none');
-        $('#content_propc').css('display', 'none');
-        $('#content_blocks').css('display', 'block');
+        $('#content_xml').addClass('hidden');
+        $('#content_propc').addClass('hidden');
+        $('#content_blocks').removeClass('hidden');
 
-        $('#btn-view-xml').css('display', 'none');
-        $('#btn-view-propc').css('display', 'inline-block');
-        $('#btn-view-blocks').css('display', 'none');
+        $('#btn-view-xml').addClass('hidden');
+        $('#btn-view-propc').removeClass('hidden');
+        $('#btn-view-blocks').addClass('hidden');
 
         if ((isDebug || isOffline) && codeXml.getValue().length > 40) {
             Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.Xml.textToDom(codeXml.getValue()), Blockly.mainWorkspace);
@@ -276,24 +276,24 @@ function renderContent(id) {
         }
         break;
       case 'propc':
-        $('.blocklyToolboxDiv').css('display', 'none')
+        $('.blocklyToolboxDiv').addClass('hidden')
 
-        $('#content_xml').css('display', 'none');
-        $('#content_propc').css('display', 'block');
-        $('#content_blocks').css('display', 'none');
+        $('#content_xml').addClass('hidden');
+        $('#content_propc').removeClass('hidden');
+        $('#content_blocks').addClass('hidden');
 
         if (isDebug || (isOffline && !docker)) {
             if (!isPropcOnlyProject) {
-                $('#btn-view-xml').css('display', 'inline-block');
+                $('#btn-view-xml').removeClass('hidden');
             } else {
-                $('#btn-view-xml').css('display', 'none');
+                $('#btn-view-xml').addClass('hidden');
             }
-            $('#btn-view-blocks').css('display', 'none');
+            $('#btn-view-blocks').addClass('hidden');
         } else {
-            $('#btn-view-xml').css('display', 'none');
-            $('#btn-view-blocks').css('display', 'inline-block');    
+            $('#btn-view-xml').addClass('hidden');
+            $('#btn-view-blocks').removeClass('hidden');    
         }
-        $('#btn-view-propc').css('display', 'none');
+        $('#btn-view-propc').addClass('hidden');
         if (!isPropcOnlyProject) {
             let raw_c = prettyCode(Blockly.propc.workspaceToCode(Blockly.mainWorkspace));
             codePropC.setValue(raw_c);
@@ -317,15 +317,15 @@ function renderContent(id) {
         }
         break;
       case 'xml':
-        $('.blocklyToolboxDiv').css('display', 'none')
+        $('.blocklyToolboxDiv').addClass('hidden')
 
-        $('#content_xml').css('display', 'block');
-        $('#content_propc').css('display', 'none');
-        $('#content_blocks').css('display', 'none');
+        $('#content_xml').removeClass('hidden');
+        $('#content_propc').addClass('hidden');
+        $('#content_blocks').addClass('hidden');
 
-        $('#btn-view-xml').css('display', 'none');
-        $('#btn-view-propc').css('display', 'none');
-        $('#btn-view-blocks').css('display', 'inline-block');
+        $('#btn-view-xml').addClass('hidden');
+        $('#btn-view-propc').addClass('hidden');
+        $('#btn-view-blocks').removeClass('hidden');
 
         // Load project code
         codeXml.setValue(Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace)));
@@ -335,7 +335,11 @@ function renderContent(id) {
         break;
                                 
     }
-
+    if (resetToolBoxSizing) {
+        resetToolBoxSizing();
+        if (codePropC) codePropC.resize();
+        if (codeXml)   codeXml.resize();
+    }
 }
 
 
@@ -395,18 +399,6 @@ var prettyCode = function (raw_code) {
             });
 
     return (raw_code);
-};
-
-
-/**
- * Toggle the find-replace display style between 'block' and 'none'
- */
-var findReplaceCode = function () {
-    if (document.getElementById('find-replace').style.display === 'none') {
-        document.getElementById('find-replace').style.display = 'block';
-    } else {
-        document.getElementById('find-replace').style.display = 'none';
-    }
 };
 
 
@@ -471,30 +463,6 @@ function init(blockly) {
         // if the project is a propc code-only project, enable code editing.
         if (projectData['board'] === 'propcfile') {
             codePropC.setReadOnly(false);
-            codePropC.commands.addCommand({
-                name: "undo",
-                bindKey: {win: "Ctrl-z", mac: "Command-z"},
-                exec: function (codePropC) {
-                    codePropC.undo();
-                },
-                readOnly: true
-            });
-            codePropC.commands.addCommand({
-                name: "redo",
-                bindKey: {win: "Ctrl-y", mac: "Command-y"},
-                exec: function (codePropC) {
-                    codePropC.redo();
-                },
-                readOnly: true
-            });
-            codePropC.commands.addCommand({
-                name: "find_replace",
-                bindKey: {win: "Ctrl-f", mac: "Command-f"},
-                exec: function () {
-                    findReplaceCode();
-                },
-                readOnly: true
-            });
             renderContent('tab_propc');
         }
     }
@@ -552,11 +520,12 @@ function cloudCompile(text, action, successHandler) {
     let isEmptyProject = propcCode.indexOf("EMPTY_PROJECT") > -1;
 
     if (isEmptyProject) {
-        alert("You can't compile an empty project");
+        utils.showMessage('Alert','You can\'t compile an empty project');
+
     } else {
         $("#compile-dialog-title").text(text);
         $("#compile-console").val('Compile... ');
-        $('#compile-dialog').modal('show');
+        $('#compile-dialog').modal();
 
         let terminalNeeded = false;
 
@@ -566,112 +535,82 @@ function cloudCompile(text, action, successHandler) {
             terminalNeeded = 'graph';
 
         // OFFLINE MODE
-        if (isOffline) {
-            if (docker) {
-                // Contact the local docker container running cloud compiler
+        if (isOffline && docker) {
+            // Contact the local docker container running cloud compiler
+            // Compute the url based on where we are now
+            postUrl = window.location.protocol + '//' + window.location.hostname + ':5001/single/prop-c/' + action;
 
-                // baseUrl = /blockly/
-                // action = 'compile'
-                // idProject = an integer project number
-                // data = {'code: propCode}
-                //propCode = "// ------ Libraries and Definitions ------↵#include "simpletools.h"↵↵↵↵// ------ Main Program ------↵int main() {↵↵  //↵↵}"
+            $.ajax({
+                'method': 'POST',
+                'url':  postUrl,
+                'data': {"code": propcCode}
+            }).done(function (data) {
+                console.log(data);
+                displayCompilerResults(action, (data.error && data.error !== "" ? false : true), data, successHandler);
+            }).fail(function (data) {
+                console.log(data);
+                displayCompilerResults(action, false, data, successHandler);
+            });    
+        } else if (isOffline) {  // Use the webpack version
+            /*
+                * Compiler optimization options:
+                *
+                *  -O0 (None)
+                *  -O1 (Mixed)
+                *  -O2 (Speed)
+                *  -Os (Size)
+                */
 
-                // Compute the url based on where we are now
-                postUrl = window.location.protocol + '//' + window.location.hostname + ':5001/single/prop-c/' + action;
-
-                $.ajax({
-                    'method': 'POST',
-                    'url':  postUrl,
-                    'data': {"code": propcCode}
-                }).done(function (data) {
-                    console.log(data);
-
-                    // Check for an error response from the compiler
-                    if (! data || data["compiler-error"] != "") {
-                        // Get message as a string, or blank if undefined
-                        let message =  (typeof data["compiler-error"] === "string") ? data["compiler-error"] : "";
-                        // Display the result in the compile console modal <div>
-                        $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
-                   } else {
-                        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
-
-                        $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
-                        if (data.success) {
-                            successHandler(data, terminalNeeded);
-                        }
-
-                        // Scoll automatically to the bottom after new data is added
-                        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
-                    }
-                }).fail(function (data) {
-                    // Data appears to be an HTTP response object
-                    if (data) {
-                        let message = "Aw snap. A server error " + data.status + " has been detected.";
-                        $("#compile-console").val($("#compile-console").val() +  message);
-                    }
-                });
-            }
-            else {  // Use the webpack version
-                /*
-                 * Compiler optimization options:
-                 *
-                 *  -O0 (None)
-                 *  -O1 (Mixed)
-                 *  -O2 (Speed)
-                 *  -Os (Size)
-                 */
-
-                localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
-                    if (data.error) {
-                        console.log(data);
-                        // Get message as a string, or blank if undefined
-                        alert("BlocklyProp was unable to compile your project:\n" + data['message']
-                            + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
-                    } else {
-                        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
-                        $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
-                        console.log(data);
-
-                        // The success handler will transfer the binary data to the BP client
-                        if (data.success && data.binary) {
-                            successHandler(data, terminalNeeded);
-                        }
-
-                        // Scoll automatically to the bottom after new data is added
-                        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
-                    }
-                });
-            }
-        }
-        else {  // ONLINE MODE
+            localCompile(action, {'single.c': propcCode}, 'single.c', '-Os', '-Os', function(data) {
+                displayCompilerResults(action, (data.error && data.error !== "" ? false : true), data, successHandler);
+            });
+        } else {  // ONLINE MODE
             $.ajax({
                 'method': 'POST',
                 'url': baseUrl + 'rest/compile/c/' + action + '?id=' + idProject,
                 'data': {"code": propcCode}
             }).done(function (data) {
-                if (data.error || typeof data.error === "undefined") {
-                    // console.log(data);
-                    // Get message as a string, or blank if undefined
-                    var message = (typeof data['message'] === "string") ? data['message'] : (typeof data.error !== "undefined") ? data['message'].toString() : "";
-                    alert("BlocklyProp was unable to compile your project:\n" + message
-                            + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
-                } else {
-                    var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
-                    $("#compile-console").val($("#compile-console").val() + data['compiler-output'] + data['compiler-error'] + loadWaitMsg);
-                    if (data.success) {
-                        successHandler(data, terminalNeeded);
-                    }
-
-                    // Scoll automatically to the bottom after new data is added
-                    document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
-                }
+                console.log(data);
+                displayCompilerResults(action, (data.error && data.error !== "" ? false : true), data, successHandler);
             }).fail(function (data) {
-                // console.log(data);
-                var message = (typeof data === "string") ? data : data.toString();
-                alert("BlocklyProp was unable to compile your project:\n----------\n" + message
-                        + "\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac)");
+                console.log(data);
+                displayCompilerResults(action, false, data, successHandler);
             });
         }
+    }
+}
+
+/**
+ * Show the results from the compiler
+ * @param action
+ * @param success
+ * @param data
+ * @param successHandler
+ */
+function displayCompilerResults(action, success, data, successHandler) {
+    if (success) {
+        var loadWaitMsg = (action !== 'compile') ? '\nDownload...' : '';
+        $("#compile-console").val($("#compile-console").val() + data['message'] + loadWaitMsg);
+
+        // The success handler will transfer the binary data to the BP client
+        if (data.success && data.binary) {
+            successHandler(data, terminalNeeded);
+        }
+
+        // Scoll automatically to the bottom after new data is added
+        document.getElementById("compile-console").scrollTop = document.getElementById("compile-console").scrollHeight;
+    } else {
+        // Get message as a string, or blank if undefined
+        var message = "";
+        if (typeof data.error === "string") {
+            message = data.error;
+        } else {
+            (typeof data['message'] === "string") ? data['message'] : (typeof data.error !== "undefined") ? data['message'].toString() : "";
+        }
+        $("#compile-console").val($("#compile-console").val() + 
+                ("\n\nBlocklyProp was unable to compile your project:\n" + message +
+                "\n\nIt may help to \"Force Refresh\" by pressing Control-Shift-R " + 
+                "(Windows/Linux) or Shift-Command-R (Mac)"));
     }
 }
 
@@ -782,10 +721,9 @@ function loadInto(modal_message, compile_command, load_option, load_action) {
             }
         });
     } else if (client_available) {
-        alert("No device detected - ensure it is connected, powered, and selected in the ports list.\n\nMake sure your BlocklyPropClient is up-to-date.");
+        utils.showMessage("No device detected", " - Make sure the device is connected, powered, and selected in the ports list.<br> - Make sure your BlocklyPropClient is up-to-date.");
     } else {
-        alert("BlocklyPropClient not available to communicate with a microcontroller."
-                + "\n\nIt may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac).");
+        utils.showMessage("BlocklyProp-client is not available.", "It may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac).");
     }
 }
 
@@ -845,7 +783,7 @@ function serial_console() {
                 updateTermBox(0);
             }
 
-            $('#console-dialog').on('hidden.bs.modal', function () {
+            $('#console-dialog').on($.modal.CLOSE, function () {
                 active_connection = null;
                 connString = '';
                 connStrYet = false;
@@ -865,7 +803,7 @@ function serial_console() {
                 displayInTerm("Connection established with: " + getComPort() + "\n");
             }
 
-            $('#console-dialog').on('hidden.bs.modal', function () {
+            $('#console-dialog').on($.modal.CLOSE, function () {
                 term_been_scrolled = false;
                 active_connection = null;
                 updateTermBox(0);
@@ -895,7 +833,7 @@ function serial_console() {
         }
         client_ws_connection.send(JSON.stringify(msg_to_send));
 
-        $('#console-dialog').on('hidden.bs.modal', function () {
+        $('#console-dialog').on($.modal.CLOSE, function () {
             if (msg_to_send.action !== 'close') { // because this is getting called multiple times...?
                 msg_to_send.action = 'close';
                 if (document.getElementById('serial-conn-info')) {
@@ -909,7 +847,7 @@ function serial_console() {
         });
     }
 
-    $('#console-dialog').modal('show');
+    $('#console-dialog').modal();
 }
 
 
@@ -950,11 +888,11 @@ function graphing_console() {
                 onlyInteger: true
             };
         }
-        $('#graph_x-axis_label').css('display', 'block');
+        $('#graph_x-axis_label').removeClass('hidden');
         graph_options.showPoint = false;
         graph_options.showLine = true;
         if (graph_settings_str[2] === 'X') {
-            $('#graph_x-axis_label').css('display', 'none');
+            $('#graph_x-axis_label').addClass('hidden');
             if (Number(graph_settings_str[5]) !== 0 || Number(graph_settings_str[6]) !== 0) {
                 graph_options.axisX = {
                     type: Chartist.AutoScaleAxis,
@@ -1024,7 +962,7 @@ function graphing_console() {
                 }
             };
 
-            $('#graphing-dialog').on('hidden.bs.modal', function () {
+            $('#graphing-dialog').on($.modal.CLOSE, function () {
                 connection.close();
                 graphStartStop('stop');
                 connString = '';
@@ -1053,7 +991,7 @@ function graphing_console() {
                 graphStartStop('start');
             }
 
-            $('#graphing-dialog').on('hidden.bs.modal', function () {
+            $('#graphing-dialog').on($.modal.CLOSE, function () {
                 graphStartStop('stop');
                 if (msg_to_send.action !== 'close') { // because this is getting called multiple times.... ?
                     msg_to_send.action = 'close';
@@ -1068,12 +1006,12 @@ function graphing_console() {
             // create simulated graph?
         }
 
-        $('#graphing-dialog').modal('show');
+        $('#graphing-dialog').modal();
         if (document.getElementById('btn-graph-play')) {
             document.getElementById('btn-graph-play').innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="15"><path d="M5.5,2 L4,2 4,11 5.5,11 Z M8.5,2 L10,2 10,11 8.5,11 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>';
         }
     } else {
-        alert('To use the graphing feature, your program must have both a graph initialize block and a graph value block.');
+        utils.showMessage('Missing blocks', 'To use the graphing feature, your program must have both a graph initialize block and a graph value block.');
     }
 }
 
@@ -1153,7 +1091,7 @@ var select_com_port = function (com_port) {
     if (com_port !== null) {
         $("#comPort").val(com_port);
     }
-    if ($("#comPort").val() === null && $('#comPort option').size() > 0) {
+    if ($("#comPort").val() === null && $('#comPort option').length > 0) {
         $("#comPort").val($('#comPort option:first').text());
     }
 };
@@ -1185,43 +1123,35 @@ function downloadPropC() {
     var propcCode = Blockly.propc.workspaceToCode(Blockly.mainWorkspace);
     var isEmptyProject = propcCode.indexOf("EMPTY_PROJECT") > -1;
     if (isEmptyProject) {
-        alert("You can't download an empty project");
+        utils.showMessage("Oops!", "You can't download an empty project");
     } else {
-        utils.confirm('Downloading a SimpleIDE project', 'To open your project in SimpleIDE, two files will be downloaded.  They must both be saved in the same folder on your computer.', function (confirmed) {
-            if (confirmed) {
-                utils.prompt("Enter a filename:", 'Project' + idProject, function (value) {
-                    if (value) {
+        utils.prompt(
+            'Downloading a SimpleIDE project', 
+            'To open your project in SimpleIDE, two files will be downloaded.  They must both be saved in the same folder on your computer.<br>Filename: ',
+            'Project' + idProject, 
+            function (value) {
+                if (value) {
+                    var sideFileContent = ".c\n>compiler=C\n>memtype=cmm main ram compact\n";
+                    sideFileContent += ">optimize=-Os\n>-m32bit-doubles\n>-fno-exceptions\n>defs::-std=c99\n";
+                    sideFileContent += ">-lm\n>BOARD::ACTIVITYBOARD";
+                    
+                    // Check for any file extentions at the end of the submitted name, and truncate if any
+                    if (value.indexOf(".") !== -1)
+                        value = value.substring(0, value.indexOf("."));
+                    // Check to make sure the filename is not too long
+                    if (value.length >= 30)
+                        value = value.substring(0, 29);
+                    // Replace any illegal characters
+                    value = value.replace(/[\\/:*?\"<>|]/g, '_');
 
-                        var sideFileContent = ".c\n>compiler=C\n>memtype=cmm main ram compact\n";
-                        sideFileContent += ">optimize=-Os\n>-m32bit-doubles\n>-fno-exceptions\n>defs::-std=c99\n";
-                        sideFileContent += ">-lm\n>BOARD::ACTIVITYBOARD";
-                        var saveData = (function () {
-                            var a = document.createElement("a");
-                            document.body.appendChild(a);
-                            a.style = "display: none";
-                            return function (data, fileName) {
-                                var blob = new Blob([data], {type: "octet/stream"});
-                                var url = window.URL.createObjectURL(blob);
-                                a.href = url;
-                                a.download = fileName;
-                                a.click();
-                                window.URL.revokeObjectURL(url);
-                            };
-                        }());
-                        // Check for any file extentions at the end of the submitted name, and truncate if any
-                        if (value.indexOf(".") !== -1)
-                            value = value.substring(0, value.indexOf("."));
-                        // Check to make sure the filename is not too long
-                        if (value.length >= 30)
-                            value = value.substring(0, 29);
-                        // Replace any illegal characters
-                        value = value.replace(/[\\/:*?\"<>|]/g, '_');
-                        saveData(propcCode, value + ".c");
-                        saveData(value + sideFileContent, value + ".side");
-                    }
-                });
+                    var blob = new Blob([propcCode], {type: "text/plain;charset=utf-8"});
+                    saveAs(blob, value + ".c");
+
+                    var blob2 = new Blob([value + sideFileContent], {type: "text/plain;charset=utf-8"});
+                    saveAs(blob2, value + ".side");
+                }
             }
-        });
+        );
     }
 }
 
@@ -1369,23 +1299,9 @@ function graph_play(setTo) {
  * Save a graph to the local file system
  */
 function downloadGraph() {
-    utils.prompt("Download Graph Output - Filename:", 'Graph' + idProject, function (value) {
+    utils.prompt("Download Graph Output", "Filename:", 'Graph' + idProject, function (value) {
         if (value) {
-
             // put all of the pieces together into a downloadable file
-            var saveData = (function () {
-                var a = document.createElement("a");
-                document.body.appendChild(a);
-                a.style = "display: none";
-                return function (data, fileName) {
-                    var blob = new Blob([data], {type: "octet/stream"});
-                    var url = window.URL.createObjectURL(blob);
-                    a.href = url;
-                    a.download = fileName;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                };
-            }());
 
             // TODO: The chartStyle contains 16 CSS errors. These need to be addressed.
             var svgGraph = document.getElementById('serial_graphing'),
@@ -1411,7 +1327,9 @@ function downloadGraph() {
             svgxml = svgxml.replace(regY, 'y="' + (theY + 12) + '"');
             var breakpoint = svgxml.indexOf('>') + 1;
             svgxml = svgxml.substring(0, breakpoint) + chartStyle + svgxml.substring(breakpoint, svgxml.length);
-            saveData(svgxml, value + '.svg');
+
+            var blob = new Blob([svgxml], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, value + ".svg");
         }
     });
 }
@@ -1421,27 +1339,16 @@ function downloadGraph() {
  * Download the graph as a csv file to the local file system
  */
 function downloadCSV() {
-    utils.prompt("Download Graph data as CSV - Filename:", 'graph_data' + idProject, function (value) {
+    utils.prompt("Download Graph data as CSV", "Filename:", 'graph_data' + idProject, function (value) {
         if (value) {
-
             // put all of the pieces together into a downloadable file
-            var saveData = (function () {
-                var a = document.createElement("a");
-                document.body.appendChild(a);
-                a.style = "display: none";
-                return function (data, fileName) {
-                    var blob = new Blob([data], {type: "octet/stream"});
-                    var url = window.URL.createObjectURL(blob);
-                    a.href = url;
-                    a.download = fileName;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                };
-            }());
             var graph_csv_temp = graph_csv_data.join('\n');
             var idx1 = graph_csv_temp.indexOf('\n') + 1;
             var idx2 = graph_csv_temp.indexOf('\n', idx1 + 1);
-            saveData(graph_csv_temp.substring(0, idx1) + graph_csv_temp.substring(idx2 + 1, graph_csv_temp.length - 1), value + '.csv');
+            var svgxml = graph_csv_temp.substring(0, idx1) + graph_csv_temp.substring(idx2 + 1, graph_csv_temp.length - 1)
+
+            var blob = new Blob([svgxml], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, value + ".svg");
         }
     });
 }

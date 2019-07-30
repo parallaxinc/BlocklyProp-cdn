@@ -117,13 +117,14 @@ bpIcons = {
     magicWandWhite:      '<svg width="14" height="15"><path d="M1,10 L5,10 5,11 1,11 Z M2,12 L6,12 6,13 2,13 Z M1,14 5,14 5,15 1,15 Z M0.5,2.75 L2.5,0.6 5.5,3.5 3.5,5.5 Z M5,7 L7,4.75 14,12 12,14 Z M0,7 Q1.5,6.5 2,5 Q2.5,6.5 4,7 Q2.5,7.5 2,9 Q1.5,7.5 0,7 Z M7,3 Q9.5,2.5 10,0 Q10.5,2.5 13,3 Q10.5,3.5 10,6 Q9.5,3.5 7,3 Z" style="stroke-width:0;fill:#fff;"/></svg>',
     undoWhite:           '<svg width="15" height="15"><path d="M3.5,6.5 L2.25,4.5 0.75,10.25 6,10.5 5,8.5 Q8.5,5.5 12,7 Q8,3.5 3.5,6.5 Z M11,11 L14.5,11 Q12.5,6 7,8.25 Q11,8 11,11 Z" style="stroke-width:0;fill:#fff;"/></svg>',
     redoWhite:           '<svg width="15" height="15"><path d="M11.5,6.5 L12.75,4.5 14.25,10.25 9,10.5 10,8.5 Q6.5,5.5 3,7 Q7,3.5 11.5,6.5 Z M4,11 L0.5,11 Q2.5,6 8,8.25 Q4,8 4,11 Z" style="stroke-width:0;fill:#fff;"/></svg>',
-    eyeBlack:            '<svg width="14" height="15" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#000;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#000;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#000;stroke-width:1.5;fill:#000;"></circle></svg>',
-    eyeWhite:            '<svg width="14" height="15" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#fff;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#fff;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#fff;stroke-width:1.5;fill:#fff;"></circle></svg>',
+    eyeBlack:            '<svg width="14" height="14" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#000;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#000;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#000;stroke-width:1.5;fill:#000;"></circle></svg>',
+    eyeWhite:            '<svg width="14" height="14" style="vertical-align: middle;"><path d="M0.5,7 C4,1.5 10,1.5 13.5,7 C10,12.5 4,12.5 0.5,7 M0.5,7 C4,3.5 10,3.5 13.5,7" style="stroke:#fff;stroke-width:1.5;fill:none;"/><circle cx="7" cy="6.5" r="2.75" style="stroke:#fff;stroke-width:1.5;fill:none;"></circle><circle cx="7" cy="6.5" r=".5" style="stroke:#fff;stroke-width:1.5;fill:#fff;"></circle></svg>',
     playWhite:           '<svg width="14" height="15"><path d="M4,3 L4,11 10,7 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
     pauseWhite:          '<svg width="14" height="15"><path d="M5.5,2 L4,2 4,11 5.5,11 Z M8.5,2 L10,2 10,11 8.5,11 Z" style="stroke:#fff;stroke-width:1;fill:#fff;"/></svg>',
     fileWhite:           '<svg width="14" height="15"><path d="M2,.5 L2,13.5 12,13.5 12,7.5 5.5,7.5 5.5,.5 Z M 8,1.5 L8,5 11,5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
     eraserWhite:         '<svg width="15" height="15"><path d="M2,12 A1.5,1.5 0 0 1 2,10 L10,2 14.5,6.5 7,14 M10,11 L5.5,6.5 M15,14 L4,14 2,12 M15,13.2 5,13.2" style="stroke:#fff;stroke-width:1;fill:none;"/><path d="M2,12 A1.5,1.5 0 0 1 2,10 L5.5,6.5 10,11 7,14 4,14 Z" style="stroke-width:0;fill:#fff;"/></svg>',
     cameraWhite:         '<svg width="14" height="15"><path d="M1.5,13.5 L.5,12.5 .5,5.5 1.5,4.5 2.5,4.5 4,3 7,3 8.5,4.5 12.5,4.5 13.5,5.5 13.5,12.5 12.5,13.5 Z M 2,9 A 4,4,0,0,0,10,9 A 4,4,0,0,0,2,9 Z M 4.5,9 A 1.5,1.5,0,0,0,7.5,9 A 1.5,1.5,0,0,0,4.5,9 Z M 10.5,6.5 A 1,1,0,0,0,13.5,6.5 A 1,1,0,0,0,10.5,6.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
+    caretBlack:          '<svg width="8"  height="4" ><path d="M0,0 8,0 4,4 z" style="fill:rgb(51, 51, 51);stroke=:none;"/></svg>',
 }
 
 /**
@@ -203,7 +204,9 @@ $(document).ready(function () {
     $('#prop-btn-eeprom').on('click',       function () {  loadInto('Load into EEPROM', 'eeprom', 'CODE', 'EEPROM');  });
     $('#prop-btn-term').on('click',         function () {  serial_console();  });
     $('#prop-btn-graph').on('click',        function () {  graphing_console();  });
-    $('#prop-btn-find-replace').on('click', function () {  findReplaceCode();  });
+    $('#prop-btn-find-replace').on('click', function () {  
+        // TODO: toggle Ace editor's find-replace thingy.
+    });
     $('#prop-btn-pretty').on('click',       function () {  formatWizard();  });
     $('#prop-btn-undo').on('click',         function () {  codePropC.undo();  });
     $('#prop-btn-redo').on('click',         function () {  codePropC.redo();  });
@@ -216,21 +219,19 @@ $(document).ready(function () {
     $('#client-setup').on('click',          function () {  configure_client();  });
     $('#propc-find-btn').on('click',        function () {  codePropC.find(document.getElementById('propc-find').value, {}, true);  });
     $('#propc-replace-btn').on('click',     function () {  codePropC.replace(document.getElementById('propc-replace').value, {needle: document.getElementById('propc-find').value}, true);  });
-    $('#find-replace-close').on('click',    function () {  findReplaceCode();  });
     $('#upload-close').on('click',          function () {  clearUploadInfo();  });
-    //$('#selectfile').on('change', {fileValue: this.files}, function (e) {  console.log(e.data.fileValue); uploadHandler(e.data.fileValue);  });
+    $('#selectfile').on('change',           function () {  uploadHandler($('#selectfile')[0].files);  });
     $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false);  });
     $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
-    $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
-    $('#save-btn').on('click',              function () {  saveProject();  });
-    $('#new-project-menu-item').on('click', function () {  clearNewProjectModal(); showNewProjectModal('open'); });// window.location = 'blocklyc.html?newProject=true'  });
+    $('#new-project-menu-item').on('click', function () {  clearNewProjectModal(); showNewProjectModal('open');  });
     $('#btn-graph-play').on('click',        function () {  graph_play();  });
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
     $('#btn-graph-csv').on('click',         function () {  downloadCSV();  });
     $('#btn-graph-clear').on('click',       function () {  graphStartStop('clear');  });
     $('#save-as-board-type').on('change',   function () {  checkBoardType($('#saveAsDialogSender').html());  });
     $('#save-as-board-btn').on('click',     function () {  saveProjectAs();  });
+    $('.open-client-modal').on('click',     function () {  $('#client-download-modal').modal()  });
     for (var k = 1; k < 4; k++) {
         $('#mac' + k + '-btn').on('click',  function () {  showStep('mac', k, 4);  });
         $('#win' + k + '-btn').on('click',  function () {  showStep('win', k, 3);  });
@@ -250,29 +251,58 @@ $(document).ready(function () {
         }
     });
 
+    $('#options-menu').on('click', function () {  
+        $target = $(this).next('.dropdown-menu');
+        if ($target.hasClass('open')) {
+            $target.removeClass('open');
+        } else {
+            $target.addClass('open');
+        }
+    });
+
+    $(document).on('click', function (event) { 
+        if(!$(event.target).closest('.dropdown-menu').length && !$(event.target).closest('.dropdown-toggle').length && $('.dropdown-menu').hasClass('open')) {
+            $('.dropdown-menu').removeClass('open');
+        }        
+    });
+
+    $(document).on('click.modal', 'button[rel~="modal:close"]', $.modal.close);
+
     $('#save-project-as').on('click',      function () {  saveAsDialog();  });
     $('#download-project').on('click',     function () {  downloadCode();  });
     $('#upload-project').on('click',       function () {  uploadCode();    });
-    $('#save-check-dialog').on('hidden.bs.modal', function () {  timestampSaveTime(5, false);  });
+    $('#save-check-dialog').on($.modal.CLOSE, function () {  timestampSaveTime(5, false);  });
 
     $("#selectfile").focus(function () {
-        $('#selectfile-verify-notvalid').css('display', 'none');
-        $('#selectfile-verify-valid').css('display', 'none');
-        $('#selectfile-verify-boardtype').css('display', 'none');
+        $('#selectfile-verify-notvalid').addClass('hidden');
+        $('#selectfile-verify-valid').addClass('hidden');
+        $('#selectfile-verify-boardtype').addClass('hidden');
     });
 
     // set the upload modal's title to "import" if offline
     if (isOffline) {
          $('#upload-dialog-title').html(page_text_label['editor_import']);
          $('#upload-project span').html(page_text_label['editor_import']);
+         $('.auth-true').removeClass('hidden');
+         $('.auth-false').addClass('hidden');
+         $('.online-only').addClass('hidden');
+         $('.offline-only').removeClass('hidden');
+    } else {
+        if (user_authenticated) {
+            $('.auth-true').removeClass('hidden');
+            $('.auth-false').addClass('hidden');
+        } else {
+            $('.auth-false').removeClass('hidden');
+            $('.auth-true').addClass('hidden');
+        }
     }
-
+    
     // disable to upload dialog buttons until a valid file is uploaded
     document.getElementById("selectfile-replace").disabled = true;
     document.getElementById("selectfile-append").disabled = true;
 
     // Reset the upload/import modal to its default state when closed
-    $('#upload-dialog').on('hidden.bs.modal', function () {
+    $('#upload-dialog').on($.modal.CLOSE, function () {
         // reset the title of the modal
         if (isOffline) {
             $('upload-dialog-title').html(page_text_label['editor_import']);
@@ -289,14 +319,6 @@ $(document).ready(function () {
         // reset the blockly toolbox sizing to ensure it renders correctly:
         resetToolBoxSizing(100);
     });
-
-    if (user_authenticated) {
-        $('.auth-true').css('display', $(this).attr('data-displayas'));
-        $('.auth-false').css('display', 'none');
-    } else {
-        $('.auth-false').css('display', $(this).attr('data-displayas'));
-        $('.auth-true').css('display', 'none');
-    }
 
     $('.url-prefix').attr('href', function (idx, cur) {
         return baseUrl + cur;
@@ -339,14 +361,9 @@ $(document).ready(function () {
         // Stop pinging
         clearInterval(pingInterval);
 
-        // hide save interaction elements
-        $('.online-only').addClass('hidden');
-	    $('.offline-only').removeClass('hidden');
-
         $("#save_as_dialog_title_text").html('Choose a project name and board type');
         $("#save_as_dialog_button").html('Continue');
         $(".save-as-close").addClass('hidden');
-
 
         $('#save-as-project-name').val('MyProject');
         $("#saveAsDialogSender").html('offline');
@@ -367,7 +384,7 @@ $(document).ready(function () {
             $('#selectfile-replace').html(page_text_label['editor_button_open']);
 
             // Import a project .SVG file
-            $('#upload-dialog').modal('show');
+            $('#upload-dialog').modal();
 
         } else if (window.localStorage.getItem('localProject')) {
             // Look for a default project in the local browser store
@@ -376,7 +393,7 @@ $(document).ready(function () {
         } else {
             // TODO: why is this here?
             // Open save-as modal
-            $('#save-as-type-dialog').modal('show');
+            $('#save-as-type-dialog').modal();
         }
 
     } else {
@@ -417,7 +434,7 @@ $(document).ready(function () {
                 // simplemde.toTextArea();
                 // simplemde = null;
                 
-                $('#new-project-dialog').modal('hide');
+                $.modal.close();
 
             } else {
                 // otherwise, return to the splash page
@@ -461,7 +478,11 @@ var showNewProjectModal = function(openModal) {
 
     // If the editor is passed the 'newProject' parameter, open the modal
     if (getURLParameter('newProject') || openModal === 'open') {
-        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
+        $('#new-project-dialog').modal({
+            escapeClose: false,
+            clickClose: false,
+            showClose: false
+        });
         var projectTimestamp = new Date();
         $('#edit-project-created-date').html(projectTimestamp);
         $('#edit-project-last-modified').html(projectTimestamp);
@@ -548,7 +569,7 @@ function resetToolBoxSizing(d) {
                 blocklyDiv[i].style.height = navHeight + 'px';
             }
 
-            if (Blockly.mainWorkspace) {
+            if (Blockly.mainWorkspace && blocklyDiv[0].style.display !== 'none') {
                 Blockly.svgResize(Blockly.mainWorkspace);
             }
         }, d);
@@ -566,10 +587,10 @@ function resetToolBoxSizing(d) {
             blocklyDiv[i].style.height = navHeight + 'px';
         }
 
-        if (Blockly.mainWorkspace) {
+        if (Blockly.mainWorkspace && blocklyDiv[0].style.display !== 'none') {
             Blockly.svgResize(Blockly.mainWorkspace);
         }
-}
+    }
 }
 
 /**
@@ -662,7 +683,6 @@ var checkLastSavedTime = function () {
     var d_now = new Date();
     var t_now = d_now.getTime();
     var s_save = Math.round((d_now.getTime() - last_saved_time) / 60000);
-    $('#save-check-warning-time').html(s_save.toString(10));
 
     //if (s_save > 58) {
     // TODO: It's been to long - autosave, then close/set URL back to login page.
@@ -670,8 +690,16 @@ var checkLastSavedTime = function () {
 
     if (t_now > last_saved_timestamp && checkLeave() && user_authenticated) {
         // It's time to pop up a modal to remind the user to save.
-        $('#save-check-dialog').modal('show');
-    }
+        utils.confirm(
+                page_text_label['editor_save-check'], 
+                page_text_label['editor_save-check_warning'], 
+                function(user_choice) {
+                    if (user_choice) saveProject();
+                }, 
+                page_text_label['project_savelink'], 
+                page_text_label['editor_button_close'])
+        }
+    $('#save-check-warning-time').html(s_save.toString(10));
 };
 
 
@@ -704,7 +732,7 @@ var showInfo = function (data) {
     };
 
     // Set the prject icon to the correct board type
-    $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
+    $(".project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
 };
 
 
@@ -787,7 +815,7 @@ var saveAsDialog = function () {
     if (inDemo !== 'demo') {     // if (1 === 1) {
 
         // Old function - still in use because save-as+board type is not approved for use.
-        utils.prompt("Save project as", projectData['name'], function (value) {
+        utils.prompt("Save project as", "Filename:", projectData['name'], function (value) {
             if (value) {
                 var code = getXml();
                 projectData['code'] = code;
@@ -831,7 +859,7 @@ var saveAsDialog = function () {
         }
 
         // Open modal
-        $('#save-as-type-dialog').modal('show');
+        $('#save-as-type-dialog').modal()
     }
 };
 
@@ -846,9 +874,9 @@ var checkBoardType = function (requestor) {
         var save_as_type = $('#save-as-board-type').val();
         // save-as-verify-boardtype
         if (current_type === save_as_type || save_as_type === 'propcfile') {
-            document.getElementById('save-as-verify-boardtype').style.display = 'none';
+            $('#save-as-verify-boardtype').removeClass('hidden');
         } else {
-            document.getElementById('save-as-verify-boardtype').style.display = 'block';
+            $('#save-as-verify-boardtype').addClass('hidden');
         }
     }
 };
@@ -947,7 +975,11 @@ var editProjectDetails = function () {
         $('#open-modal-sender').html('open');
 
         // show the modal
-        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
+        $('#new-project-dialog').modal({
+            escapeClose: false,
+            clickClose: false,
+            showClose: false
+        })
 
     } else {
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
@@ -1083,7 +1115,7 @@ function downloadCode() {
         project_filename = projectData['name'].replace(/[^a-z0-9]/gi, '_').toLowerCase();
     }
 
-    utils.prompt(Blockly.Msg.DIALOG_DOWNLOAD, project_filename, function (value) {
+    utils.prompt(Blockly.Msg.DIALOG_DOWNLOAD, "Filename: ", project_filename, function (value) {
         if (value) {
             // get the paths of the blocks themselves and the size/position of the blocks
             var projSVG = document.getElementsByClassName('blocklyBlockCanvas');
@@ -1093,42 +1125,6 @@ function downloadCode() {
             var projW = (parseInt(projSize.width) + parseInt(projSize.left) + 236).toString();
 
             // put all of the pieces together into a downloadable file
-            var saveData = (function () {
-                // TODO: WIP - swapping out download for node.js/nwsaveas dialog option
-                //if (!isOffline) {
-                    var a = document.createElement("a");
-                    document.body.appendChild(a);
-                    a.style = "display: none";
-                    return function (data, fileName) {
-                        var blob = new Blob([data], {type: "octet/stream"});
-                        var url = window.URL.createObjectURL(blob);
-                        a.href = url;
-                        a.download = fileName;
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                    };
-                //} else {
-                    /*
-                    var a = document.createElement("input");
-                    a.type = "file";
-                    a.name = "member" + i;
-
-                    document.body.appendChild(a);
-                    a.style = "display: none";
-                    return function (data, fileName) {
-                        var att = document.createAttribute("nwsaveas");
-                        att.value = fileName;
-                        a.setAttributeNode(att);
-                        a.addEventListener("change", function() {
-                            var filePath = this.value;
-                            console.log("Saving to: " + filePath);
-                            localSaveAs(filePath, data);
-                        });
-                        a.click();
-                    };
-                    */ 
-                //}
-            }());
 
             // a header with the necessary svg XML header and style information to make the blocks render correctly
             // TODO: make SVG valid.
@@ -1164,20 +1160,24 @@ function downloadCode() {
             SVGfooter += '<text class="bkginfo" x="100%" y="100%" transform="translate(-225,13)" data-createdon="' + projectData['created'] + '" data-lastmodified="' + dt + '"></text>';
 
             // Check for any file extentions at the end of the submitted name, and truncate if any
-            if (value.indexOf(".") !== -1)
+            if (value.indexOf(".") !== -1) {
                 value = value.substring(0, value.indexOf("."));
+            }
             // Check to make sure the filename is not too long
-            if (value.length >= 30)
+            if (value.length >= 30) {
                 value = value.substring(0, 29);
+            }
             // Replace any illegal characters
             value = value.replace(/[\\/:*?\"<>|]/g, '_');
 
             var xmlChecksum = hashCode(projXMLcode).toString();
-
             var xmlChecksum = '000000000000'.substring(xmlChecksum.length, 12) + xmlChecksum;
 
             // Assemble both the SVG (image) of the blocks and the blocks' XML definition
-            saveData(SVGheader + projSVGcode + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>', value + '.svg');
+            var svgxml = SVGheader + projSVGcode + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>';
+
+            var blob = new Blob([svgxml], {type: "text/plain;charset=utf-8"});
+            saveAs(blob, value + ".svg");
         }
     });
 }
@@ -1190,7 +1190,7 @@ function uploadCode() {
     if (checkLeave() && !isOffline) {
         utils.showMessage(Blockly.Msg.DIALOG_UNSAVED_PROJECT, Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
     } else {
-        $('#upload-dialog').modal('show');
+        $('#upload-dialog').modal();
     }
 }
 
@@ -1232,9 +1232,9 @@ function uploadHandler(files) {
             }
             if (xmlValid) {
                 if (projectData && uploadBoardType !== projectData['board']) {
-                    $('#selectfile-verify-boardtype').css('display', 'block');
+                    $('#selectfile-verify-boardtype').removeClass('hidden');
                 } else {
-                    $('#selectfile-verify-boardtype').css('display', 'none');
+                    $('#selectfile-verify-boardtype').addClass('hidden');
                 }
             }
             if (uploadedXML !== '') {
@@ -1288,12 +1288,12 @@ function uploadHandler(files) {
         }
 
         if (xmlValid === true) {
-            $('#selectfile-verify-valid').css('display', 'block');
+            $('#selectfile-verify-valid').removeClass('hidden');
             document.getElementById("selectfile-replace").disabled = false;
             document.getElementById("selectfile-append").disabled = false;
             uploadedXML = xmlString;
         } else {
-            $('#selectfile-verify-notvalid').css('display', 'block');
+            $('#selectfile-verify-notvalid').removeClass('hidden');
             document.getElementById("selectfile-replace").disabled = true;
             document.getElementById("selectfile-append").disabled = true;
             uploadedXML = '';
@@ -1310,9 +1310,9 @@ function clearUploadInfo() {
     // Reset all of the upload fields and containers
     uploadedXML = '';
     $('#selectfile').val('');
-    $('#selectfile-verify-notvalid').css('display', 'none');
-    $('#selectfile-verify-valid').css('display', 'none');
-    $('#selectfile-verify-boardtype').css('display', 'none');
+    $('#selectfile-verify-notvalid').addClass('hidden');
+    $('#selectfile-verify-valid').addClass('hidden');
+    $('#selectfile-verify-boardtype').addClass('hidden');
     document.getElementById("selectfile-replace").disabled = true;
     document.getElementById("selectfile-append").disabled = true;
 
@@ -1334,7 +1334,7 @@ function uploadMergeCode(append) {
         window.location = 'blocklyc.html';
     }
 
-    $('#upload-dialog').modal('hide');
+    $.modal.close();
     if (uploadedXML !== '') {
         var projCode = '';
         if (append) {
