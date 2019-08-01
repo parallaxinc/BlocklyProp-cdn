@@ -269,11 +269,12 @@ function renderContent(id) {
         $('#btn-view-propc').removeClass('hidden');
         $('#btn-view-blocks').addClass('hidden');
 
-        if ((isDebug || isOffline) && codeXml.getValue().length > 40) {
+        if ((isDebug || isOffline) && codeXml && codeXml.getValue().length > 40) {
             Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.Xml.textToDom(codeXml.getValue()), Blockly.mainWorkspace);
         } else {
             Blockly.mainWorkspace.render();
         }
+        if (resetToolBoxSizing) resetToolBoxSizing();
         break;
       case 'propc':
         $('.blocklyToolboxDiv').addClass('hidden')
@@ -313,6 +314,7 @@ function renderContent(id) {
                 let raw_c = prettyCode(blankProjectCode);
                 codePropC.setValue(raw_c);
                 codePropC.gotoLine(0);
+                codePropC.resize();
             }   
         }
         break;
@@ -331,14 +333,8 @@ function renderContent(id) {
         codeXml.setValue(Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(Blockly.mainWorkspace)));
         codeXml.getSession().setUseWrapMode(true);
         codeXml.gotoLine(0);
-
-        break;
-                                
-    }
-    if (resetToolBoxSizing) {
-        resetToolBoxSizing();
-        if (codePropC) codePropC.resize();
-        if (codeXml)   codeXml.resize();
+        codeXml.resize();
+        break;                     
     }
 }
 
@@ -546,8 +542,12 @@ function cloudCompile(text, action, successHandler) {
                 'data': {"code": propcCode}
             }).done(function (data) {
                 console.log(data);
+                data.error = data['compiler-error'];
+                data.message = data['compiler-output'];
                 displayCompilerResults(action, (data.error && data.error !== "" ? false : true), data, successHandler);
             }).fail(function (data) {
+                data.error = data['compiler-error'];
+                data.message = data['compiler-output'];
                 console.log(data);
                 displayCompilerResults(action, false, data, successHandler);
             });    
@@ -721,7 +721,7 @@ function loadInto(modal_message, compile_command, load_option, load_action) {
             }
         });
     } else if (client_available) {
-        utils.showMessage("No device detected", " - Make sure the device is connected, powered, and selected in the ports list.<br> - Make sure your BlocklyPropClient is up-to-date.");
+        utils.showMessage("No device detected", "<ul><li>Make sure the device is connected, powered, and selected in the ports list.</li><li>Make sure your BlocklyProp-Client is up-to-date.</li></ul>");
     } else {
         utils.showMessage("BlocklyProp-client is not available.", "It may help to \"Force Refresh\" by pressing Control-Shift-R (Windows/Linux) or Shift-Command-R (Mac).");
     }

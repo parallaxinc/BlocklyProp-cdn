@@ -204,9 +204,7 @@ $(document).ready(function () {
     $('#prop-btn-eeprom').on('click',       function () {  loadInto('Load into EEPROM', 'eeprom', 'CODE', 'EEPROM');  });
     $('#prop-btn-term').on('click',         function () {  serial_console();  });
     $('#prop-btn-graph').on('click',        function () {  graphing_console();  });
-    $('#prop-btn-find-replace').on('click', function () {  
-        // TODO: toggle Ace editor's find-replace thingy.
-    });
+    $('#prop-btn-find-replace').on('click', function () {  codePropC.execCommand('find')  });
     $('#prop-btn-pretty').on('click',       function () {  formatWizard();  });
     $('#prop-btn-undo').on('click',         function () {  codePropC.undo();  });
     $('#prop-btn-redo').on('click',         function () {  codePropC.redo();  });
@@ -217,8 +215,6 @@ $(document).ready(function () {
     $('#download-side').on('click',         function () {  downloadPropC();  });
     $('#term-graph-setup').on('click',      function () {  configure_term_graph();  });
     $('#client-setup').on('click',          function () {  configure_client();  });
-    $('#propc-find-btn').on('click',        function () {  codePropC.find(document.getElementById('propc-find').value, {}, true);  });
-    $('#propc-replace-btn').on('click',     function () {  codePropC.replace(document.getElementById('propc-replace').value, {needle: document.getElementById('propc-find').value}, true);  });
     $('#upload-close').on('click',          function () {  clearUploadInfo();  });
     $('#selectfile').on('change',           function () {  uploadHandler($('#selectfile')[0].files);  });
     $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false);  });
@@ -261,7 +257,10 @@ $(document).ready(function () {
     });
 
     $(document).on('click', function (event) { 
-        if(!$(event.target).closest('.dropdown-menu').length && !$(event.target).closest('.dropdown-toggle').length && $('.dropdown-menu').hasClass('open')) {
+        // Toggle the dropdown menu
+        if(!$(event.target).closest('.dropdown-menu').length && 
+                !$(event.target).closest('.dropdown-toggle').length && 
+                $('.dropdown-menu').hasClass('open')) {
             $('.dropdown-menu').removeClass('open');
         }        
     });
@@ -320,6 +319,45 @@ $(document).ready(function () {
         resetToolBoxSizing(100);
     });
 
+    // Handler for the continue button on the new/edit project modal
+    $('#new-project-continue').on('click', function () {
+        if (validateNewProjectForm()) {
+            var code = '';
+            // If editing details, preserve the code, otherwise start over
+            if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
+                if (projectData['board'] === 'propcfile') {
+                    code = propcAsBlocksXml();
+                } else {
+                    code = getXml();
+                }
+            } else {
+                code = '<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>';
+            }
+    
+            // save the form fields into the projectData object       
+            pd = {
+                'board': $('#new-project-board-type').val(),
+                'code': code,
+                'created': $('#edit-project-created-date').html(),
+                'description': $("#new-project-description").val(),        // simplemde.value(),
+                'description-html': $("#new-project-description").val(),   // simplemde.options.previewRender(simplemde.value()),
+                'id': 0,
+                'modified': $('#edit-project-created-date').html(),
+                'name': $('#new-project-name').val(),
+                'private': true,
+                'shared': false,
+                'type': "PROPC",
+                'user': "offline",
+                'yours': true,
+            }
+
+            // then load the toolbox using the projectData
+            window.localStorage.setItem('localProject', JSON.stringify(pd));
+            window.location.href = 'blocklyc.html';
+        }
+        resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary) 
+    });
+
     $('.url-prefix').attr('href', function (idx, cur) {
         return baseUrl + cur;
     });
@@ -350,7 +388,7 @@ $(document).ready(function () {
         setupWorkspace(projectlink);
 
     } else if (!idProject && !isOffline) {
-        window.location = baseUrl;
+        window.location.href = baseUrl;
 
     } else if (!idProject && isOffline) {
         // Disable the login link for the BP Client status area
@@ -405,7 +443,7 @@ $(document).ready(function () {
             .fail(function () {
             // Failed to load project - this probably means that it belongs to another user and is not shared.
             utils.showMessage('Unable to Access Project', 'The BlocklyProp Editor was unable to access the project you requested.  If you are sure the project exists, you may need to contact the project\'s owner and ask them to share their project before you will be able to view it.', function () {
-                window.location = baseUrl;
+                window.location.href = baseUrl;
             });
         });
     }
@@ -438,7 +476,7 @@ $(document).ready(function () {
 
             } else {
                 // otherwise, return to the splash page
-                window.location = 'index.html';
+                window.location.href = 'index.html';
             }
         });
 
@@ -468,13 +506,13 @@ var showNewProjectModal = function(openModal) {
     $("#new-project-board-type").empty();
 
     // populate the board type dropdown menu with a header first,
-    $("#new-project-board-type")
-            .append($('<option />')
-            .val('')
-            .text(page_text_label['project_create_board_type_select'])
-            .attr('disabled','disabled')
-            .attr('selected','selected')
-    );
+    $("#new-project-board-type").append(
+        $('<option />')
+                .val('')
+                .text(page_text_label['project_create_board_type_select'])
+                .attr('disabled','disabled')
+                .attr('selected','selected')
+        );
 
     // If the editor is passed the 'newProject' parameter, open the modal
     if (getURLParameter('newProject') || openModal === 'open') {
@@ -506,74 +544,16 @@ var showNewProjectModal = function(openModal) {
                     .text(profile[boardTypes].description));
         }
     }
-
-    // when the user clicks the 'Continue' button, validate the form
-    $('#new-project-continue').on('click', function () {
-        if (validateNewProjectForm()) {
-            var code = '';
-            // If editing details, preserve the code, otherwise start over
-            if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
-                if (projectData['board'] === 'propcfile') {
-                    code = propcAsBlocksXml();
-                } else {
-                    code = getXml();
-                }
-            } else {
-                code = '<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>';
-            }
-    
-            // save the form fields into the projectData object       
-            pd = {
-                'board': $('#new-project-board-type').val(),
-                'code': code,
-                'created': $('#edit-project-created-date').html(),
-                'description': $("#new-project-description").val(),        // simplemde.value(),
-                'description-html': $("#new-project-description").val(),   // simplemde.options.previewRender(simplemde.value()),
-                'id': 0,
-                'modified': $('#edit-project-created-date').html(),
-                'name': $('#new-project-name').val(),
-                'private': true,
-                'shared': false,
-                'type': "PROPC",
-                'user': "offline",
-                'yours': true,
-            }
-
-            // then load the toolbox using the projectData
-            window.localStorage.setItem('localProject', JSON.stringify(pd));
-            window.location = 'blocklyc.html';
-        }
-        resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary) 
-    });
 }
 
 /**
  * Reset the sizing of blockly's toolbox and canvas.  This is a workaround to ensure that it renders correctly
- * @param d milliseconds to delay the resizing, especially if used after a change in the window's location or a reload
+ * @param resizeDelay milliseconds to delay the resizing, especially if used after a change in the window's location or a reload
  */
-function resetToolBoxSizing(d) {
+function resetToolBoxSizing(resizeDelay) {
     // Vanilla Javascript is used here for speed - jQuery could probably be used, but this is faster.
-    if (d) {
-        // Force the toolbox to render correctly
-        setTimeout(function () {
-            // find the height of just the blockly workspace by subtracting the height of the navigation bar
-            let navTop = parseInt(document.getElementById('editor').offsetHeight);
-            let navHeight = parseInt(window.innerHeight) - navTop;
-            let navWidth = parseInt(window.innerWidth);
-            var blocklyDiv = [document.getElementById('content_blocks'), document.getElementById('content_propc'), document.getElementById('content_xml')];
-
-            for (var i = 0; i < 3; i++) {
-                blocklyDiv[i].style.left = '0px';
-                blocklyDiv[i].style.top = navTop + 'px';
-                blocklyDiv[i].style.width = navWidth + 'px';
-                blocklyDiv[i].style.height = navHeight + 'px';
-            }
-
-            if (Blockly.mainWorkspace && blocklyDiv[0].style.display !== 'none') {
-                Blockly.svgResize(Blockly.mainWorkspace);
-            }
-        }, d);
-    } else {
+    // Force the toolbox to render correctly
+    setTimeout(function () {
         // find the height of just the blockly workspace by subtracting the height of the navigation bar
         let navTop = parseInt(document.getElementById('editor').offsetHeight);
         let navHeight = parseInt(window.innerHeight) - navTop;
@@ -590,7 +570,7 @@ function resetToolBoxSizing(d) {
         if (Blockly.mainWorkspace && blocklyDiv[0].style.display !== 'none') {
             Blockly.svgResize(Blockly.mainWorkspace);
         }
-    }
+    }, resizeDelay || 0);
 }
 
 /**
@@ -635,8 +615,9 @@ var setupWorkspace = function (data) {
         Blockly.unbindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
         Blockly.codeOnlyKeybind = true;
 
-        // Show PropC editing UI elements
+        // Show PropC editing UI elements, hide blocks only elements
         $('.propc-only').removeClass('hidden');
+        $('.no-propc').addClass('hidden');
         
         // Create UI block content from project details
         renderContent('propc');
@@ -936,7 +917,7 @@ var saveProjectAs = function (requestor) {
 
         //setupWorkspace(pd);
         window.localStorage.setItem('localProject', JSON.stringify(pd));
-        window.location = 'blocklyc.html';
+        window.location.href = 'blocklyc.html';
     }  
 };
 
@@ -1283,7 +1264,7 @@ function uploadHandler(files) {
 
                 projectData = pd;
                 // window.localStorage.setItem('localProject', JSON.stringify(pd));
-		        // window.location = 'blocklyc.html';
+		        // window.location.href = 'blocklyc.html';
 	        }
         }
 
@@ -1318,7 +1299,7 @@ function clearUploadInfo() {
 
     // when opening a file but the user cancels, return to the splash screen
     if (isOffline && getURLParameter('openFile') === 'true') {
-        window.location = 'index.html';
+        window.location.href = 'index.html';
     }
 }
 
@@ -1331,7 +1312,7 @@ function uploadMergeCode(append) {
     // when opening a file when directed from the splash screen in the offline app, load the selected project
     if (!append && isOffline && getURLParameter('openFile') === 'true') {
         window.localStorage.setItem('localProject', JSON.stringify(projectData));
-        window.location = 'blocklyc.html';
+        window.location.href = 'blocklyc.html';
     }
 
     $.modal.close();
