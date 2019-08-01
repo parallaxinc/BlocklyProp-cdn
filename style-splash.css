@@ -133,3 +133,8 @@ img.full-width {
     height: 50px;
     background-color: #E3E3E3;
 }
+
+.footer .navbar {
+    margin-bottom: 0px;
+    border-top: 1px solid #e7e7e7;
+}
