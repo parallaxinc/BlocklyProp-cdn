@@ -26,61 +26,85 @@
  * @type {{confirm: utils.confirm, showMessage: utils.showMessage, prompt: utils.prompt}}
  */
 var utils = {
-    showMessage: function (title, message, callback) {
-        bootbox.dialog({
-            title: title,
-            message: message,
-            buttons: {
-                confirm: {
-                    label: "Ok",
-                    className: "btn-primary",
-                    callback: callback
-                }
-            }
+    showMessage: function (title, message, popupCallbackFunction) {
+        $('#generic-cancel').addClass('hidden');
+        $('#generic-prompt-group').addClass('hidden');
+        $('.generic-dialog-text').removeClass('hidden').html(message);
+        $('#generic-dialog-title').html(title);
+        $('#generic-continue')
+                .html('Ok')
+                .removeClass('hidden')
+                .on('click', function () {
+                    if (popupCallbackFunction) popupCallbackFunction();
+                    $.modal.close();
+                    $('#generic-continue').off('click');
+                    $('#generic-cancel').off('click');
+                });
+        $('#generic-dialog').modal({
+            closeExisting: false,
+            escapeClose: false,
+            clickClose: false,
+            showClose: false
         });
     },
-
-    prompt: function (title, defaultValue, callback) {
-        bootbox.prompt({
-            title: title,
-            value: defaultValue,
-            callback: callback,
-            buttons: {
-                cancel: {
-                    label: "Cancel",
-                    className: "btn-default",
-                    callback: callback
-                },
-                confirm: {
-                    label: "Confirm",
-                    className: "btn-primary",
-                    callback: callback
-                }
-            }
-
+    prompt: function (title, message, defaultValue, popupCallbackFunction) {
+        $('#generic-prompt-group').removeClass('hidden');
+        $('#generic-prompt').val(defaultValue);
+        $('.generic-dialog-text').addClass('hidden');
+        $('#generic-dialog-label').html(message);
+        $('#generic-dialog-title').html(title);
+        $('#generic-continue')
+                .html('Submit')
+                .removeClass('hidden')
+                .on('click', function () {
+                    if (popupCallbackFunction) popupCallbackFunction($('#generic-prompt').val());
+                    $.modal.close();
+                    $('#generic-continue').off('click');
+                    $('#generic-cancel').off('click');
+                });
+        $('#generic-cancel')
+                .html('Cancel')
+                .removeClass('hidden')
+                .on('click', function () {
+                    if (popupCallbackFunction) popupCallbackFunction(null);
+                    $.modal.close();
+                    $('#generic-continue').off('click');
+                    $('#generic-cancel').off('click');
+                });
+        $('#generic-dialog').modal({
+            closeExisting: false,
+            escapeClose: false,
+            clickClose: false,
+            showClose: false
         });
     },
-
-    confirm: function (title, message, callback, optionLabelConfirm, optionLabelCancel) {
-        bootbox.dialog({
-            title: title,
-            message: message,
-            buttons: {
-                cancel: {
-                    label: (optionLabelCancel || "Cancel"),
-                    className: "btn-default",
-                    callback: function () {
-                        callback(false);
-                    }
-                },
-                confirm: {
-                    label: (optionLabelConfirm || "Confirm"),
-                    className: "btn-primary",
-                    callback: function () {
-                        callback(true);
-                    }
-                }
-            }
+    confirm: function (title, message, popupCallbackFunction, optionLabelConfirm, optionLabelCancel) {
+        $('#generic-prompt-group').addClass('hidden');
+        $('.generic-dialog-text').removeClass('hidden').html(message);
+        $('#generic-dialog-title').html(title);
+        $('#generic-continue')
+                .html(optionLabelConfirm || 'Confirm')
+                .removeClass('hidden')
+                .on('click', function () {
+                    if (popupCallbackFunction) popupCallbackFunction(true);
+                    $.modal.close();
+                    $('#generic-continue').off('click');
+                    $('#generic-cancel').off('click');
+                });
+        $('#generic-cancel')
+                .html(optionLabelCancel || 'Cancel')
+                .removeClass('hidden')
+                .on('click', function () {
+                    if (popupCallbackFunction) popupCallbackFunction(false);
+                    $.modal.close();
+                    $('#generic-continue').off('click');
+                    $('#generic-cancel').off('click');
+                });
+        $('#generic-dialog').modal({
+            closeExisting: false,
+            escapeClose: false,
+            clickClose: false,
+            showClose: false
         });
     }
 };

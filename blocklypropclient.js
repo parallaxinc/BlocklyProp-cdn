@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2019 Parallax Inc.
  *
@@ -164,7 +163,7 @@ var version_as_number = function (rawVersion) {
         $("#client-unknown-span").removeClass("hidden");
         $(".client-required-version").html(client_recommended_version);
         $(".client-your-version").html('<b>UNKNOWN</b>');
-        $('#client-version-modal').modal('show');                 
+        $('#client-version-modal').modal();                 
 
         //bootbox.alert("BlocklyProp is unable to determine what version of " +
         //        "BlocklyPropClient is installed on your computer.\nYou may need to install" +
@@ -226,20 +225,20 @@ var check_client = function () {
                 $("#client-unknown-span").removeClass("hidden");
                 $(".client-required-version").html(client_min_version);
                 $(".client-your-version").html(data.version || '<b>UNKNOWN</b>');
-                $('#client-version-modal').modal('show');                 
+                $('#client-version-modal').modal();                 
             } else if (client_version < version_as_number(client_min_version)) {
                 //bootbox.alert("This system now requires at least version " + client_min_version + " of BlocklyPropClient- yours is: " + data.version);                    
                 $('.bpc-version').addClass('hidden');
                 $("#client-danger-span").removeClass("hidden");
                 $(".client-required-version").html(client_min_version);
                 $(".client-your-version").html(data.version);
-                $('#client-version-modal').modal('show');
+                $('#client-version-modal').modal();
             } else if (client_version < version_as_number(client_recommended_version)) {
                 $('.bpc-version').addClass('hidden');
                 $("#client-warning-span").removeClass("hidden");
                 $(".client-required-version").html(client_recommended_version);
                 $(".client-your-version").html(data.version);
-                $('#client-version-modal').modal('show');
+                $('#client-version-modal').modal();
             }
 
             client_use_type = 'http';
@@ -304,25 +303,20 @@ var configure_client = function () {
         value: client_domain_port
     }).appendTo(domain_port_group);
 
-    bootbox.dialog({
-        title: "Configure BlocklyPropClient",
-        message: url_input,
-        buttons: {
-            cancel: {
-                label: "Cancel",
-                className: "btn-default"
-            },
-            save: {
-                label: "Save",
-                className: "btn-success",
-                callback: function () {
+    utils.confirm(
+        page_text_label['editor_set_bpc_port'] ,
+            url_input, 
+            function (user_choice) {
+                if (user_choice) {
                     client_domain_name = $("#domain_name").val();
                     client_domain_port = $("#port_number").val();
                     client_url = "http://" + client_domain_name + ":" + client_domain_port + "/";
                 }
-            }
-        }
-    });
+            }, 
+            page_text_label['editor_set'], 
+            page_text_label['editor_button_cancel']
+    );
+
 };
 
 // checks for and, if found, uses a newer WebSockets-only client
@@ -505,7 +499,7 @@ function establish_socket() {
                     client_ws_connection.close();
 
                 } else if (ws_msg.action === 'alert') {
-                    alert(ws_msg.msg);
+                    utils.showMessage('BlocklyProp-client:', ws_msg.msg);
                 }
             }
 

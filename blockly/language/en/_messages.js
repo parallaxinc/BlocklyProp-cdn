@@ -805,6 +805,7 @@ page_text_label['editor_client_available_short'] = "<strong>Select the correct p
 page_text_label['editor_client_checking'] = "Looking for BlocklyProp-Client...";
 page_text_label['editor_client_not-available'] = "BlocklyProp-Client <b>not found</b>. Click here for instructions.";
 page_text_label['editor_client_title'] = "BlocklyProp Client/Launcher";
+page_text_label['editor_set_bpc_port'] = "Configure BlocklyProp-Client Path/Port";
 page_text_label['editor_demo_dialog_continue'] = "Continue demo";
 page_text_label['editor_demo_dialog_continue_text'] = "Compiling and saving are disabled";
 page_text_label['editor_demo_dialog_login'] = "Log in";
@@ -835,6 +836,7 @@ page_text_label['editor_run_ram'] = "Load RAM";
 page_text_label['editor_run_terminal'] = "Serial terminal";
 page_text_label['editor_run_title'] = "Run";
 page_text_label['editor_save'] = "Save";
+page_text_label['editor_set'] = "Set";
 page_text_label['editor_save-as'] = "Save project as";
 page_text_label['editor_save-check'] = "Save project reminder";
 page_text_label['editor_save-check_warning'] = "It has been <span id=\"save-check-warning-time\"></span> minutes since you last saved your project. Save now?";
@@ -1128,6 +1130,6 @@ Blockly.BlockSvg.prototype.showHelp_ = function () {
 
         // Disable this until the help issue is addressed. Refeence issue Solo-26
         //$('#help-content').html('<iframe src="' + u + '" style="height:600px; border:none;" />');
-	    //$('#help-dialog').modal('show');
+	    //$('#help-dialog').modal();
     }
 };
