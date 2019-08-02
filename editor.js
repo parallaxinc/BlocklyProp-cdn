@@ -531,24 +531,40 @@ var showNewProjectModal = function(openModal) {
  * @param d milliseconds to delay the resizing, especially if used after a change in the window's location or a reload
  */
 function resetToolBoxSizing(d) {
+    // Vanilla Javascript is used here for speed - jQuery could probably be used, but this is faster.
     if (d) {
         // Force the toolbox to render correctly
         setTimeout(function () {
             // find the height of just the blockly workspace by subtracting the height of the navigation bar
-            let navHeight = $(window).height() - $('tr').first().outerHeight();
-            if (navHeight) {
-                $('#content_blocks, #content, .injectionDiv, .blocklyToolboxDiv').height(navHeight);
-                $('.blocklySvg').attr('height', navHeight);
+            let navTop = parseInt(document.getElementById('editor').offsetHeight);
+            let navHeight = parseInt(window.innerHeight) - navTop;
+            let navWidth = parseInt(window.innerWidth);
+            var blocklyDiv = [document.getElementById('content_blocks'), document.getElementById('content_propc'), document.getElementById('content_xml')];
+
+            for (var i = 0; i < 3; i++) {
+                blocklyDiv[i].style.left = '0px';
+                blocklyDiv[i].style.top = navTop + 'px';
+                blocklyDiv[i].style.width = navWidth + 'px';
+                blocklyDiv[i].style.height = navHeight + 'px';
             }
-            //Blockly.mainWorkspace.getCanvas().resize();
+
+            Blockly.svgResize(Blockly.mainWorkspace);
         }, d);
     } else {
-        let navHeight = $(window).height() - $('tr').first().outerHeight();
-        if (navHeight) {
-            $('#content_blocks, #content, .injectionDiv, .blocklyToolboxDiv').height(navHeight);
-            $('.blocklySvg').attr('height', navHeight);
+        // find the height of just the blockly workspace by subtracting the height of the navigation bar
+        let navTop = parseInt(document.getElementById('editor').offsetHeight);
+        let navHeight = parseInt(window.innerHeight) - navTop;
+        let navWidth = parseInt(window.innerWidth);
+        var blocklyDiv = [document.getElementById('content_blocks'), document.getElementById('content_propc'), document.getElementById('content_xml')];
+
+        for (var i = 0; i < 3; i++) {
+            blocklyDiv[i].style.left = '0px';
+            blocklyDiv[i].style.top = navTop + 'px';
+            blocklyDiv[i].style.width = navWidth + 'px';
+            blocklyDiv[i].style.height = navHeight + 'px';
         }
-        //Blockly.mainWorkspace.getCanvas().resize();
+
+        Blockly.svgResize(Blockly.mainWorkspace);
     }
 }
 
@@ -609,6 +625,7 @@ var setupWorkspace = function (data) {
         $('#edit-project-details').html(page_text_label['editor_edit-details']);
     }
 
+    resetToolBoxSizing();
     timestampSaveTime(20, true);
     setInterval(checkLastSavedTime, 60000);
 }

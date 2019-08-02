@@ -40,14 +40,15 @@ html, body {
     font-family: Arimo, sans-serif;
     margin: 0;
     padding:0;
-    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.blocklySvg {
-    height: 100%;
-    width: 100%;
-    position: absolute; /* Safari height clipping fix */
+#content {
+  flex-grow: 1;
 }
+
 
 .blocklyWidgetDiv .goog-menuitem-content, .blocklyContextMenu, .blocklydropdownmenu {
     font: normal 14px Arimo, sans-serif !important;
@@ -64,15 +65,6 @@ html, body {
     border-bottom: 2px solid rgba(104, 110, 116, 0.7);
 }
 
-#content_blocks, #content {
-    height: calc(100vh - 67px) !important;
-    background-color: #fff;
-    margin: 0;
-    padding:0;
-    overflow: hidden;
-    width: 100%
-}
-
 .blocklyMinimalBody {
     height: 64px;
 }
@@ -81,63 +73,19 @@ h1 {
     font-weight: normal;
     font-size: 140%;
 }
-td {
-    vertical-align: top;
-}
 
-/* Tabs */
-#tabRow>td {
-    border: 1px solid #ccc;
-}
-td.tabon {
-    border-bottom-color: #ddd !important;
-    background-color: #ddd;
-    padding: 5px 19px;
-}
-td.taboff {
-    cursor: pointer;
-    padding: 5px 19px;
-}
-td.taboff:hover {
-    background-color: #eee;
-}
-td.tabmin {
-    border-top-style: none !important;
-    border-left-style: none !important;
-    border-right-style: none !important;
-}
-td.tabmax {
-    border-top-style: none !important;
-    border-left-style: none !important;
-    border-right-style: none !important;
-    width: 99%;
-    text-align: right;
-}
-table#content_table {
-    width: 100%;
-    height: 100%;
-}
-table {
-    border-collapse: collapse;
-    margin: 0;
-    padding: 0;
-    border: none;
-}
-td {
-    padding: 0;
-}
 pre,
 #content_xml,
 #content_spin,
 #content_propc {
     width: 100%;
-    height: 100%;
     padding: 0;
     margin: 0;
     border: 1px solid #ccc;
     border-top-style: none;
     overflow: hidden;
     display: none;
+    position: absolute;
 }
 #textarea_xml,
 #textarea_spin,
@@ -150,9 +98,7 @@ pre,
     border: none;
     resize: none;
 }
-#content_blocks, #content {
-    height: 100%;
-}
+
 iframe {
     width: 100%;
     height: 100%;
@@ -500,7 +446,6 @@ ul > hr {
     line-height: 25px;
     color: #337ab7;
     text-decoration: none;
-    display:inline; 
     float:right;
     padding-right: 10px;
 }
