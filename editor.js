@@ -223,7 +223,13 @@ $(document).ready(function () {
     $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
-    $('#save-btn').on('click',              function () {  saveProject();  });
+    $('#save-btn, #save-project').on('click', function () {  
+        if (isOffline) {
+            downloadCode(); 
+        } else {
+            saveProject();
+        }
+    });
     $('#new-project-menu-item').on('click', function () {  clearNewProjectModal(); showNewProjectModal('open'); });// window.location = 'blocklyc.html?newProject=true'  });
     $('#btn-graph-play').on('click',        function () {  graph_play();  });
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
@@ -242,13 +248,6 @@ $(document).ready(function () {
     $('.show-os-chr').on('click',           function () {  showOS('ChromeOS');  });
     $('.show-os-lnx').on('click',           function () {  showOS('Linux');  });
 
-    $('#save-project').on('click', function () {
-        if (isOffline) {
-            downloadCode();
-        } else {
-            saveProject();  
-        }
-    });
 
     $('#save-project-as').on('click',      function () {  saveAsDialog();  });
     $('#download-project').on('click',     function () {  downloadCode();  });
@@ -265,6 +264,7 @@ $(document).ready(function () {
     if (isOffline) {
          $('#upload-dialog-title').html(page_text_label['editor_import']);
          $('#upload-project span').html(page_text_label['editor_import']);
+         $('#save-project-as, save-as-btn').addClass('hidden');
     }
 
     // disable to upload dialog buttons until a valid file is uploaded
@@ -1174,6 +1174,12 @@ function downloadCode() {
 
             // Assemble both the SVG (image) of the blocks and the blocks' XML definition
             saveData(SVGheader + projSVGcode + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>', value + '.svg');
+            if (isOffline) {
+                // update the projectData global and the localStrage for the current project.
+                projectData.code = projXMLcode;
+                projectData.modified = dt;
+                window.localStorage.setItem('localProject', JSON.stringify(projectData));
+            }
         }
     });
 }
