@@ -528,29 +528,12 @@ var showNewProjectModal = function(openModal) {
 
 /**
  * Reset the sizing of blockly's toolbox and canvas.  This is a workaround to ensure that it renders correctly
- * @param d milliseconds to delay the resizing, especially if used after a change in the window's location or a reload
+ * @param resizeDelay milliseconds to delay the resizing, especially if used after a change in the window's location or a reload
  */
-function resetToolBoxSizing(d) {
+function resetToolBoxSizing(resizeDelay) {
     // Vanilla Javascript is used here for speed - jQuery could probably be used, but this is faster.
-    if (d) {
-        // Force the toolbox to render correctly
-        setTimeout(function () {
-            // find the height of just the blockly workspace by subtracting the height of the navigation bar
-            let navTop = parseInt(document.getElementById('editor').offsetHeight);
-            let navHeight = parseInt(window.innerHeight) - navTop;
-            let navWidth = parseInt(window.innerWidth);
-            var blocklyDiv = [document.getElementById('content_blocks'), document.getElementById('content_propc'), document.getElementById('content_xml')];
-
-            for (var i = 0; i < 3; i++) {
-                blocklyDiv[i].style.left = '0px';
-                blocklyDiv[i].style.top = navTop + 'px';
-                blocklyDiv[i].style.width = navWidth + 'px';
-                blocklyDiv[i].style.height = navHeight + 'px';
-            }
-
-            Blockly.svgResize(Blockly.mainWorkspace);
-        }, d);
-    } else {
+    // Force the toolbox to render correctly
+    setTimeout(function () {
         // find the height of just the blockly workspace by subtracting the height of the navigation bar
         let navTop = parseInt(document.getElementById('editor').offsetHeight);
         let navHeight = parseInt(window.innerHeight) - navTop;
@@ -564,8 +547,10 @@ function resetToolBoxSizing(d) {
             blocklyDiv[i].style.height = navHeight + 'px';
         }
 
-        Blockly.svgResize(Blockly.mainWorkspace);
-    }
+        if (Blockly.mainWorkspace && blocklyDiv[0].style.display !== 'none') {
+            Blockly.svgResize(Blockly.mainWorkspace);
+        }
+    }, resizeDelay || 0);
 }
 
 /**
