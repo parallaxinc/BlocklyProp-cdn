@@ -478,12 +478,19 @@ var showNewProjectModal = function(openModal) {
     // defined in propc.js in the 'profile' object
     // (except 'default', which is where the current project's type is stored)
     for(var boardTypes in profile) {
-        if (boardTypes !== 'default') {
+        if (boardTypes !== 'default' && boardTypes !== 'propcfile') {
             $("#new-project-board-type")
                     .append($('<option />')
                     .val(boardTypes)
                     .text(profile[boardTypes].description));
         }
+    }
+    // TODO: only show the code-only project option if in Demo/experimental
+    if (inDemo) {
+        $("#new-project-board-type")
+        .append($('<option />')
+        .val('propcfile')
+        .text(profile['propcfile'].description));
     }
 
     // when the user clicks the 'Continue' button, validate the form

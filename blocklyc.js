@@ -291,7 +291,7 @@ function renderContent(id) {
             $('#btn-view-blocks').css('display', 'none');
         } else {
             $('#btn-view-xml').css('display', 'none');
-            $('#btn-view-blocks').css('display', 'inline-block');    
+            $('#btn-view-blocks').css('display', (isPropcOnlyProject ? 'none' : 'inline-block'));   
         }
         $('#btn-view-propc').css('display', 'none');
         if (!isPropcOnlyProject) {
@@ -313,7 +313,7 @@ function renderContent(id) {
                 let raw_c = prettyCode(blankProjectCode);
                 codePropC.setValue(raw_c);
                 codePropC.gotoLine(0);
-            }   
+            } 
         }
         break;
       case 'xml':
