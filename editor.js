@@ -1215,11 +1215,11 @@ function uploadHandler(files) {
             // maybe projectData.code.length < 43??? i.e. empty project? instead of the URL parameter...
     	    if (getURLParameter('openFile') === "true" && isOffline) {
                 var titleIndex = xmlString.indexOf('transform="translate(-225,-53)">Title: ');
-                var projectTitle = xmlString.substring((titleIndex + 39), xmlString.indexOf('</text>', (titleIndex + 40)));
+                var projectTitle = xmlString.substring((titleIndex + 39), xmlString.indexOf('</text>', (titleIndex + 39)));
                 titleIndex = xmlString.indexOf('transform="translate(-225,-8)">Description: ');
                 var projectDesc = '';
                 if (titleIndex > -1) {
-                    projectDesc = xmlString.substring((titleIndex + 44), xmlString.indexOf('</text>', (titleIndex + 45)));
+                    projectDesc = xmlString.substring((titleIndex + 44), xmlString.indexOf('</text>', (titleIndex + 44)));
                 }
 
 
