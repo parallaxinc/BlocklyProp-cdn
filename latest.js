@@ -61,8 +61,6 @@ var projectBoard = {
 $.get("rest/shared/project/list?sort=modified&order=desc&limit=5&offset=0", function (data) {
     // Loop through each row returned
     $.each(data['rows'], function (index, project) {
-        if (getURLParameter('debug')) console.log(project);
-
         var user = '';
 
         // Set the user name for use in the anchor element below
