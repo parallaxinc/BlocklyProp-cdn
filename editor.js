@@ -223,7 +223,13 @@ $(document).ready(function () {
     $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
-    $('#save-btn').on('click',              function () {  saveProject();  });
+    $('#save-btn, #save-project').on('click', function () {  
+        if (isOffline) {
+            downloadCode(); 
+        } else {
+            saveProject();
+        }
+    });
     $('#new-project-menu-item').on('click', function () {  clearNewProjectModal(); showNewProjectModal('open'); });// window.location = 'blocklyc.html?newProject=true'  });
     $('#btn-graph-play').on('click',        function () {  graph_play();  });
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
@@ -242,13 +248,6 @@ $(document).ready(function () {
     $('.show-os-chr').on('click',           function () {  showOS('ChromeOS');  });
     $('.show-os-lnx').on('click',           function () {  showOS('Linux');  });
 
-    $('#save-project').on('click', function () {
-        if (isOffline) {
-            downloadCode();
-        } else {
-            saveProject();  
-        }
-    });
 
     $('#save-project-as').on('click',      function () {  saveAsDialog();  });
     $('#download-project').on('click',     function () {  downloadCode();  });
@@ -265,6 +264,7 @@ $(document).ready(function () {
     if (isOffline) {
          $('#upload-dialog-title').html(page_text_label['editor_import']);
          $('#upload-project span').html(page_text_label['editor_import']);
+         $('#save-project-as, save-as-btn').addClass('hidden');
     }
 
     // disable to upload dialog buttons until a valid file is uploaded
@@ -478,12 +478,19 @@ var showNewProjectModal = function(openModal) {
     // defined in propc.js in the 'profile' object
     // (except 'default', which is where the current project's type is stored)
     for(var boardTypes in profile) {
-        if (boardTypes !== 'default') {
+        if (boardTypes !== 'default' && boardTypes !== 'propcfile') {
             $("#new-project-board-type")
                     .append($('<option />')
                     .val(boardTypes)
                     .text(profile[boardTypes].description));
         }
+    }
+    // TODO: only show the code-only project option if in Demo/experimental
+    if (inDemo) {
+        $("#new-project-board-type")
+        .append($('<option />')
+        .val('propcfile')
+        .text(profile['propcfile'].description));
     }
 
     // when the user clicks the 'Continue' button, validate the form
@@ -1208,11 +1215,11 @@ function uploadHandler(files) {
             // maybe projectData.code.length < 43??? i.e. empty project? instead of the URL parameter...
     	    if (getURLParameter('openFile') === "true" && isOffline) {
                 var titleIndex = xmlString.indexOf('transform="translate(-225,-53)">Title: ');
-                var projectTitle = xmlString.substring((titleIndex + 39), xmlString.indexOf('</text>', (titleIndex + 40)));
+                var projectTitle = xmlString.substring((titleIndex + 39), xmlString.indexOf('</text>', (titleIndex + 39)));
                 titleIndex = xmlString.indexOf('transform="translate(-225,-8)">Description: ');
                 var projectDesc = '';
                 if (titleIndex > -1) {
-                    projectDesc = xmlString.substring((titleIndex + 44), xmlString.indexOf('</text>', (titleIndex + 45)));
+                    projectDesc = xmlString.substring((titleIndex + 44), xmlString.indexOf('</text>', (titleIndex + 44)));
                 }
 
 
