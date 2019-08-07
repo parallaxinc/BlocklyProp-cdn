@@ -1377,8 +1377,10 @@ function uploadMergeCode(append) {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
         }
 
-        Blockly.mainWorkspace.clear();
         loadToolbox(projectData['code']);
+        if(Blockly.mainWorkspace) {
+            Blockly.mainWorkspace.clear();
+        }
         clearUploadInfo();
     }
 }
