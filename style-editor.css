@@ -55,6 +55,10 @@ html, body {
     max-height: 110% !important;
 }
 
+.dropdown-menu>li>a {
+    cursor: pointer;
+}
+
 .field_code {
     background-color: #fff;
     height: 200px;
