@@ -55,6 +55,8 @@ html, body {
     max-height: 110% !important;
 }
 
+
+/* Solo-50 Keep mouse pointer from changing to an i-bar */
 .dropdown-menu>li>a {
     cursor: pointer;
 }
