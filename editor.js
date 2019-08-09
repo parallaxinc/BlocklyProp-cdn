@@ -129,15 +129,20 @@ bpIcons = {
 /**
  * Verify that the project name and board type fields have data
  *
- * @returns {boolean} True if form contains data, otherwise false
+ * @returns {boolean} True if form contains valid data, otherwise false
  */
 function validateNewProjectForm() {
-    // this should only be used offline.
+    // This function should only be used in offline mode
     if (!isOffline) { 
         return true; 
     }
 
-    $(".proj").validate({
+    // Select the 'proj' class in new-project.html
+    let project = $(".proj");
+
+    // Validate the jQuery object based on these rules. Supply helpful
+    // error messages to use when a rule is violated
+    project.validate({
         rules: {
             'new-project-name': "required",
             'new-project-board-type': "required"
@@ -148,11 +153,7 @@ function validateNewProjectForm() {
         }
     });
 
-    // if form is invalid return false
-    if (!$(".proj").valid()) { 
-        return false; 
-    }
-    return true;
+    return project.valid() ? true : false;
 }
 
 // TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
@@ -495,8 +496,10 @@ var showNewProjectModal = function(openModal) {
 
     // when the user clicks the 'Continue' button, validate the form
     $('#new-project-continue').on('click', function () {
+        // verify that the project contains a valid board type and project name
         if (validateNewProjectForm()) {
             var code = '';
+
             // If editing details, preserve the code, otherwise start over
             if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
                 if (projectData['board'] === 'propcfile') {
