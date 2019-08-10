@@ -1461,7 +1461,8 @@ function getXml() {
     } else if (projectData && projectData.code) {
         return projectData.code;
     } else {
-        return false;
+        // Return the XML for a blank project if none is found.
+        return '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
     }
 }
 
