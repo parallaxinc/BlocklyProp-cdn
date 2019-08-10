@@ -372,8 +372,9 @@ $(document).ready(function () {
 
         } else if (window.localStorage.getItem('localProject')) {
             // Look for a default project in the local browser store
-            setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
-            //window.localStorage.removeItem('localProject');
+            setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')), function () {
+                window.localStorage.removeItem('localProject');
+            });
         } else {
             // TODO: why is this here?
             // Open save-as modal
@@ -567,7 +568,7 @@ function resetToolBoxSizing(resizeDelay) {
  *
  * @param data
  */
-var setupWorkspace = function (data) {
+var setupWorkspace = function (data, callback) {
     console.log(data);
     projectData = data;
 
@@ -623,6 +624,7 @@ var setupWorkspace = function (data) {
     resetToolBoxSizing();
     timestampSaveTime(20, true);
     setInterval(checkLastSavedTime, 60000);
+    if (callback) callback();
 }
 
 
@@ -917,7 +919,8 @@ var editProjectDetails = function () {
             projectData.code = getXml();
         }
 
-        window.localStorage.setItem('localProject', JSON.stringify(projectData));
+        // TODO: I think these can be deleted.  localProject should only be used to temporarily store a project when the window location is changed or the page is refreshed.
+        //window.localStorage.setItem('localProject', JSON.stringify(projectData));
         //window.location = 'projectcreate.html?edit=true';
 
         $('#new-project-board-dropdown').addClass('hidden');
