@@ -1061,7 +1061,7 @@ function decodeFromValidXml(str) {
  *
  */
 function downloadCode() {
-    if (projectData && projectData['board'] !== 'propcfile' && projectData['code'].length < 50) {
+    if (projectData && projectData['board'] !== 'propcfile' && getXml().length < 50) {
         alert('You can\'t save an empty project!');
     } else {
 
@@ -1461,8 +1461,15 @@ function loadToolbox(xmlText) {
  * @returns {string}
  */
 function getXml() {
-    var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-    return Blockly.Xml.domToText(xml);
+    if (Blockly.Xml) {
+        var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+        return Blockly.Xml.domToText(xml);
+    } else if (projectData && projectData.code) {
+        return projectData.code;
+    } else {
+        // Return the XML for a blank project if none is found.
+        return '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
+    }
 }
 
 
