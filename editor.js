@@ -66,6 +66,18 @@ var projectData = null;
 
 
 /**
+ * Constant string that represents the base, empty project header
+ *
+ * @type {string}
+ *
+ * @description Converting the string to a constant because it is referenced
+ * in a number of places. The string is sufficiently complex that it could
+ * be misspelled without detection.
+ */
+const EmptyProjectCodeHeader = '<xml xmlns="http://www.w3.org/1999/xhtml">';
+
+
+/**
  * Force the saveCheck() function to exit immediately with a false result
  *
  * TODO: This flag is used in exactly one place. Why do we need it?
@@ -512,7 +524,7 @@ var showNewProjectModal = function(openModal) {
                     code = getXml();
                 }
             } else {
-                code = '<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>';
+                code = EmptyProjectCodeHeader;
             }
     
             // save the form fields into the projectData object       
@@ -888,7 +900,7 @@ var saveProjectAs = function (requestor) {
         var tt = new Date();
         var pd = {
             'board': p_type,
-            'code': "<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>",
+            'code': EmptyProjectCodeHeader,
             'created': tt,
             'description': "",
             'description-html': "",
@@ -990,7 +1002,7 @@ var checkLeave = function () {
     }
 
     if (projectData === null) {
-        if (currentXml === '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>') {
+        if (currentXml === EmptyProjectCodeHeader) {
             return false;
         } else {
             return true;
@@ -1220,7 +1232,7 @@ function uploadHandler(files) {
                 }
             }
             if (uploadedXML !== '') {
-                uploadedXML = '<xml xmlns="http://www.w3.org/1999/xhtml">' + uploadedXML + '</xml>';
+                uploadedXML = EmptyProjectCodeHeader + uploadedXML + '</xml>';
             };
 
             // TODO: check to see if this is used when opened from the editor (and not the splash screen)
@@ -1382,11 +1394,11 @@ function uploadMergeCode(append) {
             });
             tmpv += '</variables>';
             // add everything back together
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + tmpv + projCode + newCode + '</xml>';
         } else if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') === -1) {
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + newCode + projCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + newCode + projCode + '</xml>';
         } else {
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + projCode + newCode + '</xml>';
         }
 
         if(Blockly.mainWorkspace) {
@@ -1475,7 +1487,7 @@ function getXml() {
         return projectData.code;
     } else {
         // Return the XML for a blank project if none is found.
-        return '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
+        return EmptyProjectCodeHeader + '</xml>';
     }
 }
 
