@@ -66,6 +66,21 @@ var projectData = null;
 
 
 /**
+ * Constant string that represents the base, empty project header
+ *
+ * @type {string}
+ *
+ * @description Converting the string to a constant because it is referenced
+ * in a number of places. The string is sufficiently complex that it could
+ * be misspelled without detection.
+ */
+const EmptyProjectCodeHeader = '<xml xmlns="http://www.w3.org/1999/xhtml">';
+
+
+/**
+ * Force the saveCheck() function to exit immediately with a false result
+ *
+ * TODO: This flag is used in exactly one place. Why do we need it?
  *
  * @type {boolean}
  */
@@ -129,15 +144,20 @@ bpIcons = {
 /**
  * Verify that the project name and board type fields have data
  *
- * @returns {boolean} True if form contains data, otherwise false
+ * @returns {boolean} True if form contains valid data, otherwise false
  */
 function validateNewProjectForm() {
-    // this should only be used offline.
+    // This function should only be used in offline mode
     if (!isOffline) { 
         return true; 
     }
 
-    $(".proj").validate({
+    // Select the 'proj' class in new-project.html
+    let project = $(".proj");
+
+    // Validate the jQuery object based on these rules. Supply helpful
+    // error messages to use when a rule is violated
+    project.validate({
         rules: {
             'new-project-name': "required",
             'new-project-board-type': "required"
@@ -148,11 +168,7 @@ function validateNewProjectForm() {
         }
     });
 
-    // if form is invalid return false
-    if (!$(".proj").valid()) { 
-        return false; 
-    }
-    return true;
+    return project.valid() ? true : false;
 }
 
 // TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
@@ -371,8 +387,9 @@ $(document).ready(function () {
 
         } else if (window.localStorage.getItem('localProject')) {
             // Look for a default project in the local browser store
-            setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
-            //window.localStorage.removeItem('localProject');
+            setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')), function () {
+                window.localStorage.removeItem('localProject');
+            });
         } else {
             // TODO: why is this here?
             // Open save-as modal
@@ -495,8 +512,10 @@ var showNewProjectModal = function(openModal) {
 
     // when the user clicks the 'Continue' button, validate the form
     $('#new-project-continue').on('click', function () {
+        // verify that the project contains a valid board type and project name
         if (validateNewProjectForm()) {
             var code = '';
+
             // If editing details, preserve the code, otherwise start over
             if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
                 if (projectData['board'] === 'propcfile') {
@@ -505,7 +524,7 @@ var showNewProjectModal = function(openModal) {
                     code = getXml();
                 }
             } else {
-                code = '<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>';
+                code = EmptyProjectCodeHeader;
             }
     
             // save the form fields into the projectData object       
@@ -564,7 +583,7 @@ function resetToolBoxSizing(resizeDelay) {
  *
  * @param data
  */
-var setupWorkspace = function (data) {
+var setupWorkspace = function (data, callback) {
     console.log(data);
     projectData = data;
 
@@ -620,6 +639,7 @@ var setupWorkspace = function (data) {
     resetToolBoxSizing();
     timestampSaveTime(20, true);
     setInterval(checkLastSavedTime, 60000);
+    if (callback) callback();
 }
 
 
@@ -880,7 +900,7 @@ var saveProjectAs = function (requestor) {
         var tt = new Date();
         var pd = {
             'board': p_type,
-            'code': "<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>",
+            'code': EmptyProjectCodeHeader,
             'created': tt,
             'description': "",
             'description-html': "",
@@ -914,7 +934,8 @@ var editProjectDetails = function () {
             projectData.code = getXml();
         }
 
-        window.localStorage.setItem('localProject', JSON.stringify(projectData));
+        // TODO: I think these can be deleted.  localProject should only be used to temporarily store a project when the window location is changed or the page is refreshed.
+        //window.localStorage.setItem('localProject', JSON.stringify(projectData));
         //window.location = 'projectcreate.html?edit=true';
 
         $('#new-project-board-dropdown').addClass('hidden');
@@ -962,23 +983,26 @@ window.onbeforeunload = function () {
  * TODO: We might get here if we failed to load a new project.
  */
 var checkLeave = function () {
-    // Return if there is no project data
+    // Return if projectData is undefined
     if (!projectData) {
         return false;
     }
 
-    var currentXml = '';
-    var savedXml = projectData['code'];
     if (ignoreSaveCheck) {
         return false;
     }
+
+    let currentXml;
+    let savedXml = projectData['code'];
+
     if (projectData['board'] === 'propcfile') {
         currentXml = propcAsBlocksXml();
     } else {
         currentXml = getXml();
     }
+
     if (projectData === null) {
-        if (currentXml === '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>') {
+        if (currentXml === EmptyProjectCodeHeader) {
             return false;
         } else {
             return true;
@@ -1055,7 +1079,7 @@ function decodeFromValidXml(str) {
  *
  */
 function downloadCode() {
-    if (projectData && projectData['board'] !== 'propcfile' && projectData['code'].length < 50) {
+    if (projectData && projectData['board'] !== 'propcfile' && getXml().length < 50) {
         alert('You can\'t save an empty project!');
     } else {
 
@@ -1208,7 +1232,7 @@ function uploadHandler(files) {
                 }
             }
             if (uploadedXML !== '') {
-                uploadedXML = '<xml xmlns="http://www.w3.org/1999/xhtml">' + uploadedXML + '</xml>';
+                uploadedXML = EmptyProjectCodeHeader + uploadedXML + '</xml>';
             };
 
             // TODO: check to see if this is used when opened from the editor (and not the splash screen)
@@ -1370,11 +1394,11 @@ function uploadMergeCode(append) {
             });
             tmpv += '</variables>';
             // add everything back together
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + tmpv + projCode + newCode + '</xml>';
         } else if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') === -1) {
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + newCode + projCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + newCode + projCode + '</xml>';
         } else {
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + projCode + newCode + '</xml>';
         }
 
         if(Blockly.mainWorkspace) {
@@ -1451,12 +1475,20 @@ function loadToolbox(xmlText) {
 
 
 /**
+ * Convert the current project workspace into an XML document
  *
  * @returns {string}
  */
 function getXml() {
-    var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-    return Blockly.Xml.domToText(xml);
+    if (Blockly.Xml) {
+        var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+        return Blockly.Xml.domToText(xml);
+    } else if (projectData && projectData.code) {
+        return projectData.code;
+    } else {
+        // Return the XML for a blank project if none is found.
+        return EmptyProjectCodeHeader + '</xml>';
+    }
 }
 
 
