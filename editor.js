@@ -66,6 +66,9 @@ var projectData = null;
 
 
 /**
+ * Force the saveCheck() function to exit immediately with a false result
+ *
+ * TODO: This flag is used in exactly one place. Why do we need it?
  *
  * @type {boolean}
  */
@@ -968,21 +971,24 @@ window.onbeforeunload = function () {
  * TODO: We might get here if we failed to load a new project.
  */
 var checkLeave = function () {
-    // Return if there is no project data
+    // Return if projectData is undefined
     if (!projectData) {
         return false;
     }
 
-    var currentXml = '';
-    var savedXml = projectData['code'];
     if (ignoreSaveCheck) {
         return false;
     }
+
+    let currentXml;
+    let savedXml = projectData['code'];
+
     if (projectData['board'] === 'propcfile') {
         currentXml = propcAsBlocksXml();
     } else {
         currentXml = getXml();
     }
+
     if (projectData === null) {
         if (currentXml === '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>') {
             return false;
@@ -1457,6 +1463,7 @@ function loadToolbox(xmlText) {
 
 
 /**
+ * Convert the current project workspace into an XML document
  *
  * @returns {string}
  */
