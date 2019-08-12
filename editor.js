@@ -142,7 +142,7 @@ bpIcons = {
 }
 
 /**
- * Verify that the project name and board type fields have data
+ * Verify that the project name and board type form fields have data
  *
  * @returns {boolean} True if form contains valid data, otherwise false
  */
@@ -152,7 +152,7 @@ function validateNewProjectForm() {
         return true; 
     }
 
-    // Select the 'proj' class in new-project.html
+    // Select the 'proj' class
     let project = $(".proj");
 
     // Validate the jQuery object based on these rules. Supply helpful
@@ -344,9 +344,17 @@ $(document).ready(function () {
         setupWorkspace(projectlink);
 
     } else if (!idProject && !isOffline) {
+        // redirect to the home page if the project id was not specified
+        // and the code is running in the online mode
         window.location = baseUrl;
 
     } else if (!idProject && isOffline) {
+        // ----------------------------------------------------------
+        // If the project id is not provided and the code is
+        // operating in the offline mode, open a modal window to
+        // prompt the user to load a project form local storage.
+        // ----------------------------------------------------------
+
         // Disable the login link for the BP Client status area
         $('#unauth-login-anchor').attr('href', '#');
 
@@ -367,10 +375,13 @@ $(document).ready(function () {
         $('#save-as-project-name').val('MyProject');
         $("#saveAsDialogSender").html('offline');
         $("#save-as-board-type").empty();
+
+        // populate the board type drop down list
         for (key in profile) {
             $("#save-as-board-type").append($('<option />').val(key).text(profile[key].description));
         }
 
+        // Load a project file from local storage
         if (getURLParameter('openFile') === "true" && isOffline) {
             // set title to Open file
             $('#upload-dialog-title').html(page_text_label['editor_open']);
@@ -386,7 +397,9 @@ $(document).ready(function () {
             $('#upload-dialog').modal('show');
 
         } else if (window.localStorage.getItem('localProject')) {
-            // Look for a default project in the local browser store
+            // load the last used project from the browser local storage in offline mode
+            //
+            // load the project from the browser store
             setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')), function () {
                 window.localStorage.removeItem('localProject');
             });
