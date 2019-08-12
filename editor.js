@@ -174,12 +174,16 @@ function validateNewProjectForm() {
 // TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
 // var simplemde = null;
 
+
 /**
- *
+ * Event handler that triggers only once and only when the DOM is
+ * in a ready state.
  */
 $(document).ready(function () {
     // Ensure blockly workspace takes the remainder of the window.
-    $(window).on('resize', function () { resetToolBoxSizing() });
+    $(window).on('resize', function () {
+        resetToolBoxSizing()
+    });
 
     // Insert the text strings (internationalization) once the page has loaded    
     // insert into <span> tags
@@ -553,20 +557,33 @@ var showNewProjectModal = function(openModal) {
 }
 
 /**
- * Reset the sizing of blockly's toolbox and canvas.  This is a workaround to ensure that it renders correctly
- * @param resizeDelay milliseconds to delay the resizing, especially if used after a change in the window's location or a reload
+ * Reset the sizing of blockly's toolbox and canvas.
+ *
+ * NOTE: This is a workaround to ensure that it renders correctly
+ * TODO: Find a permanent replacement for this workaround.
+ *
+ * @param resizeDelay milliseconds to delay the resizing, especially
+ * if used after a change in the window's location or a during page
+ * reload.
  */
 function resetToolBoxSizing(resizeDelay) {
-    // Vanilla Javascript is used here for speed - jQuery could probably be used, but this is faster.
-    // Force the toolbox to render correctly
+    // Vanilla Javascript is used here for speed - jQuery
+    // could probably be used, but this is faster. Force
+    // the toolbox to render correctly
     setTimeout(function () {
-        // find the height of just the blockly workspace by subtracting the height of the navigation bar
-        let navTop = parseInt(document.getElementById('editor').offsetHeight);
-        let navHeight = parseInt(window.innerHeight) - navTop;
-        let navWidth = parseInt(window.innerWidth);
-        var blocklyDiv = [document.getElementById('content_blocks'), document.getElementById('content_propc'), document.getElementById('content_xml')];
+        // find the height of just the blockly workspace by
+        // subtracting the height of the navigation bar
+        let navTop = document.getElementById('editor').offsetHeight;
+        let navHeight = window.innerHeight - navTop;
+        let navWidth = window.innerWidth;
 
-        for (var i = 0; i < 3; i++) {
+        let blocklyDiv = [
+            document.getElementById('content_blocks'),
+            document.getElementById('content_propc'),
+            document.getElementById('content_xml')
+        ];
+
+        for (let i = 0; i < 3; i++) {
             blocklyDiv[i].style.left = '0px';
             blocklyDiv[i].style.top = navTop + 'px';
             blocklyDiv[i].style.width = navWidth + 'px';
@@ -584,7 +601,6 @@ function resetToolBoxSizing(resizeDelay) {
  * @param data
  */
 var setupWorkspace = function (data, callback) {
-    console.log(data);
     projectData = data;
 
     // Update the UI with project related details
@@ -977,8 +993,11 @@ window.onbeforeunload = function () {
 
 
 /**
+ * Evaluate the project to see if it has been modified since it
+ * was loaded or saved.
  *
- * @returns {boolean}
+ * @returns {boolean} True if the project has changed since the last
+ * load or save operation.
  *
  * TODO: We might get here if we failed to load a new project.
  */
@@ -992,27 +1011,43 @@ var checkLeave = function () {
         return false;
     }
 
+    // The current state of the project code
     let currentXml;
-    let savedXml = projectData['code'];
+    // The original state fo the project code
+    let savedXml;
 
-    if (projectData['board'] === 'propcfile') {
-        currentXml = propcAsBlocksXml();
+    if (isOffline) {
+        // Get the original state of the project code
+        // The source for an offline project is the browser storage
+        let project = window.localStorage.getItem('localProject');
+        if (project) {
+            savedXml = project.code;
+        } else {
+            savedXml = EmptyProjectCodeHeader;
+        }
+
+        // Get the current project state from the Blockly core
+        if (Blockly.Xml && Blockly.mainWorkspace) {
+            let xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+            currentXml = Blockly.Xml.domToText(xml);
+        } else {
+            currentXml = EmptyProjectCodeHeader;
+        }
     } else {
-        currentXml = getXml();
+        // ONLINE MODE
+        savedXml = projectData.code;
+
+        if (projectData['board'] === 'propcfile') {
+            currentXml = propcAsBlocksXml();
+        } else {
+            currentXml = getXml();
+        }
     }
 
     if (projectData === null) {
-        if (currentXml === EmptyProjectCodeHeader) {
-            return false;
-        } else {
-            return true;
-        }
+        return currentXml !== EmptyProjectCodeHeader;
     } else {
-        if (savedXml === currentXml) {
-            return false;
-        } else {
-            return true;
-        }
+        return savedXml !== currentXml;
     }
 };
 
@@ -1480,6 +1515,7 @@ function loadToolbox(xmlText) {
  * @returns {string}
  */
 function getXml() {
+//    if (Blockly.Xml && Blockly.mainWorkspace) {
     if (Blockly.Xml) {
         var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
         return Blockly.Xml.domToText(xml);
