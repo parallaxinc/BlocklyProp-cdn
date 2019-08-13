@@ -133,8 +133,8 @@ bpIcons = {
  */
 function validateNewProjectForm() {
     // This function should only be used in offline mode
-    if (!isOffline) { 
-        return true; 
+    if (!isOffline) {
+        return true;
     }
 
     // Select the 'proj' class in new-project.html
@@ -159,18 +159,15 @@ function validateNewProjectForm() {
 // TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
 // var simplemde = null;
 
-/**
- *
- */
-$(document).ready(function () {
-    // Ensure blockly workspace takes the remainder of the window.
-    $(window).on('resize', function () { resetToolBoxSizing() });
 
-    // Insert the text strings (internationalization) once the page has loaded    
+
+function initInternationalText() {
+
+    // Insert the text strings (internationalization) once the page has loaded
     // insert into <span> tags
     $(".keyed-lang-string").each(function () {
         var span_tag = $(this);
-        
+
         // Set the text of the label spans
         var pageLabel = span_tag.attr('data-key');
         if (pageLabel) {
@@ -183,21 +180,25 @@ $(document).ready(function () {
             }
         }
     });
-    
+
     // insert text strings (internationalization) into button/link tooltips
     for (var i = 0; i < tooltip_text.length; i++) {
         if (tooltip_text[i] && document.getElementById(tooltip_text[i][0])) {
             $('#' + tooltip_text[i][0]).attr('title', tooltip_text[i][1]);
         }
     }
+}
 
-    if (getURLParameter('debug')) console.log("User authentication is: ", user_authenticated);
 
-    // Draw the custom icons into the specified <span> tags
-    $('.bpIcon[data-icon]').each(function () { $(this).html(bpIcons[$(this).attr('data-icon')]); });
 
-    /* WIP/TODO: Move javascript that is inline in the HTML files to included scripts.  This keeps the HTML simple and clean.
-    */
+
+function initEventHandlers() {
+    /*
+ * TODO: Move javascript that is inline in the HTML files to included scripts.
+ *    This keeps the HTML simple and clean.
+ *
+ * This is a WIP.
+*/
     // Set up event handlers - Attach events to nav/action menus/buttons
     $('#prop-btn-comp').on('click',         function () {  compile();  });
     $('#prop-btn-ram').on('click',          function () {  loadInto('Load into RAM', 'bin', 'CODE', 'RAM');  });
@@ -224,9 +225,10 @@ $(document).ready(function () {
     $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
-    $('#save-btn, #save-project').on('click', function () {  
+
+    $('#save-btn, #save-project').on('click', function () {
         if (isOffline) {
-            downloadCode(); 
+            downloadCode();
         } else {
             saveProject();
         }
@@ -236,8 +238,13 @@ $(document).ready(function () {
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
     $('#btn-graph-csv').on('click',         function () {  downloadCSV();  });
     $('#btn-graph-clear').on('click',       function () {  graphStartStop('clear');  });
-    $('#save-as-board-type').on('change',   function () {  checkBoardType($('#saveAsDialogSender').html());  });
+
+    $('#save-as-board-type').on('change',   function () {
+        checkBoardType( $('#saveAsDialogSender').html());
+    });
+
     $('#save-as-board-btn').on('click',     function () {  saveProjectAs();  });
+
     for (var k = 1; k < 4; k++) {
         $('#mac' + k + '-btn').on('click',  function () {  showStep('mac', k, 4);  });
         $('#win' + k + '-btn').on('click',  function () {  showStep('win', k, 3);  });
@@ -261,6 +268,62 @@ $(document).ready(function () {
         $('#selectfile-verify-boardtype').css('display', 'none');
     });
 
+}
+
+
+/**
+ * disable to upload dialog buttons until a valid file is uploaded
+ */
+function disableUploadDialogButtons() {
+    document.getElementById("selectfile-replace").disabled = true;
+    document.getElementById("selectfile-append").disabled = true;
+}
+
+
+/**
+ * Reset the upload/import modal window to defaults after use
+ */
+function resetUploadImportModalDialog() {
+    // reset the title of the modal
+    if (isOffline) {
+        $('upload-dialog-title').html(page_text_label['editor_import']);
+    } else {
+        $('upload-dialog-title').html(page_text_label['editor_upload']);
+    }
+
+    // hide "append" button
+    $('#selectfile-append').removeClass('hidden');
+
+    // change color of the "replace" button to blue and change text to "Open"
+    $('#selectfile-replace').removeClass('btn-primary').addClass('btn-danger').html(page_text_label['editor_button_replace']);
+
+    // reset the blockly toolbox sizing to ensure it renders correctly:
+    resetToolBoxSizing(100);
+}
+
+
+
+
+/**
+ * Execute this code as soon as the DOM becomes ready.
+ */
+$(document).ready(function () {
+    // Update the blockly workspace to ensure that it takes
+    // the remainder of the window.
+    $(window).on('resize', function () {
+        resetToolBoxSizing()
+    });
+
+    // Load the internationalization messages
+    initInternationalText()
+
+    // Draw the custom icons into the specified <span> tags
+    $('.bpIcon[data-icon]').each(function () {
+        $(this).html(bpIcons[$(this).attr('data-icon')]);
+    });
+
+    initEventHandlers();
+
     // set the upload modal's title to "import" if offline
     if (isOffline) {
          $('#upload-dialog-title').html(page_text_label['editor_import']);
@@ -268,28 +331,11 @@ $(document).ready(function () {
          $('#save-project-as, save-as-btn').addClass('hidden');
     }
 
-    // disable to upload dialog buttons until a valid file is uploaded
-    document.getElementById("selectfile-replace").disabled = true;
-    document.getElementById("selectfile-append").disabled = true;
+    disableUploadDialogButtons();
 
     // Reset the upload/import modal to its default state when closed
-    $('#upload-dialog').on('hidden.bs.modal', function () {
-        // reset the title of the modal
-        if (isOffline) {
-            $('upload-dialog-title').html(page_text_label['editor_import']);
-        } else {
-            $('upload-dialog-title').html(page_text_label['editor_upload']);
-        }
+    $('#upload-dialog').on('hidden.bs.modal', resetUploadImportModalDialog());
 
-        // hide "append" button
-        $('#selectfile-append').removeClass('hidden');
-
-        // change color of the "replace" button to blue and change text to "Open"
-        $('#selectfile-replace').removeClass('btn-primary').addClass('btn-danger').html(page_text_label['editor_button_replace']);
-
-        // reset the blockly toolbox sizing to ensure it renders correctly:
-        resetToolBoxSizing(100);
-    });
 
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
@@ -1300,17 +1346,31 @@ function clearUploadInfo() {
 
 
 /**
+ * Open and load an svg project file
  *
- * @param append
+ * @param append is true if the project being loaded will be appended
+ * to the existing project
+ *
+ * @description
+ * This is called when the 'Open' button on the Open Project dialog
+ * box is selected. At this point, the projectData global object
+ * has been populated. In the offline mode, the function copies the
+ * project to the browser's localStorage and then redirects the
+ * browser back to the same page, but without the 'opeFile..' query
+ * string.
  */
 function uploadMergeCode(append) {
-    // when opening a file when directed from the splash screen in the offline app, load the selected project
-    if (!append && isOffline && getURLParameter('openFile') === 'true') {
-        window.localStorage.setItem('localProject', JSON.stringify(projectData));
-        window.location = 'blocklyc.html';
+    if (isOffline) {
+        // When opening a file when directed from the splash screen in
+        // the offline app, load the selected project
+        if (!append && getURLParameter('openFile') === 'true') {
+            window.localStorage.setItem('localProject', JSON.stringify(projectData));
+            window.location = 'blocklyc.html';
+        }
     }
 
     $('#upload-dialog').modal('hide');
+
     if (uploadedXML !== '') {
         var projCode = '';
         if (append) {
