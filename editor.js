@@ -190,8 +190,6 @@ function initInternationalText() {
 }
 
 
-
-
 function initEventHandlers() {
     /*
  * TODO: Move javascript that is inline in the HTML files to included scripts.
@@ -287,6 +285,7 @@ function resetUploadImportModalDialog() {
     // reset the title of the modal
     if (isOffline) {
         $('upload-dialog-title').html(page_text_label['editor_import']);
+
     } else {
         $('upload-dialog-title').html(page_text_label['editor_upload']);
     }
@@ -302,6 +301,32 @@ function resetUploadImportModalDialog() {
 }
 
 
+
+
+/**
+ * Set the client download links
+ */
+function initClientDownloadLinks() {
+    $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
+    $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
+    $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
+}
+
+
+/**
+ * Set the URLs for all of the CDN-sourced images
+ */
+function initCdnImageUrls() {
+    $("img").each(function () {
+        let img_tag = $(this);
+
+        // Set the source of the image
+        let img_source = img_tag.attr('data-src');
+        if (img_source) {
+            img_tag.attr('src', cdnUrl + img_source);
+        }
+    });
+}
 
 
 /**
@@ -349,20 +374,8 @@ $(document).ready(function () {
         return baseUrl + cur;
     });
 
-    /*
-     * Set the URLs for all of the CDN-sourced images
-     */
-    $("img").each(function () {
-        var img_tag = $(this);
-        // Set the source of the image
-        var img_source = img_tag.attr('data-src');
-        if (img_source) {  img_tag.attr('src', cdnUrl + img_source);  }
-    });
-
-    // Set the client download links
-    $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
-    $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
-    $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
+    initCdnImageUrls();
+    initClientDownloadLinks();
 
     idProject = getURLParameter('project');
 
