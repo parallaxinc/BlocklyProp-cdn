@@ -185,6 +185,15 @@ $(document).ready(function () {
         resetToolBoxSizing()
     });
 
+/*
+    window.addEventListener(
+        "beforeunload",
+        function(event) {
+        if (checkLeave()) {
+            return Blockly.Msg.DIALOG_CHANGED_SINCE;
+        }});
+*/
+
     // Insert the text strings (internationalization) once the page has loaded    
     // insert into <span> tags
     $(".keyed-lang-string").each(function () {
@@ -237,11 +246,17 @@ $(document).ready(function () {
     $('#propc-find-btn').on('click',        function () {  codePropC.find(document.getElementById('propc-find').value, {}, true);  });
     $('#propc-replace-btn').on('click',     function () {  codePropC.replace(document.getElementById('propc-replace').value, {needle: document.getElementById('propc-find').value}, true);  });
     $('#find-replace-close').on('click',    function () {  findReplaceCode();  });
+
+    // Close the upload project dialog
     $('#upload-close').on('click',          function () {  clearUploadInfo();  });
+
     //$('#selectfile').on('change', {fileValue: this.files}, function (e) {  console.log(e.data.fileValue); uploadHandler(e.data.fileValue);  });
+
+    // Upload svg dialog result buttons
     $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false);  });
     $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
+
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
     $('#save-btn, #save-project').on('click', function () {  
         if (isOffline) {
@@ -399,7 +414,9 @@ $(document).ready(function () {
 
             // Import a project .SVG file
             $('#upload-dialog').modal('show');
-
+            if (projectData) {
+                setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
+            }
         } else if (window.localStorage.getItem('localProject')) {
             // load the last used project from the browser local storage in offline mode
             //
@@ -1000,6 +1017,7 @@ var editProjectDetails = function () {
  */
 window.onbeforeunload = function () {
     if (checkLeave() && !isOffline) {
+//    if (checkLeave()) {
         return Blockly.Msg.DIALOG_CHANGED_SINCE;
     }
 };
@@ -1032,11 +1050,14 @@ var checkLeave = function () {
     if (isOffline) {
         // Get the original state of the project code
         // The source for an offline project is the browser storage
-        let project = window.localStorage.getItem('localProject');
-        if (project) {
-            savedXml = project.code;
-        } else {
+        let rawProject = window.localStorage.getItem('localProject');
+        if (!rawProject) {
             savedXml = EmptyProjectCodeHeader;
+        } else {
+            // project is a JSON document at this point. Decode it into
+            // an object so we can get at the project code.
+            let project = JSON.parse(rawProject);
+            savedXml = project.code;
         }
 
         // Get the current project state from the Blockly core
@@ -1044,7 +1065,17 @@ var checkLeave = function () {
             let xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
             currentXml = Blockly.Xml.domToText(xml);
         } else {
-            currentXml = EmptyProjectCodeHeader;
+            // The project has not been loaded into the Blockly core.
+            // This is possible if the project has just been loaded
+            // and control is being handed off to the core editor.
+            // In this case, the project loader should have placed a
+            // copy of the project in the projectData object.
+            if (projectData) {
+                currentXml = projectData.code;
+            }
+            else {
+                currentXml = EmptyProjectCodeHeader;
+            }
         }
     } else {
         // ONLINE MODE
@@ -1366,8 +1397,18 @@ function clearUploadInfo() {
 
 
 /**
+ * Open and load an svg project file
  *
- * @param append
+ * @param append is true if the project being loaded will be appended
+ * to the existing project
+ *
+ * @description
+ * This is called when the 'Open' button on the Open Project dialog
+ * box is selected. At this point, the projectData global object
+ * has been populated. In the offline mode, the function copies the
+ * project to the browser's localStorage and then redirects the
+ * browser back to the same page, but without the 'opeFile..' query
+ * string.
  */
 function uploadMergeCode(append) {
     // when opening a file when directed from the splash screen in the offline app, load the selected project
@@ -1449,9 +1490,12 @@ function uploadMergeCode(append) {
             projectData['code'] = EmptyProjectCodeHeader + projCode + newCode + '</xml>';
         }
 
+        // Clear the existing Blockly workspace.
         if(Blockly.mainWorkspace) {
             Blockly.mainWorkspace.clear();
         }
+
+        // This call fails because there is no Blockly workspace context
         loadToolbox(projectData['code']);
         clearUploadInfo();
     }
@@ -1517,8 +1561,15 @@ function initToolbox(profileName) {
  * @param xmlText
  */
 function loadToolbox(xmlText) {
-    var xmlDom = Blockly.Xml.textToDom(xmlText);
-    Blockly.Xml.domToWorkspace(xmlDom, Blockly.mainWorkspace);
+    if (Blockly.mainWorkspace) {
+        let xmlDom = Blockly.Xml.textToDom(xmlText);
+
+        // domToWorkspace expects (XML DOM, Blockly workspace)
+        return Blockly.Xml.domToWorkspace(xmlDom, Blockly.mainWorkspace);
+    } else {
+        console.log("Loading toolbox with invalid Blockly workspace");
+        return null;
+    }
 }
 
 
