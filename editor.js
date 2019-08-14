@@ -11,6 +11,7 @@
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
  *
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -57,10 +58,11 @@ var user_authenticated = ($("meta[name=user-auth]").attr("content") === 'true') 
 var isOffline = ($("meta[name=isOffline]").attr("content") === 'true') ? true : false;
 
 
-//QUESTION: What does this do?
 /**
+ * Global variable that holds the original version of the loaded
+ * project.
  *
- * @type {null}
+ * @type {string}
  */
 var projectData = null;
 
@@ -95,6 +97,8 @@ var last_saved_timestamp = 0;
 
 
 /**
+ * Timestamp to record when the current project was last saved to
+ * storage
  *
  * @type {number}
  */
@@ -102,6 +106,7 @@ var last_saved_time = 0;
 
 
 /**
+ * The primary key for the project (online version)
  *
  * @type {number}
  */
@@ -109,10 +114,12 @@ var idProject = 0;
 
 
 /**
+ * Uploaded project XML code
  *
  * @type {string}
  */
 var uploadedXML = '';
+
 
 /**  WIP/TODO: generate svg icons and inject them.  This keeps the HTML simple and clean.
  *
@@ -141,6 +148,51 @@ bpIcons = {
     cameraWhite:         '<svg width="14" height="15"><path d="M1.5,13.5 L.5,12.5 .5,5.5 1.5,4.5 2.5,4.5 4,3 7,3 8.5,4.5 12.5,4.5 13.5,5.5 13.5,12.5 12.5,13.5 Z M 2,9 A 4,4,0,0,0,10,9 A 4,4,0,0,0,2,9 Z M 4.5,9 A 1.5,1.5,0,0,0,7.5,9 A 1.5,1.5,0,0,0,4.5,9 Z M 10.5,6.5 A 1,1,0,0,0,13.5,6.5 A 1,1,0,0,0,10.5,6.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
 }
 
+// TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
+
+
+
+
+/**
+ * Check project state to see if it has changed before leaving the page
+ *
+ * @returns {boolean}
+ *
+ * TODO: We might get here if we failed to load a new project.
+ */
+function checkLeave () {
+    // Return if there is no project data
+    if (!projectData) {
+        return false;
+    }
+
+    var currentXml = '';
+    var savedXml = projectData['code'];
+
+    if (ignoreSaveCheck) {
+        return false;
+    }
+    if (projectData['board'] === 'propcfile') {
+        currentXml = propcAsBlocksXml();
+    } else {
+        currentXml = getXml();
+    }
+    if (projectData === null) {
+        if (currentXml === '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>') {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        if (savedXml === currentXml) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+};
+
+
 /**
  * Verify that the project name and board type form fields have data
  *
@@ -148,8 +200,8 @@ bpIcons = {
  */
 function validateNewProjectForm() {
     // This function should only be used in offline mode
-    if (!isOffline) { 
-        return true; 
+    if (!isOffline) {
+        return true;
     }
 
     // Select the 'proj' class
@@ -171,34 +223,18 @@ function validateNewProjectForm() {
     return project.valid() ? true : false;
 }
 
-// TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
-// var simplemde = null;
 
 
 /**
- * Event handler that triggers only once and only when the DOM is
- * in a ready state.
+ * Set text strings for all of the UI labels
  */
-$(document).ready(function () {
-    // Ensure blockly workspace takes the remainder of the window.
-    $(window).on('resize', function () {
-        resetToolBoxSizing()
-    });
+function initInternationalText() {
 
-/*
-    window.addEventListener(
-        "beforeunload",
-        function(event) {
-        if (checkLeave()) {
-            return Blockly.Msg.DIALOG_CHANGED_SINCE;
-        }});
-*/
-
-    // Insert the text strings (internationalization) once the page has loaded    
+    // Insert the text strings (internationalization) once the page has loaded
     // insert into <span> tags
     $(".keyed-lang-string").each(function () {
         var span_tag = $(this);
-        
+
         // Set the text of the label spans
         var pageLabel = span_tag.attr('data-key');
         if (pageLabel) {
@@ -211,21 +247,26 @@ $(document).ready(function () {
             }
         }
     });
-    
+
     // insert text strings (internationalization) into button/link tooltips
     for (var i = 0; i < tooltip_text.length; i++) {
         if (tooltip_text[i] && document.getElementById(tooltip_text[i][0])) {
             $('#' + tooltip_text[i][0]).attr('title', tooltip_text[i][1]);
         }
     }
+}
 
-    if (getURLParameter('debug')) console.log("User authentication is: ", user_authenticated);
 
-    // Draw the custom icons into the specified <span> tags
-    $('.bpIcon[data-icon]').each(function () { $(this).html(bpIcons[$(this).attr('data-icon')]); });
-
-    /* WIP/TODO: Move javascript that is inline in the HTML files to included scripts.  This keeps the HTML simple and clean.
-    */
+/**
+ * Configure all of the event handlers
+ */
+function initEventHandlers() {
+    /*
+ * TODO: Move javascript that is inline in the HTML files to included scripts.
+ *    This keeps the HTML simple and clean.
+ *
+ * This is a WIP.
+*/
     // Set up event handlers - Attach events to nav/action menus/buttons
     $('#prop-btn-comp').on('click',         function () {  compile();  });
     $('#prop-btn-ram').on('click',          function () {  loadInto('Load into RAM', 'bin', 'CODE', 'RAM');  });
@@ -246,21 +287,26 @@ $(document).ready(function () {
     $('#propc-find-btn').on('click',        function () {  codePropC.find(document.getElementById('propc-find').value, {}, true);  });
     $('#propc-replace-btn').on('click',     function () {  codePropC.replace(document.getElementById('propc-replace').value, {needle: document.getElementById('propc-find').value}, true);  });
     $('#find-replace-close').on('click',    function () {  findReplaceCode();  });
+    $('#upload-close').on('click',          function () {  clearUploadInfo(false);  });
 
-    // Close the upload project dialog
-    $('#upload-close').on('click',          function () {  clearUploadInfo();  });
+/*
+    $('#selectfile').on('change',
+        {fileValue: this.files},
+        function (e) {
+            console.log(e.data.fileValue);
+            uploadHandler(e.data.fileValue);
+    });
+*/
 
-    //$('#selectfile').on('change', {fileValue: this.files}, function (e) {  console.log(e.data.fileValue); uploadHandler(e.data.fileValue);  });
-
-    // Upload svg dialog result buttons
     $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false);  });
     $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
-    $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
 
+    $('#selectfile-clear').on('click',      function () {  clearUploadInfo(true);  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
-    $('#save-btn, #save-project').on('click', function () {  
+
+    $('#save-btn, #save-project').on('click', function () {
         if (isOffline) {
-            downloadCode(); 
+            downloadCode();
         } else {
             saveProject();
         }
@@ -270,8 +316,13 @@ $(document).ready(function () {
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
     $('#btn-graph-csv').on('click',         function () {  downloadCSV();  });
     $('#btn-graph-clear').on('click',       function () {  graphStartStop('clear');  });
-    $('#save-as-board-type').on('change',   function () {  checkBoardType($('#saveAsDialogSender').html());  });
+
+    $('#save-as-board-type').on('change',   function () {
+        checkBoardType( $('#saveAsDialogSender').html());
+    });
+
     $('#save-as-board-btn').on('click',     function () {  saveProjectAs();  });
+
     for (var k = 1; k < 4; k++) {
         $('#mac' + k + '-btn').on('click',  function () {  showStep('mac', k, 4);  });
         $('#win' + k + '-btn').on('click',  function () {  showStep('win', k, 3);  });
@@ -295,6 +346,115 @@ $(document).ready(function () {
         $('#selectfile-verify-boardtype').css('display', 'none');
     });
 
+}
+
+
+/**
+ * disable to upload dialog buttons until a valid file is uploaded
+ */
+function disableUploadDialogButtons() {
+    document.getElementById("selectfile-replace").disabled = true;
+    document.getElementById("selectfile-append").disabled = true;
+}
+
+
+/**
+ * Reset the upload/import modal window to defaults after use
+ */
+function resetUploadImportModalDialog() {
+    // reset the title of the modal
+    if (isOffline) {
+        $('upload-dialog-title').html(page_text_label['editor_import']);
+
+    } else {
+        $('upload-dialog-title').html(page_text_label['editor_upload']);
+    }
+
+    // hide "append" button
+    $('#selectfile-append').removeClass('hidden');
+
+    // change color of the "replace" button to blue and change text to "Open"
+    $('#selectfile-replace').removeClass('btn-primary').addClass('btn-danger').html(page_text_label['editor_button_replace']);
+
+    // reset the blockly toolbox sizing to ensure it renders correctly:
+    resetToolBoxSizing(100);
+}
+
+
+/**
+ * Set the client download links
+ */
+function initClientDownloadLinks() {
+    $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
+    $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
+    $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
+}
+
+
+/**
+ * Set the URLs for all of the CDN-sourced images
+ */
+function initCdnImageUrls() {
+    $("img").each(function () {
+        let img_tag = $(this);
+
+        // Set the source of the image
+        let img_source = img_tag.attr('data-src');
+        if (img_source) {
+            img_tag.attr('src', cdnUrl + img_source);
+        }
+    });
+}
+
+
+/**
+ * Execute this code as soon as the DOM becomes ready.
+ */
+$(document).ready(function () {
+    /* -- Set up amy event handlers once the DOM is ready -- */
+
+    // Update the blockly workspace to ensure that it takes
+    // the remainder of the window.
+    $(window).on('resize', function () {
+        resetToolBoxSizing()
+    });
+
+
+    /* Event handler for the OnBeforeUnload event
+     *
+     * This event fires just before the document begins to unload.
+     * The unload can be stopped by returning a string message. The
+     * browser will then open a modal dialog the presents the
+     * message and options for Cancel and Leave. If the Cancel option
+     * is selected the unload event is cancelled and page processing
+     * continues.
+     */
+    window.addEventListener('beforeunload', function (e) {
+        if (isOffline) {
+            // Call checkLeave only if we are NOT loading a new project
+            if (getURLParameter('openFile') === "true") {
+                return;
+            }
+        }
+
+        if (checkLeave()) {
+            e.preventDefault();     // Cancel the event
+            e.returnValue = Blockly.Msg.DIALOG_CHANGED_SINCE;
+            return Blockly.Msg.DIALOG_CHANGED_SINCE;
+        }
+    });
+
+
+    // Load the internationalization messages
+    initInternationalText()
+
+    // Draw the custom icons into the specified <span> tags
+    $('.bpIcon[data-icon]').each(function () {
+        $(this).html(bpIcons[$(this).attr('data-icon')]);
+    });
+
+    initEventHandlers();
+
     // set the upload modal's title to "import" if offline
     if (isOffline) {
          $('#upload-dialog-title').html(page_text_label['editor_import']);
@@ -302,28 +462,11 @@ $(document).ready(function () {
          $('#save-project-as, save-as-btn').addClass('hidden');
     }
 
-    // disable to upload dialog buttons until a valid file is uploaded
-    document.getElementById("selectfile-replace").disabled = true;
-    document.getElementById("selectfile-append").disabled = true;
+    disableUploadDialogButtons();
 
     // Reset the upload/import modal to its default state when closed
-    $('#upload-dialog').on('hidden.bs.modal', function () {
-        // reset the title of the modal
-        if (isOffline) {
-            $('upload-dialog-title').html(page_text_label['editor_import']);
-        } else {
-            $('upload-dialog-title').html(page_text_label['editor_upload']);
-        }
+    $('#upload-dialog').on('hidden.bs.modal', resetUploadImportModalDialog());
 
-        // hide "append" button
-        $('#selectfile-append').removeClass('hidden');
-
-        // change color of the "replace" button to blue and change text to "Open"
-        $('#selectfile-replace').removeClass('btn-primary').addClass('btn-danger').html(page_text_label['editor_button_replace']);
-
-        // reset the blockly toolbox sizing to ensure it renders correctly:
-        resetToolBoxSizing(100);
-    });
 
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
@@ -337,31 +480,18 @@ $(document).ready(function () {
         return baseUrl + cur;
     });
 
-    /*
-     * Set the URLs for all of the CDN-sourced images
-     */
-    $("img").each(function () {
-        var img_tag = $(this);
-        // Set the source of the image
-        var img_source = img_tag.attr('data-src');
-        if (img_source) {  img_tag.attr('src', cdnUrl + img_source);  }
-    });
-
-    // Set the client download links
-    $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
-    $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
-    $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
+    initCdnImageUrls();
+    initClientDownloadLinks();
 
     idProject = getURLParameter('project');
 
-    var projectlink = null;
-    
+    //Decode and parse project data coming from a sharelink
     if (window.location.href.indexOf('projectlink') > -1) {
-        //Decode and parse project data coming from a sharelink
-        var projectRaw = atob($("meta[name=projectlink]").attr("content"));
-        projectlink = JSON.parse(projectRaw);
-        setupWorkspace(projectlink);
-
+        // Decode the base-64 encoded project link
+        let projectRaw = atob($("meta[name=projectlink]").attr("content"));
+        if (projectRaw.length > 0) {
+            setupWorkspace(JSON.parse(projectRaw));
+        }
     } else if (!idProject && !isOffline) {
         // redirect to the home page if the project id was not specified
         // and the code is running in the online mode
@@ -446,10 +576,10 @@ $(document).ready(function () {
 
     // these are only set up for the offline editor
     if (isOffline) {
-
         // show the new project modal
         showNewProjectModal();
 
+        // Set up the click even handler for the "New Project" modal dialog
         // return to the splash screen if the user clicks the cancel button
         $('#new-project-cancel').on('click', function() {
 
@@ -465,16 +595,15 @@ $(document).ready(function () {
                 $('#edit-project-last-modified').html('');
                 $('#open-modal-sender').html('');
 
-                // simplemde.toTextArea();
-                // simplemde = null;
-                
                 $('#new-project-dialog').modal('hide');
 
             } else {
                 // otherwise, return to the splash page
+                alert("jumping off to the index page");
                 window.location = 'index.html';
             }
         });
+
 
     } // isOffline
 
@@ -1011,92 +1140,6 @@ var editProjectDetails = function () {
 
 
 /**
- * Event handler for the OnBeforeUnload event
- *
- * @returns {string}
- */
-window.onbeforeunload = function () {
-    if (checkLeave() && !isOffline) {
-//    if (checkLeave()) {
-        return Blockly.Msg.DIALOG_CHANGED_SINCE;
-    }
-};
-
-
-/**
- * Evaluate the project to see if it has been modified since it
- * was loaded or saved.
- *
- * @returns {boolean} True if the project has changed since the last
- * load or save operation.
- *
- * TODO: We might get here if we failed to load a new project.
- */
-var checkLeave = function () {
-    // Return if projectData is undefined
-    if (!projectData) {
-        return false;
-    }
-
-    if (ignoreSaveCheck) {
-        return false;
-    }
-
-    // The current state of the project code
-    let currentXml;
-    // The original state fo the project code
-    let savedXml;
-
-    if (isOffline) {
-        // Get the original state of the project code
-        // The source for an offline project is the browser storage
-        let rawProject = window.localStorage.getItem('localProject');
-        if (!rawProject) {
-            savedXml = EmptyProjectCodeHeader;
-        } else {
-            // project is a JSON document at this point. Decode it into
-            // an object so we can get at the project code.
-            let project = JSON.parse(rawProject);
-            savedXml = project.code;
-        }
-
-        // Get the current project state from the Blockly core
-        if (Blockly.Xml && Blockly.mainWorkspace) {
-            let xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-            currentXml = Blockly.Xml.domToText(xml);
-        } else {
-            // The project has not been loaded into the Blockly core.
-            // This is possible if the project has just been loaded
-            // and control is being handed off to the core editor.
-            // In this case, the project loader should have placed a
-            // copy of the project in the projectData object.
-            if (projectData) {
-                currentXml = projectData.code;
-            }
-            else {
-                currentXml = EmptyProjectCodeHeader;
-            }
-        }
-    } else {
-        // ONLINE MODE
-        savedXml = projectData.code;
-
-        if (projectData['board'] === 'propcfile') {
-            currentXml = propcAsBlocksXml();
-        } else {
-            currentXml = getXml();
-        }
-    }
-
-    if (projectData === null) {
-        return currentXml !== EmptyProjectCodeHeader;
-    } else {
-        return savedXml !== currentXml;
-    }
-};
-
-
-/**
  *
  * @type {number}
  */
@@ -1118,8 +1161,11 @@ function hashCode(str) {
     return (hash + 2147483647) + 1;
 }
 
+
 /**
- * Encode a string to an XML-safe string by replacing unsafe characters with HTML entities
+ * Encode a string to an XML-safe string by replacing unsafe
+ * characters with HTML entities
+ *
  * @param str
  * @returns {string}
  */
@@ -1136,8 +1182,11 @@ function encodeToValidXml(str) {
     );
 }
 
+
 /**
- * Decode a string from an XML-safe string by replacing HTML entities with their standard characters
+ * Decode a string from an XML-safe string by replacing HTML
+ * entities with their standard characters
+ *
  * @param str
  * @returns {string}
  */
@@ -1161,7 +1210,6 @@ function downloadCode() {
     if (projectData && projectData['board'] !== 'propcfile' && getXml().length < 50) {
         alert('You can\'t save an empty project!');
     } else {
-
         var projXMLcode = '';
         
         if (projectData && projectData['board'] === 'propcfile') {
@@ -1174,7 +1222,9 @@ function downloadCode() {
         projXMLcode = projXMLcode.substring(0, (projXMLcode.length - 6));
 
         var project_filename = 'Project' + idProject;
+
         if (isOffline) {
+            // Create a filename from the project title
             project_filename = projectData['name'].replace(/[^a-z0-9]/gi, '_').toLowerCase();
         }
 
@@ -1261,7 +1311,9 @@ function downloadCode() {
  */
 function uploadCode() {
     if (checkLeave() && !isOffline) {
-        utils.showMessage(Blockly.Msg.DIALOG_UNSAVED_PROJECT, Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
+        utils.showMessage(
+            Blockly.Msg.DIALOG_UNSAVED_PROJECT,
+            Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
     } else {
         $('#upload-dialog').modal('show');
     }
@@ -1269,6 +1321,7 @@ function uploadCode() {
 
 
 /**
+ *  NOT USED.
  *
  * @param files
  */
@@ -1378,8 +1431,9 @@ function uploadHandler(files) {
 
 /**
  *
+ * @param redirect boolean flag to permit page redirection
  */
-function clearUploadInfo() {
+function clearUploadInfo(redirect) {
     // Reset all of the upload fields and containers
     uploadedXML = '';
     $('#selectfile').val('');
@@ -1390,8 +1444,11 @@ function clearUploadInfo() {
     document.getElementById("selectfile-append").disabled = true;
 
     // when opening a file but the user cancels, return to the splash screen
-    if (isOffline && getURLParameter('openFile') === 'true') {
-        window.location = 'index.html';
+    if ( redirect === true) {
+        if (isOffline && getURLParameter('openFile') === 'true') {
+            alert("Redirecting to the home page....");
+            window.location = 'index.html';
+        }
     }
 }
 
@@ -1411,13 +1468,17 @@ function clearUploadInfo() {
  * string.
  */
 function uploadMergeCode(append) {
-    // when opening a file when directed from the splash screen in the offline app, load the selected project
-    if (!append && isOffline && getURLParameter('openFile') === 'true') {
-        window.localStorage.setItem('localProject', JSON.stringify(projectData));
-        window.location = 'blocklyc.html';
+    if (isOffline) {
+        // When opening a file when directed from the splash screen in
+        // the offline app, load the selected project
+        if (!append && getURLParameter('openFile') === 'true') {
+            window.localStorage.setItem('localProject', JSON.stringify(projectData));
+            window.location = 'blocklyc.html';
+        }
     }
 
     $('#upload-dialog').modal('hide');
+
     if (uploadedXML !== '') {
         var projCode = '';
         if (append) {
@@ -1490,14 +1551,16 @@ function uploadMergeCode(append) {
             projectData['code'] = EmptyProjectCodeHeader + projCode + newCode + '</xml>';
         }
 
-        // Clear the existing Blockly workspace.
+        //
         if(Blockly.mainWorkspace) {
             Blockly.mainWorkspace.clear();
         }
 
         // This call fails because there is no Blockly workspace context
         loadToolbox(projectData['code']);
-        clearUploadInfo();
+
+        // CAUTION: This call can redirect to the home page
+        clearUploadInfo(false);
     }
 }
 
@@ -1563,12 +1626,7 @@ function initToolbox(profileName) {
 function loadToolbox(xmlText) {
     if (Blockly.mainWorkspace) {
         let xmlDom = Blockly.Xml.textToDom(xmlText);
-
-        // domToWorkspace expects (XML DOM, Blockly workspace)
-        return Blockly.Xml.domToWorkspace(xmlDom, Blockly.mainWorkspace);
-    } else {
-        console.log("Loading toolbox with invalid Blockly workspace");
-        return null;
+        Blockly.Xml.domToWorkspace(xmlDom, Blockly.mainWorkspace);
     }
 }
 
@@ -1579,8 +1637,7 @@ function loadToolbox(xmlText) {
  * @returns {string}
  */
 function getXml() {
-//    if (Blockly.Xml && Blockly.mainWorkspace) {
-    if (Blockly.Xml) {
+    if (Blockly.Xml && Blockly.mainWorkspace) {
         var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
         return Blockly.Xml.domToText(xml);
     } else if (projectData && projectData.code) {
