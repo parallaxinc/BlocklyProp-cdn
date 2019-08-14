@@ -543,7 +543,7 @@ $(document).ready(function () {
             $('#selectfile-replace').html(page_text_label['editor_button_open']);
 
             // Import a project .SVG file
-            $('#upload-dialog').modal('show');
+            $('#upload-dialog').modal({keyboard: false, backdrop: 'static'});
             if (projectData) {
                 setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
             }
@@ -557,7 +557,7 @@ $(document).ready(function () {
         } else {
             // TODO: why is this here?
             // Open save-as modal
-            $('#save-as-type-dialog').modal('show');
+            $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
         }
 
     } else {
@@ -581,7 +581,7 @@ $(document).ready(function () {
 
         // Set up the click even handler for the "New Project" modal dialog
         // return to the splash screen if the user clicks the cancel button
-        $('#new-project-cancel').on('click', function() {
+        $('#new-project-cancel').on('click', function(e) {
 
             // if the project is being edited, clear the fields and close the modal
             if ($('#open-modal-sender').html() === 'open') {
@@ -599,7 +599,6 @@ $(document).ready(function () {
 
             } else {
                 // otherwise, return to the splash page
-                alert("jumping off to the index page");
                 window.location = 'index.html';
             }
         });
@@ -616,6 +615,7 @@ $(document).ready(function () {
  * 
  */
 var clearNewProjectModal = function() {
+    // Reset the values in the form to defaults
     $('#new-project-name').val('');
     $('#new-project-description').val('');
     $('#new-project-dialog-title').html(page_text_label['editor_newproject_title']);
@@ -627,25 +627,33 @@ var clearNewProjectModal = function() {
  *  @param openModal force the modal to open when set to 'open'
  */
 var showNewProjectModal = function(openModal) {
-    // clear out the board type dropdown menu
+
+    // Clear out the board type dropdown menu
     $("#new-project-board-type").empty();
 
-    // populate the board type dropdown menu with a header first,
+    // Populate the board type dropdown menu with a header first,
     $("#new-project-board-type")
-            .append($('<option />')
-            .val('')
-            .text(page_text_label['project_create_board_type_select'])
-            .attr('disabled','disabled')
-            .attr('selected','selected')
+        .append($('<option />')
+        .val('')
+        .text(page_text_label['project_create_board_type_select'])
+        .attr('disabled','disabled')
+        .attr('selected','selected')
     );
 
     // If the editor is passed the 'newProject' parameter, open the modal
     if (getURLParameter('newProject') || openModal === 'open') {
-        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
-        var projectTimestamp = new Date();
+        // trap modal closing
+        $("#new-project-dialog").on('hidden.bs.modal', function(){
+            alert("Hello World!");
+        });
+
+        // Show the New Project modal dialog box
+        $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
+
+        // Populate the time stamp fields
+        let projectTimestamp = new Date();
         $('#edit-project-created-date').html(projectTimestamp);
         $('#edit-project-last-modified').html(projectTimestamp);
-
     }
 
     // if the newProject modal was opened from the editor, flag it so if the user
@@ -853,7 +861,7 @@ var checkLastSavedTime = function () {
 
     if (t_now > last_saved_timestamp && checkLeave() && user_authenticated) {
         // It's time to pop up a modal to remind the user to save.
-        $('#save-check-dialog').modal('show');
+        $('#save-check-dialog').modal({keyboard: false, backdrop: 'static'});
     }
 };
 
@@ -1014,7 +1022,7 @@ var saveAsDialog = function () {
         }
 
         // Open modal
-        $('#save-as-type-dialog').modal('show');
+        $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
     }
 };
 
@@ -1131,7 +1139,7 @@ var editProjectDetails = function () {
         $('#open-modal-sender').html('open');
 
         // show the modal
-        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
+        $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
 
     } else {
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
@@ -1315,7 +1323,7 @@ function uploadCode() {
             Blockly.Msg.DIALOG_UNSAVED_PROJECT,
             Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
     } else {
-        $('#upload-dialog').modal('show');
+        $('#upload-dialog').modal({keyboard: false, backdrop: 'static'});
     }
 }
 
@@ -1446,7 +1454,6 @@ function clearUploadInfo(redirect) {
     // when opening a file but the user cancels, return to the splash screen
     if ( redirect === true) {
         if (isOffline && getURLParameter('openFile') === 'true') {
-            alert("Redirecting to the home page....");
             window.location = 'index.html';
         }
     }
