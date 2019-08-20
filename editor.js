@@ -369,11 +369,15 @@ function initEventHandlers() {
 
     $('#save-as-board-btn').on('click',     function () {  saveProjectAs();  });
 
-    for (var k = 1; k < 4; k++) {
-        $('#mac' + k + '-btn').on('click',  function () {  showStep('mac', k, 4);  });
-        $('#win' + k + '-btn').on('click',  function () {  showStep('win', k, 3);  });
-        $('#chr' + k + '-btn').on('click',  function () {  showStep('chr', k, 3);  });
-    }
+    $('#win1-btn').on('click',              function () {  showStep('win', 1, 3);  });
+    $('#win2-btn').on('click',              function () {  showStep('win', 2, 3);  });
+    $('#win3-btn').on('click',              function () {  showStep('win', 3, 3);  });
+    $('#chr1-btn').on('click',              function () {  showStep('chr', 1, 3);  });
+    $('#chr2-btn').on('click',              function () {  showStep('chr', 2, 3);  });
+    $('#chr3-btn').on('click',              function () {  showStep('chr', 3, 3);  });
+    $('#mac1-btn').on('click',              function () {  showStep('mac', 1, 4);  });
+    $('#mac2-btn').on('click',              function () {  showStep('mac', 2, 4);  });
+    $('#mac3-btn').on('click',              function () {  showStep('mac', 3, 4);  });
     $('#mac4-btn').on('click',              function () {  showStep('mac', 4, 4);  });
     $('.show-os-win').on('click',           function () {  showOS('Windows');  });
     $('.show-os-mac').on('click',           function () {  showOS('MacOS');  });
