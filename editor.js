@@ -11,6 +11,7 @@
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
  *
+ *
  * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -57,15 +58,31 @@ var user_authenticated = ($("meta[name=user-auth]").attr("content") === 'true') 
 var isOffline = ($("meta[name=isOffline]").attr("content") === 'true') ? true : false;
 
 
-//QUESTION: What does this do?
 /**
+ * Global variable that holds the original version of the loaded
+ * project.
  *
- * @type {null}
+ * @type {string}
  */
 var projectData = null;
 
 
 /**
+ * Constant string that represents the base, empty project header
+ *
+ * @type {string}
+ *
+ * @description Converting the string to a constant because it is referenced
+ * in a number of places. The string is sufficiently complex that it could
+ * be misspelled without detection.
+ */
+const EmptyProjectCodeHeader = '<xml xmlns="http://www.w3.org/1999/xhtml">';
+
+
+/**
+ * Force the saveCheck() function to exit immediately with a false result
+ *
+ * TODO: This flag is used in exactly one place. Why do we need it?
  *
  * @type {boolean}
  */
@@ -80,6 +97,8 @@ var last_saved_timestamp = 0;
 
 
 /**
+ * Timestamp to record when the current project was last saved to
+ * storage
  *
  * @type {number}
  */
@@ -87,6 +106,7 @@ var last_saved_time = 0;
 
 
 /**
+ * The primary key for the project (online version)
  *
  * @type {number}
  */
@@ -94,10 +114,12 @@ var idProject = 0;
 
 
 /**
+ * Uploaded project XML code
  *
  * @type {string}
  */
 var uploadedXML = '';
+
 
 /**  WIP/TODO: generate svg icons and inject them.  This keeps the HTML simple and clean.
  *
@@ -126,18 +148,92 @@ bpIcons = {
     cameraWhite:         '<svg width="14" height="15"><path d="M1.5,13.5 L.5,12.5 .5,5.5 1.5,4.5 2.5,4.5 4,3 7,3 8.5,4.5 12.5,4.5 13.5,5.5 13.5,12.5 12.5,13.5 Z M 2,9 A 4,4,0,0,0,10,9 A 4,4,0,0,0,2,9 Z M 4.5,9 A 1.5,1.5,0,0,0,7.5,9 A 1.5,1.5,0,0,0,4.5,9 Z M 10.5,6.5 A 1,1,0,0,0,13.5,6.5 A 1,1,0,0,0,10.5,6.5 Z" style="stroke:#fff;stroke-width:1;fill:#fff;" fill-rule="evenodd"/></svg>',
 }
 
+// TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
+
+
 /**
- * Verify that the project name and board type fields have data
- *
- * @returns {boolean} True if form contains data, otherwise false
+ * Ping the Rest API every 60 seconds
+ * @type {number}
  */
-function validateNewProjectForm() {
-    // this should only be used offline.
-    if (!isOffline) { 
-        return true; 
+let pingInterval = setInterval(() => {
+    $.get(baseUrl + 'ping');
+    },
+    60000
+);
+
+
+function initUploadModalLabels() {
+
+    // set the upload modal's title to "import" if offline
+    if (isOffline) {
+        $('#upload-dialog-title').html(page_text_label['editor_import']);
+        $('#upload-project span').html(page_text_label['editor_import']);
+
+        // Hide the save-as button.
+        $('#save-project-as, save-as-btn').addClass('hidden');
+    }
+}
+
+
+/**
+ * Check project state to see if it has changed before leaving the page
+ *
+ * @returns {boolean}
+ *
+ * TODO: We might get here if we failed to load a new project.
+ */
+function checkLeave () {
+    // Return if there is no project data
+    if (!projectData) {
+        return false;
     }
 
-    $(".proj").validate({
+    var currentXml = '';
+    var savedXml = projectData['code'];
+
+    if (ignoreSaveCheck) {
+        return false;
+    }
+    if (projectData['board'] === 'propcfile') {
+        currentXml = propcAsBlocksXml();
+    } else {
+        currentXml = getXml();
+    }
+
+    // TODO: We're checking for a null projectData object above; why are we testing again?
+    if (projectData === null) {
+        if (currentXml === '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>') {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        if (savedXml === currentXml) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+};
+
+
+/**
+ * Verify that the project name and board type form fields have data
+ *
+ * @returns {boolean} True if form contains valid data, otherwise false
+ */
+function validateNewProjectForm() {
+    // This function should only be used in offline mode
+    if (!isOffline) {
+        return true;
+    }
+
+    // Select the 'proj' class
+    let project = $(".proj");
+
+    // Validate the jQuery object based on these rules. Supply helpful
+    // error messages to use when a rule is violated
+    project.validate({
         rules: {
             'new-project-name': "required",
             'new-project-board-type': "required"
@@ -148,55 +244,75 @@ function validateNewProjectForm() {
         }
     });
 
-    // if form is invalid return false
-    if (!$(".proj").valid()) { 
-        return false; 
-    }
-    return true;
+    return project.valid() ? true : false;
 }
 
-// TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
-// var simplemde = null;
+
 
 /**
- *
+ * Insert the text strings (internationalization) for all of the UI
+ * elements on the editor page once the page has been loaded.
  */
-$(document).ready(function () {
-    // Ensure blockly workspace takes the remainder of the window.
-    $(window).on('resize', function () { resetToolBoxSizing() });
-
-    // Insert the text strings (internationalization) once the page has loaded    
-    // insert into <span> tags
+function initInternationalText() {
+    // Locate each HTML element of class 'keyed-lang-string'
     $(".keyed-lang-string").each(function () {
-        var span_tag = $(this);
-        
-        // Set the text of the label spans
-        var pageLabel = span_tag.attr('data-key');
+
+        // Set a reference to the current selected element
+        let span_tag = $(this);
+
+        // Get the associated key value that will be used to locate
+        // the text string in the page_text_label array. This array
+        // is declared in _messages.js
+        let pageLabel = span_tag.attr('data-key');
+
+        // If there is a key value
         if (pageLabel) {
             if (span_tag.is('a')) {
+                // if the html element is an anchor, add a link
                 span_tag.attr('href', page_text_label[pageLabel]);
             } else if (span_tag.is('input')) {
+                // if the html element is a form input, set the
+                // default value for the element
                 span_tag.attr('value', page_text_label[pageLabel]);
             } else {
+                // otherwise, assume that we're inserting html
                 span_tag.html(page_text_label[pageLabel]);
             }
         }
     });
-    
+
     // insert text strings (internationalization) into button/link tooltips
-    for (var i = 0; i < tooltip_text.length; i++) {
+    for (let i = 0; i < tooltip_text.length; i++) {
         if (tooltip_text[i] && document.getElementById(tooltip_text[i][0])) {
             $('#' + tooltip_text[i][0]).attr('title', tooltip_text[i][1]);
         }
     }
+}
 
-    if (getURLParameter('debug')) console.log("User authentication is: ", user_authenticated);
 
-    // Draw the custom icons into the specified <span> tags
-    $('.bpIcon[data-icon]').each(function () { $(this).html(bpIcons[$(this).attr('data-icon')]); });
+/**
+ * Initialize the tool bar icons
+ */
+function initEditorIcons() {
+    // Locate each element that has a class 'bpIcon' assigned and
+    // contains a 'data-icon' attribute. Itereate through each
+    // match and draw the custom icons into the specified element
+    // --------------------------------------------------------------
+    $('.bpIcon[data-icon]').each( () => {
+        $(this).html(bpIcons[$(this).attr('data-icon')]);
+    });
+}
 
-    /* WIP/TODO: Move javascript that is inline in the HTML files to included scripts.  This keeps the HTML simple and clean.
-    */
+/**
+ * Configure all of the event handlers
+ */
+function initEventHandlers() {
+    /*
+ * TODO: Move javascript that is inline in the HTML files to included scripts.
+ *    This keeps the HTML simple and clean.
+ *
+ * This is a WIP.
+*/
     // Set up event handlers - Attach events to nav/action menus/buttons
     $('#prop-btn-comp').on('click',         function () {  compile();  });
     $('#prop-btn-ram').on('click',          function () {  loadInto('Load into RAM', 'bin', 'CODE', 'RAM');  });
@@ -217,15 +333,26 @@ $(document).ready(function () {
     $('#propc-find-btn').on('click',        function () {  codePropC.find(document.getElementById('propc-find').value, {}, true);  });
     $('#propc-replace-btn').on('click',     function () {  codePropC.replace(document.getElementById('propc-replace').value, {needle: document.getElementById('propc-find').value}, true);  });
     $('#find-replace-close').on('click',    function () {  findReplaceCode();  });
-    $('#upload-close').on('click',          function () {  clearUploadInfo();  });
-    //$('#selectfile').on('change', {fileValue: this.files}, function (e) {  console.log(e.data.fileValue); uploadHandler(e.data.fileValue);  });
+    $('#upload-close').on('click',          function () {  clearUploadInfo(false);  });
+
+/*
+    $('#selectfile').on('change',
+        {fileValue: this.files},
+        function (e) {
+            console.log(e.data.fileValue);
+            uploadHandler(e.data.fileValue);
+    });
+*/
+
     $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false);  });
     $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
-    $('#selectfile-clear').on('click',      function () {  clearUploadInfo();  });
+
+    $('#selectfile-clear').on('click',      function () {  clearUploadInfo(true);  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
-    $('#save-btn, #save-project').on('click', function () {  
+
+    $('#save-btn, #save-project').on('click', function () {
         if (isOffline) {
-            downloadCode(); 
+            downloadCode();
         } else {
             saveProject();
         }
@@ -235,8 +362,13 @@ $(document).ready(function () {
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
     $('#btn-graph-csv').on('click',         function () {  downloadCSV();  });
     $('#btn-graph-clear').on('click',       function () {  graphStartStop('clear');  });
-    $('#save-as-board-type').on('change',   function () {  checkBoardType($('#saveAsDialogSender').html());  });
+
+    $('#save-as-board-type').on('change',   function () {
+        checkBoardType( $('#saveAsDialogSender').html());
+    });
+
     $('#save-as-board-btn').on('click',     function () {  saveProjectAs();  });
+
     $('#win1-btn').on('click',              function () {  showStep('win', 1, 3);  });
     $('#win2-btn').on('click',              function () {  showStep('win', 2, 3);  });
     $('#win3-btn').on('click',              function () {  showStep('win', 3, 3);  });
@@ -264,35 +396,112 @@ $(document).ready(function () {
         $('#selectfile-verify-boardtype').css('display', 'none');
     });
 
-    // set the upload modal's title to "import" if offline
-    if (isOffline) {
-         $('#upload-dialog-title').html(page_text_label['editor_import']);
-         $('#upload-project span').html(page_text_label['editor_import']);
-         $('#save-project-as, save-as-btn').addClass('hidden');
-    }
+}
 
-    // disable to upload dialog buttons until a valid file is uploaded
+
+/**
+ * disable to upload dialog buttons until a valid file is uploaded
+ */
+function disableUploadDialogButtons() {
     document.getElementById("selectfile-replace").disabled = true;
     document.getElementById("selectfile-append").disabled = true;
+}
 
-    // Reset the upload/import modal to its default state when closed
-    $('#upload-dialog').on('hidden.bs.modal', function () {
-        // reset the title of the modal
+
+/**
+ * Reset the upload/import modal window to defaults after use
+ */
+function resetUploadImportModalDialog() {
+    // reset the title of the modal
+    if (isOffline) {
+        $('upload-dialog-title').html(page_text_label['editor_import']);
+
+    } else {
+        $('upload-dialog-title').html(page_text_label['editor_upload']);
+    }
+
+    // hide "append" button
+    $('#selectfile-append').removeClass('hidden');
+
+    // change color of the "replace" button to blue and change text to "Open"
+    $('#selectfile-replace').removeClass('btn-primary').addClass('btn-danger').html(page_text_label['editor_button_replace']);
+
+    // reset the blockly toolbox sizing to ensure it renders correctly:
+    resetToolBoxSizing(100);
+}
+
+
+/**
+ * Set the client download links
+ */
+function initClientDownloadLinks() {
+    $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
+    $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
+    $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
+}
+
+
+/**
+ * Set the URLs for all of the CDN-sourced images
+ */
+function initCdnImageUrls() {
+    $("img").each(function () {
+        let img_tag = $(this);
+
+        // Set the source of the image
+        let img_source = img_tag.attr('data-src');
+        if (img_source) {
+            img_tag.attr('src', cdnUrl + img_source);
+        }
+    });
+}
+
+
+/**
+ * Execute this code as soon as the DOM becomes ready.
+ */
+$(document).ready( () => {
+    /* -- Set up amy event handlers once the DOM is ready -- */
+
+    // Update the blockly workspace to ensure that it takes
+    // the remainder of the window. This is an async call.
+    $(window).on('resize', function () {
+        resetToolBoxSizing()
+    });
+
+    // Event handler for the OnBeforeUnload event
+    // --------------------------------------------------------------
+    // This event fires just before the document begins to unload.
+    // The unload can be stopped by returning a string message. The
+    // browser will then open a modal dialog the presents the
+    // message and options for Cancel and Leave. If the Cancel option
+    // is selected the unload event is cancelled and page processing
+    // continues.
+    // --------------------------------------------------------------
+    window.addEventListener('beforeunload', function (e) {
         if (isOffline) {
-            $('upload-dialog-title').html(page_text_label['editor_import']);
-        } else {
-            $('upload-dialog-title').html(page_text_label['editor_upload']);
+            // Call checkLeave only if we are NOT loading a new project
+            if (getURLParameter('openFile') === "true") {
+                return;
+            }
         }
 
-        // hide "append" button
-        $('#selectfile-append').removeClass('hidden');
-
-        // change color of the "replace" button to blue and change text to "Open"
-        $('#selectfile-replace').removeClass('btn-primary').addClass('btn-danger').html(page_text_label['editor_button_replace']);
-
-        // reset the blockly toolbox sizing to ensure it renders correctly:
-        resetToolBoxSizing(100);
+        if (checkLeave()) {
+            e.preventDefault();     // Cancel the event
+            e.returnValue = Blockly.Msg.DIALOG_CHANGED_SINCE;
+            return Blockly.Msg.DIALOG_CHANGED_SINCE;
+        }
     });
+
+    initInternationalText();
+    initEditorIcons();
+    initEventHandlers();
+    initUploadModalLabels();
+    disableUploadDialogButtons();
+
+    // Reset the upload/import modal to its default state when closed
+    $('#upload-dialog').on('hidden.bs.modal', resetUploadImportModalDialog());
+
 
     if (user_authenticated) {
         $('.auth-true').css('display', $(this).attr('data-displayas'));
@@ -306,41 +515,37 @@ $(document).ready(function () {
         return baseUrl + cur;
     });
 
-    /*
-     * Set the URLs for all of the CDN-sourced images
-     */
-    $("img").each(function () {
-        var img_tag = $(this);
-        // Set the source of the image
-        var img_source = img_tag.attr('data-src');
-        if (img_source) {  img_tag.attr('src', cdnUrl + img_source);  }
-    });
-
-    // Set the client download links
-    $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
-    $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
-    $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
+    initCdnImageUrls();
+    initClientDownloadLinks();
 
     idProject = getURLParameter('project');
 
-    var projectlink = null;
-    
+    //Decode and parse project data coming from a sharelink
     if (window.location.href.indexOf('projectlink') > -1) {
-        //Decode and parse project data coming from a sharelink
-        var projectRaw = atob($("meta[name=projectlink]").attr("content"));
-        projectlink = JSON.parse(projectRaw);
-        setupWorkspace(projectlink);
-
+        // Decode the base-64 encoded project link
+        let projectRaw = atob($("meta[name=projectlink]").attr("content"));
+        if (projectRaw.length > 0) {
+            setupWorkspace(JSON.parse(projectRaw));
+        }
     } else if (!idProject && !isOffline) {
+        // redirect to the home page if the project id was not specified
+        // and the code is running in the online mode
         window.location = baseUrl;
 
     } else if (!idProject && isOffline) {
+        // ----------------------------------------------------------
+        // If the project id is not provided and the code is
+        // operating in the offline mode, open a modal window to
+        // prompt the user to load a project form local storage.
+        // ----------------------------------------------------------
+
         // Disable the login link for the BP Client status area
         $('#unauth-login-anchor').attr('href', '#');
 
         // TODO: Use the ping endpoint to see if we are offline.
 
-        // Stop pinging
+        // Stop pinging the Rest API
+        // TODO: Why is this necessary?
         clearInterval(pingInterval);
 
         // hide save interaction elements
@@ -355,11 +560,15 @@ $(document).ready(function () {
         $('#save-as-project-name').val('MyProject');
         $("#saveAsDialogSender").html('offline');
         $("#save-as-board-type").empty();
+
+        // populate the board type drop down list
         for (key in profile) {
             $("#save-as-board-type").append($('<option />').val(key).text(profile[key].description));
         }
 
+        // Load a project file from local storage
         if (getURLParameter('openFile') === "true" && isOffline) {
+
             // set title to Open file
             $('#upload-dialog-title').html(page_text_label['editor_open']);
 
@@ -371,16 +580,23 @@ $(document).ready(function () {
             $('#selectfile-replace').html(page_text_label['editor_button_open']);
 
             // Import a project .SVG file
-            $('#upload-dialog').modal('show');
+            $('#upload-dialog').modal({keyboard: false, backdrop: 'static'});
 
+            if (projectData) {
+                setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
+            }
         } else if (window.localStorage.getItem('localProject')) {
-            // Look for a default project in the local browser store
-            setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
-            //window.localStorage.removeItem('localProject');
+            // load the last used project from the browser local storage in offline mode
+            //
+            // load the project from the browser store
+            // TODO: Why is project getting removed from localStorage after project load?
+            setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')), function () {
+                window.localStorage.removeItem('localProject');
+            });
         } else {
             // TODO: why is this here?
             // Open save-as modal
-            $('#save-as-type-dialog').modal('show');
+            $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
         }
 
     } else {
@@ -399,12 +615,12 @@ $(document).ready(function () {
 
     // these are only set up for the offline editor
     if (isOffline) {
-
         // show the new project modal
         showNewProjectModal();
 
+        // Set up the click even handler for the "New Project" modal dialog
         // return to the splash screen if the user clicks the cancel button
-        $('#new-project-cancel').on('click', function() {
+        $('#new-project-cancel').on('click', function(e) {
 
             // if the project is being edited, clear the fields and close the modal
             if ($('#open-modal-sender').html() === 'open') {
@@ -418,9 +634,6 @@ $(document).ready(function () {
                 $('#edit-project-last-modified').html('');
                 $('#open-modal-sender').html('');
 
-                // simplemde.toTextArea();
-                // simplemde = null;
-                
                 $('#new-project-dialog').modal('hide');
 
             } else {
@@ -428,6 +641,7 @@ $(document).ready(function () {
                 window.location = 'index.html';
             }
         });
+
 
     } // isOffline
 
@@ -440,6 +654,7 @@ $(document).ready(function () {
  * 
  */
 var clearNewProjectModal = function() {
+    // Reset the values in the form to defaults
     $('#new-project-name').val('');
     $('#new-project-description').val('');
     $('#new-project-dialog-title').html(page_text_label['editor_newproject_title']);
@@ -451,25 +666,33 @@ var clearNewProjectModal = function() {
  *  @param openModal force the modal to open when set to 'open'
  */
 var showNewProjectModal = function(openModal) {
-    // clear out the board type dropdown menu
+
+    // Clear out the board type dropdown menu
     $("#new-project-board-type").empty();
 
-    // populate the board type dropdown menu with a header first,
+    // Populate the board type dropdown menu with a header first,
     $("#new-project-board-type")
-            .append($('<option />')
-            .val('')
-            .text(page_text_label['project_create_board_type_select'])
-            .attr('disabled','disabled')
-            .attr('selected','selected')
+        .append($('<option />')
+        .val('')
+        .text(page_text_label['project_create_board_type_select'])
+        .attr('disabled','disabled')
+        .attr('selected','selected')
     );
 
     // If the editor is passed the 'newProject' parameter, open the modal
     if (getURLParameter('newProject') || openModal === 'open') {
-        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
-        var projectTimestamp = new Date();
+        // trap modal closing
+        $("#new-project-dialog").on('hidden.bs.modal', function(){
+            alert("Hello World!");
+        });
+
+        // Show the New Project modal dialog box
+        $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
+
+        // Populate the time stamp fields
+        let projectTimestamp = new Date();
         $('#edit-project-created-date').html(projectTimestamp);
         $('#edit-project-last-modified').html(projectTimestamp);
-
     }
 
     // if the newProject modal was opened from the editor, flag it so if the user
@@ -499,8 +722,10 @@ var showNewProjectModal = function(openModal) {
 
     // when the user clicks the 'Continue' button, validate the form
     $('#new-project-continue').on('click', function () {
+        // verify that the project contains a valid board type and project name
         if (validateNewProjectForm()) {
             var code = '';
+
             // If editing details, preserve the code, otherwise start over
             if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
                 if (projectData['board'] === 'propcfile') {
@@ -509,7 +734,7 @@ var showNewProjectModal = function(openModal) {
                     code = getXml();
                 }
             } else {
-                code = '<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>';
+                code = EmptyProjectCodeHeader;
             }
     
             // save the form fields into the projectData object       
@@ -538,46 +763,62 @@ var showNewProjectModal = function(openModal) {
 }
 
 /**
- * Reset the sizing of blockly's toolbox and canvas.  This is a workaround to ensure that it renders correctly
- * @param resizeDelay milliseconds to delay the resizing, especially if used after a change in the window's location or a reload
+ * Reset the sizing of blockly's toolbox and canvas.
+ *
+ * NOTE: This is a workaround to ensure that it renders correctly
+ * TODO: Find a permanent replacement for this workaround.
+ *
+ * @param resizeDelay milliseconds to delay the resizing, especially
+ * if used after a change in the window's location or a during page
+ * reload.
  */
 function resetToolBoxSizing(resizeDelay) {
-    // Vanilla Javascript is used here for speed - jQuery could probably be used, but this is faster.
-    // Force the toolbox to render correctly
-    setTimeout(function () {
-        // find the height of just the blockly workspace by subtracting the height of the navigation bar
-        let navTop = parseInt(document.getElementById('editor').offsetHeight);
-        let navHeight = parseInt(window.innerHeight) - navTop;
-        let navWidth = parseInt(window.innerWidth);
-        var blocklyDiv = [document.getElementById('content_blocks'), document.getElementById('content_propc'), document.getElementById('content_xml')];
+    // Vanilla Javascript is used here for speed - jQuery
+    // could probably be used, but this is faster. Force
+    // the toolbox to render correctly
+    setTimeout(() => {
+        // find the height of just the blockly workspace by
+        // subtracting the height of the navigation bar
+        let navTop = document.getElementById('editor').offsetHeight;
+        let navHeight = window.innerHeight - navTop;
+        let navWidth = window.innerWidth;
 
-        for (var i = 0; i < 3; i++) {
+        // Build an array of UI divs that display content
+        let blocklyDiv = [
+            document.getElementById('content_blocks'),
+            document.getElementById('content_propc'),
+            document.getElementById('content_xml')
+        ];
+
+        // Set the size of the divs
+        for (let i = 0; i < 3; i++) {
             blocklyDiv[i].style.left = '0px';
             blocklyDiv[i].style.top = navTop + 'px';
             blocklyDiv[i].style.width = navWidth + 'px';
             blocklyDiv[i].style.height = navHeight + 'px';
         }
 
+        // Update the Blockly editor canvas to use the new space
         if (Blockly.mainWorkspace && blocklyDiv[0].style.display !== 'none') {
             Blockly.svgResize(Blockly.mainWorkspace);
         }
-    }, resizeDelay || 0);
+    }, resizeDelay || 10);  // 10 millisecond delay
 }
 
 /**
+ * Populate the projectData global
  *
  * @param data
  */
-var setupWorkspace = function (data) {
-    console.log(data);
+var setupWorkspace = function (data, callback) {
     projectData = data;
 
     // Update the UI with project related details
     showInfo(data);
 
-    // In the offline mode, there is no concept of project id.
-    // TODO: Resolve project id for offline mode to zero
-    // --------------------------------------------------------
+    // Set the global project ID. in the offline mode, the project
+    // id is set to 0 when the project is loaded from local storage.
+    // --------------------------------------------------------------
     if (!idProject) {
         idProject = projectData['id'];
     }
@@ -590,7 +831,7 @@ var setupWorkspace = function (data) {
     if (projectData['board'] !== 'propcfile') {
         initToolbox(projectData['board'], []);
 
-        // Reinstate keybindings from block workspace if this is not a code-only project.
+        // Reinstate key bindings from block workspace if this is not a code-only project.
         if (Blockly.codeOnlyKeybind === true) {
             Blockly.bindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
             Blockly.codeOnlyKeybind = false;
@@ -608,7 +849,7 @@ var setupWorkspace = function (data) {
 
         // Show PropC editing UI elements
         $('.propc-only').removeClass('hidden');
-        
+
         // Create UI block content from project details
         renderContent('propc');
     }
@@ -624,6 +865,11 @@ var setupWorkspace = function (data) {
     resetToolBoxSizing();
     timestampSaveTime(20, true);
     setInterval(checkLastSavedTime, 60000);
+
+    // Execute the callback function if one was provided
+    if (callback) {
+        callback();
+    }
 }
 
 
@@ -662,7 +908,7 @@ var checkLastSavedTime = function () {
 
     if (t_now > last_saved_timestamp && checkLeave() && user_authenticated) {
         // It's time to pop up a modal to remind the user to save.
-        $('#save-check-dialog').modal('show');
+        $('#save-check-dialog').modal({keyboard: false, backdrop: 'static'});
     }
 };
 
@@ -672,10 +918,12 @@ var checkLastSavedTime = function () {
  *
  * @param data is the project data structure
  */
-var showInfo = function (data) {
-    if (getURLParameter('debug')) console.log(data);
+function showInfo(data) {
+    if (getURLParameter('debug')) {
+        console.log(data);
+    }
 
-    // Display the prject name
+    // Display the project name
     $(".project-name").text(data['name']);
 
     // Does the current user own the project?
@@ -685,7 +933,7 @@ var showInfo = function (data) {
     }
 
     // Create an array of board type icons
-    var projectBoardIcon = {
+    let projectBoardIcon = {
         "activity-board": "images/board-icons/IconActivityBoard.png",
         "s3": "images/board-icons/IconS3.png",
         "heb": "images/board-icons/IconBadge.png",
@@ -696,7 +944,7 @@ var showInfo = function (data) {
     };
 
     // Set the prject icon to the correct board type
-    $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
+    $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[ data['board'] ] + '"/>');
 };
 
 
@@ -823,7 +1071,7 @@ var saveAsDialog = function () {
         }
 
         // Open modal
-        $('#save-as-type-dialog').modal('show');
+        $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
     }
 };
 
@@ -884,7 +1132,7 @@ var saveProjectAs = function (requestor) {
         var tt = new Date();
         var pd = {
             'board': p_type,
-            'code': "<xml xmlns=\"http://www.w3.org/1999/xhtml\"></xml>",
+            'code': EmptyProjectCodeHeader,
             'created': tt,
             'description': "",
             'description-html': "",
@@ -918,7 +1166,8 @@ var editProjectDetails = function () {
             projectData.code = getXml();
         }
 
-        window.localStorage.setItem('localProject', JSON.stringify(projectData));
+        // TODO: I think these can be deleted.  localProject should only be used to temporarily store a project when the window location is changed or the page is refreshed.
+        //window.localStorage.setItem('localProject', JSON.stringify(projectData));
         //window.location = 'projectcreate.html?edit=true';
 
         $('#new-project-board-dropdown').addClass('hidden');
@@ -939,71 +1188,12 @@ var editProjectDetails = function () {
         $('#open-modal-sender').html('open');
 
         // show the modal
-        $('#new-project-dialog').modal({show: true, keyboard: false, backdrop: 'static'});
+        $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
 
     } else {
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
     }
 };
-
-
-/**
- * Event handler for the OnBeforeUnload event
- *
- * @returns {string}
- */
-window.onbeforeunload = function () {
-    if (checkLeave() && !isOffline) {
-        return Blockly.Msg.DIALOG_CHANGED_SINCE;
-    }
-};
-
-
-/**
- *
- * @returns {boolean}
- *
- * TODO: We might get here if we failed to load a new project.
- */
-var checkLeave = function () {
-    // Return if there is no project data
-    if (!projectData) {
-        return false;
-    }
-
-    var currentXml = '';
-    var savedXml = projectData['code'];
-    if (ignoreSaveCheck) {
-        return false;
-    }
-    if (projectData['board'] === 'propcfile') {
-        currentXml = propcAsBlocksXml();
-    } else {
-        currentXml = getXml();
-    }
-    if (projectData === null) {
-        if (currentXml === '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>') {
-            return false;
-        } else {
-            return true;
-        }
-    } else {
-        if (savedXml === currentXml) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-};
-
-
-/**
- *
- * @type {number}
- */
-var pingInterval = setInterval(function () {
-    $.get(baseUrl + 'ping');
-}, 60000);
 
 
 /**
@@ -1019,8 +1209,11 @@ function hashCode(str) {
     return (hash + 2147483647) + 1;
 }
 
+
 /**
- * Encode a string to an XML-safe string by replacing unsafe characters with HTML entities
+ * Encode a string to an XML-safe string by replacing unsafe
+ * characters with HTML entities
+ *
  * @param str
  * @returns {string}
  */
@@ -1037,8 +1230,11 @@ function encodeToValidXml(str) {
     );
 }
 
+
 /**
- * Decode a string from an XML-safe string by replacing HTML entities with their standard characters
+ * Decode a string from an XML-safe string by replacing HTML
+ * entities with their standard characters
+ *
  * @param str
  * @returns {string}
  */
@@ -1059,10 +1255,9 @@ function decodeFromValidXml(str) {
  *
  */
 function downloadCode() {
-    if (projectData && projectData['board'] !== 'propcfile' && projectData['code'].length < 50) {
+    if (projectData && projectData['board'] !== 'propcfile' && getXml().length < 50) {
         alert('You can\'t save an empty project!');
     } else {
-
         var projXMLcode = '';
         
         if (projectData && projectData['board'] === 'propcfile') {
@@ -1075,7 +1270,9 @@ function downloadCode() {
         projXMLcode = projXMLcode.substring(0, (projXMLcode.length - 6));
 
         var project_filename = 'Project' + idProject;
+
         if (isOffline) {
+            // Create a filename from the project title
             project_filename = projectData['name'].replace(/[^a-z0-9]/gi, '_').toLowerCase();
         }
 
@@ -1162,14 +1359,17 @@ function downloadCode() {
  */
 function uploadCode() {
     if (checkLeave() && !isOffline) {
-        utils.showMessage(Blockly.Msg.DIALOG_UNSAVED_PROJECT, Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
+        utils.showMessage(
+            Blockly.Msg.DIALOG_UNSAVED_PROJECT,
+            Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
     } else {
-        $('#upload-dialog').modal('show');
+        $('#upload-dialog').modal({keyboard: false, backdrop: 'static'});
     }
 }
 
 
 /**
+ *  NOT USED.
  *
  * @param files
  */
@@ -1212,7 +1412,7 @@ function uploadHandler(files) {
                 }
             }
             if (uploadedXML !== '') {
-                uploadedXML = '<xml xmlns="http://www.w3.org/1999/xhtml">' + uploadedXML + '</xml>';
+                uploadedXML = EmptyProjectCodeHeader + uploadedXML + '</xml>';
             };
 
             // TODO: check to see if this is used when opened from the editor (and not the splash screen)
@@ -1279,8 +1479,9 @@ function uploadHandler(files) {
 
 /**
  *
+ * @param redirect boolean flag to permit page redirection
  */
-function clearUploadInfo() {
+function clearUploadInfo(redirect) {
     // Reset all of the upload fields and containers
     uploadedXML = '';
     $('#selectfile').val('');
@@ -1291,24 +1492,40 @@ function clearUploadInfo() {
     document.getElementById("selectfile-append").disabled = true;
 
     // when opening a file but the user cancels, return to the splash screen
-    if (isOffline && getURLParameter('openFile') === 'true') {
-        window.location = 'index.html';
+    if ( redirect === true) {
+        if (isOffline && getURLParameter('openFile') === 'true') {
+            window.location = 'index.html';
+        }
     }
 }
 
 
 /**
+ * Open and load an svg project file
  *
- * @param append
+ * @param append is true if the project being loaded will be appended
+ * to the existing project
+ *
+ * @description
+ * This is called when the 'Open' button on the Open Project dialog
+ * box is selected. At this point, the projectData global object
+ * has been populated. In the offline mode, the function copies the
+ * project to the browser's localStorage and then redirects the
+ * browser back to the same page, but without the 'opeFile..' query
+ * string.
  */
 function uploadMergeCode(append) {
-    // when opening a file when directed from the splash screen in the offline app, load the selected project
-    if (!append && isOffline && getURLParameter('openFile') === 'true') {
-        window.localStorage.setItem('localProject', JSON.stringify(projectData));
-        window.location = 'blocklyc.html';
+    if (isOffline) {
+        // When opening a file when directed from the splash screen in
+        // the offline app, load the selected project
+        if (!append && getURLParameter('openFile') === 'true') {
+            window.localStorage.setItem('localProject', JSON.stringify(projectData));
+            window.location = 'blocklyc.html';
+        }
     }
 
     $('#upload-dialog').modal('hide');
+
     if (uploadedXML !== '') {
         var projCode = '';
         if (append) {
@@ -1374,18 +1591,23 @@ function uploadMergeCode(append) {
             });
             tmpv += '</variables>';
             // add everything back together
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + tmpv + projCode + newCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + tmpv + projCode + newCode + '</xml>';
         } else if (newCode.indexOf('<variables>') > -1 && projCode.indexOf('<variables>') === -1) {
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + newCode + projCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + newCode + projCode + '</xml>';
         } else {
-            projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml">' + projCode + newCode + '</xml>';
+            projectData['code'] = EmptyProjectCodeHeader + projCode + newCode + '</xml>';
         }
 
+        //
         if(Blockly.mainWorkspace) {
             Blockly.mainWorkspace.clear();
         }
+
+        // This call fails because there is no Blockly workspace context
         loadToolbox(projectData['code']);
-        clearUploadInfo();
+
+        // CAUTION: This call can redirect to the home page
+        clearUploadInfo(false);
     }
 }
 
@@ -1449,18 +1671,28 @@ function initToolbox(profileName) {
  * @param xmlText
  */
 function loadToolbox(xmlText) {
-    var xmlDom = Blockly.Xml.textToDom(xmlText);
-    Blockly.Xml.domToWorkspace(xmlDom, Blockly.mainWorkspace);
+    if (Blockly.mainWorkspace) {
+        let xmlDom = Blockly.Xml.textToDom(xmlText);
+        Blockly.Xml.domToWorkspace(xmlDom, Blockly.mainWorkspace);
+    }
 }
 
 
 /**
+ * Convert the current project workspace into an XML document
  *
  * @returns {string}
  */
 function getXml() {
-    var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-    return Blockly.Xml.domToText(xml);
+    if (Blockly.Xml && Blockly.mainWorkspace) {
+        var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+        return Blockly.Xml.domToText(xml);
+    } else if (projectData && projectData.code) {
+        return projectData.code;
+    } else {
+        // Return the XML for a blank project if none is found.
+        return EmptyProjectCodeHeader + '</xml>';
+    }
 }
 
 
