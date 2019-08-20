@@ -2398,14 +2398,18 @@ Blockly.Blocks.xbee_setup = {
 
 Blockly.propc.xbee_setup = function () {
     if (!this.disabled) {
-        var mv = ['DI_PIN', 'DO_PIN', 'BAUD'];
-        var m = [];
-        for (var i = 0; i < 3; i++) {
-            m.push(this.getFieldValue(mv[i]));
-            if (i === 1) {
-                m.push('0');
-            }
+        var di_pin = this.getFieldValue('DI_PIN');
+        var do_pin = this.getFieldValue('DO_PIN');
+
+        if (profile.default.digital.toString().indexOf(di_pin + ',' + di_pin) === -1) {
+            di_pin = 'MY_' + di_pin;
         }
+        if (profile.default.digital.toString().indexOf(do_pin + ',' + do_pin) === -1) {
+            do_pin = 'MY_' + do_pin;
+        }
+
+        var m = [di_pin, do_pin, '0', this.getFieldValue('BAUD')];
+
         Blockly.propc.definitions_["include fdserial"] = '#include "fdserial.h"';
         Blockly.propc.global_vars_["xbee"] = "fdserial *xbee;";
         Blockly.propc.setups_["xbee"] = 'xbee = fdserial_open(' + m.join(',') + ');';
