@@ -1077,6 +1077,10 @@ page_text_label['register_error_sponsor_email_empty'] = "Please enter a sponsor 
 page_text_label['register_error_sponsor_email_format_error'] = "The sponsor email address is not formatted correctly";
 page_text_label['register_error_user_email_empty'] = "Please enter your email address";
 
+// ------------------------------------------------------------------
+// Text for the balloon help that appears when the cursor hovers
+// over a button in the editor toolbar
+// ------------------------------------------------------------------
 var tooltip_text = [
     ['prop-btn-comp','Verify code (compile)'],
     ['prop-btn-ram','Run once (load code to RAM)'],
