@@ -151,6 +151,28 @@ bpIcons = {
 // TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
 
 
+/**
+ * Ping the Rest API every 60 seconds
+ * @type {number}
+ */
+let pingInterval = setInterval(() => {
+    $.get(baseUrl + 'ping');
+    },
+    60000
+);
+
+
+function initUploadModalLabels() {
+
+    // set the upload modal's title to "import" if offline
+    if (isOffline) {
+        $('#upload-dialog-title').html(page_text_label['editor_import']);
+        $('#upload-project span').html(page_text_label['editor_import']);
+
+        // Hide the save-as button.
+        $('#save-project-as, save-as-btn').addClass('hidden');
+    }
+}
 
 
 /**
@@ -177,6 +199,8 @@ function checkLeave () {
     } else {
         currentXml = getXml();
     }
+
+    // TODO: We're checking for a null projectData object above; why are we testing again?
     if (projectData === null) {
         if (currentXml === '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>') {
             return false;
@@ -226,36 +250,58 @@ function validateNewProjectForm() {
 
 
 /**
- * Set text strings for all of the UI labels
+ * Insert the text strings (internationalization) for all of the UI
+ * elements on the editor page once the page has been loaded.
  */
 function initInternationalText() {
-
-    // Insert the text strings (internationalization) once the page has loaded
-    // insert into <span> tags
+    // Locate each HTML element of class 'keyed-lang-string'
     $(".keyed-lang-string").each(function () {
-        var span_tag = $(this);
 
-        // Set the text of the label spans
-        var pageLabel = span_tag.attr('data-key');
+        // Set a reference to the current selected element
+        let span_tag = $(this);
+
+        // Get the associated key value that will be used to locate
+        // the text string in the page_text_label array. This array
+        // is declared in _messages.js
+        let pageLabel = span_tag.attr('data-key');
+
+        // If there is a key value
         if (pageLabel) {
             if (span_tag.is('a')) {
+                // if the html element is an anchor, add a link
                 span_tag.attr('href', page_text_label[pageLabel]);
             } else if (span_tag.is('input')) {
+                // if the html element is a form input, set the
+                // default value for the element
                 span_tag.attr('value', page_text_label[pageLabel]);
             } else {
+                // otherwise, assume that we're inserting html
                 span_tag.html(page_text_label[pageLabel]);
             }
         }
     });
 
     // insert text strings (internationalization) into button/link tooltips
-    for (var i = 0; i < tooltip_text.length; i++) {
+    for (let i = 0; i < tooltip_text.length; i++) {
         if (tooltip_text[i] && document.getElementById(tooltip_text[i][0])) {
             $('#' + tooltip_text[i][0]).attr('title', tooltip_text[i][1]);
         }
     }
 }
 
+
+/**
+ * Initialize the tool bar icons
+ */
+function initEditorIcons() {
+    // Locate each element that has a class 'bpIcon' assigned and
+    // contains a 'data-icon' attribute. Itereate through each
+    // match and draw the custom icons into the specified element
+    // --------------------------------------------------------------
+    $('.bpIcon[data-icon]').each( () => {
+        $(this).html(bpIcons[$(this).attr('data-icon')]);
+    });
+}
 
 /**
  * Configure all of the event handlers
@@ -410,25 +456,24 @@ function initCdnImageUrls() {
 /**
  * Execute this code as soon as the DOM becomes ready.
  */
-$(document).ready(function () {
+$(document).ready( () => {
     /* -- Set up amy event handlers once the DOM is ready -- */
 
     // Update the blockly workspace to ensure that it takes
-    // the remainder of the window.
+    // the remainder of the window. This is an async call.
     $(window).on('resize', function () {
         resetToolBoxSizing()
     });
 
-
-    /* Event handler for the OnBeforeUnload event
-     *
-     * This event fires just before the document begins to unload.
-     * The unload can be stopped by returning a string message. The
-     * browser will then open a modal dialog the presents the
-     * message and options for Cancel and Leave. If the Cancel option
-     * is selected the unload event is cancelled and page processing
-     * continues.
-     */
+    // Event handler for the OnBeforeUnload event
+    // --------------------------------------------------------------
+    // This event fires just before the document begins to unload.
+    // The unload can be stopped by returning a string message. The
+    // browser will then open a modal dialog the presents the
+    // message and options for Cancel and Leave. If the Cancel option
+    // is selected the unload event is cancelled and page processing
+    // continues.
+    // --------------------------------------------------------------
     window.addEventListener('beforeunload', function (e) {
         if (isOffline) {
             // Call checkLeave only if we are NOT loading a new project
@@ -444,24 +489,10 @@ $(document).ready(function () {
         }
     });
 
-
-    // Load the internationalization messages
-    initInternationalText()
-
-    // Draw the custom icons into the specified <span> tags
-    $('.bpIcon[data-icon]').each(function () {
-        $(this).html(bpIcons[$(this).attr('data-icon')]);
-    });
-
+    initInternationalText();
+    initEditorIcons();
     initEventHandlers();
-
-    // set the upload modal's title to "import" if offline
-    if (isOffline) {
-         $('#upload-dialog-title').html(page_text_label['editor_import']);
-         $('#upload-project span').html(page_text_label['editor_import']);
-         $('#save-project-as, save-as-btn').addClass('hidden');
-    }
-
+    initUploadModalLabels();
     disableUploadDialogButtons();
 
     // Reset the upload/import modal to its default state when closed
@@ -509,7 +540,8 @@ $(document).ready(function () {
 
         // TODO: Use the ping endpoint to see if we are offline.
 
-        // Stop pinging
+        // Stop pinging the Rest API
+        // TODO: Why is this necessary?
         clearInterval(pingInterval);
 
         // hide save interaction elements
@@ -532,6 +564,7 @@ $(document).ready(function () {
 
         // Load a project file from local storage
         if (getURLParameter('openFile') === "true" && isOffline) {
+
             // set title to Open file
             $('#upload-dialog-title').html(page_text_label['editor_open']);
 
@@ -544,6 +577,7 @@ $(document).ready(function () {
 
             // Import a project .SVG file
             $('#upload-dialog').modal({keyboard: false, backdrop: 'static'});
+
             if (projectData) {
                 setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
             }
@@ -551,6 +585,7 @@ $(document).ready(function () {
             // load the last used project from the browser local storage in offline mode
             //
             // load the project from the browser store
+            // TODO: Why is project getting removed from localStorage after project load?
             setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')), function () {
                 window.localStorage.removeItem('localProject');
             });
@@ -737,19 +772,21 @@ function resetToolBoxSizing(resizeDelay) {
     // Vanilla Javascript is used here for speed - jQuery
     // could probably be used, but this is faster. Force
     // the toolbox to render correctly
-    setTimeout(function () {
+    setTimeout(() => {
         // find the height of just the blockly workspace by
         // subtracting the height of the navigation bar
         let navTop = document.getElementById('editor').offsetHeight;
         let navHeight = window.innerHeight - navTop;
         let navWidth = window.innerWidth;
 
+        // Build an array of UI divs that display content
         let blocklyDiv = [
             document.getElementById('content_blocks'),
             document.getElementById('content_propc'),
             document.getElementById('content_xml')
         ];
 
+        // Set the size of the divs
         for (let i = 0; i < 3; i++) {
             blocklyDiv[i].style.left = '0px';
             blocklyDiv[i].style.top = navTop + 'px';
@@ -757,13 +794,15 @@ function resetToolBoxSizing(resizeDelay) {
             blocklyDiv[i].style.height = navHeight + 'px';
         }
 
+        // Update the Blockly editor canvas to use the new space
         if (Blockly.mainWorkspace && blocklyDiv[0].style.display !== 'none') {
             Blockly.svgResize(Blockly.mainWorkspace);
         }
-    }, resizeDelay || 0);
+    }, resizeDelay || 10);  // 10 millisecond delay
 }
 
 /**
+ * Populate the projectData global
  *
  * @param data
  */
@@ -773,9 +812,9 @@ var setupWorkspace = function (data, callback) {
     // Update the UI with project related details
     showInfo(data);
 
-    // In the offline mode, there is no concept of project id.
-    // TODO: Resolve project id for offline mode to zero
-    // --------------------------------------------------------
+    // Set the global project ID. in the offline mode, the project
+    // id is set to 0 when the project is loaded from local storage.
+    // --------------------------------------------------------------
     if (!idProject) {
         idProject = projectData['id'];
     }
@@ -788,7 +827,7 @@ var setupWorkspace = function (data, callback) {
     if (projectData['board'] !== 'propcfile') {
         initToolbox(projectData['board'], []);
 
-        // Reinstate keybindings from block workspace if this is not a code-only project.
+        // Reinstate key bindings from block workspace if this is not a code-only project.
         if (Blockly.codeOnlyKeybind === true) {
             Blockly.bindEvent_(document, 'keydown', null, Blockly.onKeyDown_);
             Blockly.codeOnlyKeybind = false;
@@ -806,7 +845,7 @@ var setupWorkspace = function (data, callback) {
 
         // Show PropC editing UI elements
         $('.propc-only').removeClass('hidden');
-        
+
         // Create UI block content from project details
         renderContent('propc');
     }
@@ -822,7 +861,11 @@ var setupWorkspace = function (data, callback) {
     resetToolBoxSizing();
     timestampSaveTime(20, true);
     setInterval(checkLastSavedTime, 60000);
-    if (callback) callback();
+
+    // Execute the callback function if one was provided
+    if (callback) {
+        callback();
+    }
 }
 
 
@@ -871,10 +914,12 @@ var checkLastSavedTime = function () {
  *
  * @param data is the project data structure
  */
-var showInfo = function (data) {
-    if (getURLParameter('debug')) console.log(data);
+function showInfo(data) {
+    if (getURLParameter('debug')) {
+        console.log(data);
+    }
 
-    // Display the prject name
+    // Display the project name
     $(".project-name").text(data['name']);
 
     // Does the current user own the project?
@@ -884,7 +929,7 @@ var showInfo = function (data) {
     }
 
     // Create an array of board type icons
-    var projectBoardIcon = {
+    let projectBoardIcon = {
         "activity-board": "images/board-icons/IconActivityBoard.png",
         "s3": "images/board-icons/IconS3.png",
         "heb": "images/board-icons/IconBadge.png",
@@ -895,7 +940,7 @@ var showInfo = function (data) {
     };
 
     // Set the prject icon to the correct board type
-    $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[data['board']] + '"/>');
+    $("#project-icon").html('<img src="' + cdnUrl + projectBoardIcon[ data['board'] ] + '"/>');
 };
 
 
@@ -1145,15 +1190,6 @@ var editProjectDetails = function () {
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
     }
 };
-
-
-/**
- *
- * @type {number}
- */
-var pingInterval = setInterval(function () {
-    $.get(baseUrl + 'ping');
-}, 60000);
 
 
 /**
