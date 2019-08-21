@@ -594,7 +594,7 @@ $(document).ready( () => {
             // load the project from the browser store
             // check to make sure the project in localStorage is less than 10 seconds old.
             if (pd.timestamp && ((performance.now() - pd.timestamp) < 10000)) {
-                setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')), function () {
+                setupWorkspace(pd, function () {
                     window.localStorage.removeItem('localProject');
                 });
             } else {
