@@ -901,9 +901,9 @@ function setupWorkspace(data, callback) {
         // Set the help link to the ab-blocks or s3 reference
         // TODO: modify blocklyc.html/jsp and use an id or class selector
         if (projectData.board === 's3') {
-            $('[href="public/help"]').attr('href', 'https://learn.parallax.com/s3-blocks');
+            $('#online-help').attr('href', 'https://learn.parallax.com/s3-blocks');
         } else {
-            $('[href="public/help"]').attr('href', 'https://learn.parallax.com/ab-blocks');
+            $('#online-help').attr('href', 'https://learn.parallax.com/ab-blocks');
         }
     } else {
         // No, init the blockly interface
@@ -921,7 +921,7 @@ function setupWorkspace(data, callback) {
 
         // Set the help link to the prop-c reference
         // TODO: modify blocklyc.html/jsp and use an id or class selector
-        $('[href="public/help"]').attr('href', 'https://learn.parallax.com/support/C/propeller-c-reference');
+        $('#online-help').attr('href', 'https://learn.parallax.com/support/C/propeller-c-reference');
     }
 
 
