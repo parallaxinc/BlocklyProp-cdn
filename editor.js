@@ -174,7 +174,6 @@ const clearNewProjectModal = () => {
 }
 
 
-
 /**
  *
  * @param mins
@@ -217,12 +216,9 @@ const checkLastSavedTime = function () {
 };
 
 
-
-
-
-
-
-
+/**
+ *
+ */
 function initUploadModalLabels() {
 
     // set the upload modal's title to "import" if offline
@@ -307,7 +303,6 @@ function validateNewProjectForm() {
 
     return project.valid() ? true : false;
 }
-
 
 
 /**
@@ -404,9 +399,9 @@ function initEventHandlers() {
             uploadHandler(e.data.fileValue);
     });
 */
-
-    $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false);  });
-    $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
+    // Hamburger menu items
+    $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false); });
+    $('#selectfile-append').on('click',     function () {  uploadMergeCode(true); });
 
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo(true);  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
@@ -419,6 +414,7 @@ function initEventHandlers() {
         }
     });
 
+    // Load a new project
     $('#new-project-menu-item').on('click', function () {
         clearNewProjectModal();
         showNewProjectModal('open');
@@ -688,7 +684,7 @@ $(document).ready( () => {
 
         // Set up the click even handler for the "New Project" modal dialog
         // return to the splash screen if the user clicks the cancel button
-        $('#new-project-cancel').on('click', function(e) {
+        $('#new-project-cancel').on('click', () => {
 
             // if the project is being edited, clear the fields and close the modal
             if ($('#open-modal-sender').html() === 'open') {
@@ -706,7 +702,7 @@ $(document).ready( () => {
 
             } else {
                 // otherwise, return to the splash page
-                window.location = 'index.html';
+                window.location = '/';
             }
         });
 
@@ -736,14 +732,11 @@ function showNewProjectModal(openModal) {
         .attr('selected','selected')
     );
 
-    // If the editor is passed the 'newProject' parameter, open the modal
+    // If the editor is passed the 'newProject' parameter, open the
+    // New Project modal
     if (getURLParameter('newProject') || openModal === 'open') {
-        // trap modal closing
-        $("#new-project-dialog").on('hidden.bs.modal', function(){
-            alert("Hello World!");
-        });
-
         // Show the New Project modal dialog box
+
         $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
 
         // Populate the time stamp fields
