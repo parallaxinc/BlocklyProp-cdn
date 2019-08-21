@@ -545,6 +545,7 @@ $(document).ready( () => {
     // continues.
     // --------------------------------------------------------------
     window.addEventListener('beforeunload', function (e) {
+
         if (isOffline) {
             // Call checkLeave only if we are NOT loading a new project
             if (getURLParameter('openFile') === "true") {
@@ -556,6 +557,11 @@ $(document).ready( () => {
             e.preventDefault();     // Cancel the event
             e.returnValue = Blockly.Msg.DIALOG_CHANGED_SINCE;
             return Blockly.Msg.DIALOG_CHANGED_SINCE;
+        } else if (isOffline) {
+            // store the current project into the localStore so that if the page is
+            // being refreshed, then it will automatically be reloaded
+            projectData.timestamp = this.performance.now();
+            window.localStorage.setItem('localProject', JSON.stringify(projectData));
         }
     });
 
@@ -650,21 +656,30 @@ $(document).ready( () => {
             // Import a project .SVG file
             $('#upload-dialog').modal({keyboard: false, backdrop: 'static'});
 
+            // TODO: what is this doing here? Shouldn't we be setting up projectData instead of localStore?
+            //       Or can this simply be deleted, because the openFile functions will take care of this?
             if (projectData) {
                 setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
             }
         } else if (window.localStorage.getItem('localProject')) {
-            // load the last used project from the browser local storage in offline mode
-            //
+            var pd = JSON.parse(window.localStorage.getItem('localProject'));
             // load the project from the browser store
-            // TODO: Why is project getting removed from localStorage after project load?
-            setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')), function () {
+            // check to make sure the project in localStorage is less than 10 seconds old.
+            if (pd.timestamp && ((performance.now() - pd.timestamp) < 10000)) {
+                setupWorkspace(pd, function () {
+                    window.localStorage.removeItem('localProject');
+                });
+            } else {
+                // delete the localStorage (it's now too old), and redirect to the home page
                 window.localStorage.removeItem('localProject');
-            });
-        } else {
-            // TODO: why is this here?
-            // Open save-as modal
+                window.location.href = (isOffline) ? 'index.html' : baseUrl;
+            }
+        } else if (getURLParameter('newProject') === "true") {
+            // Open save-as modal (used as a new-project modal)
             $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
+        } else {
+            // No viable project available, so redirect to index page.
+            window.location.href = (isOffline) ? 'index.html' : baseUrl;
         }
 
     } else {
@@ -809,6 +824,7 @@ function showNewProjectModal(openModal) {
                 'type': "PROPC",
                 'user': "offline",
                 'yours': true,
+                'timestamp': performance.now(),
             }
 
             // then load the toolbox using the projectData
@@ -1177,9 +1193,9 @@ function saveProjectAs (requestor) {
             'type': "PROPC",
             'user': "offline",
             'yours': true,
+            'timestamp': performance.now(),
         }
 
-        //setupWorkspace(pd);
         window.localStorage.setItem('localProject', JSON.stringify(pd));
         window.location = 'blocklyc.html';
     }  
@@ -1198,10 +1214,6 @@ function editProjectDetails() {
         } else {
             projectData.code = getXml();
         }
-
-        // TODO: I think these can be deleted.  localProject should only be used to temporarily store a project when the window location is changed or the page is refreshed.
-        //window.localStorage.setItem('localProject', JSON.stringify(projectData));
-        //window.location = 'projectcreate.html?edit=true';
 
         $('#new-project-board-dropdown').addClass('hidden');
         $('#edit-project-details-static').removeClass('hidden');
@@ -1486,11 +1498,10 @@ function uploadHandler(files) {
             	    'type': "PROPC",
             	    'user': "offline",
             	    'yours': true,
+                    'timestamp': performance.now(),
 		        }
 
                 projectData = pd;
-                // window.localStorage.setItem('localProject', JSON.stringify(pd));
-		        // window.location = 'blocklyc.html';
 	        }
         }
 
@@ -1552,6 +1563,8 @@ function uploadMergeCode(append) {
         // When opening a file when directed from the splash screen in
         // the offline app, load the selected project
         if (!append && getURLParameter('openFile') === 'true') {
+            // Set a timestamp to note when the project was saved into localStorage
+            projectData.timestamp = performance.now();
             window.localStorage.setItem('localProject', JSON.stringify(projectData));
             window.location = 'blocklyc.html';
         }
