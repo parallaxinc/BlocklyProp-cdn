@@ -1282,6 +1282,7 @@ function downloadCode() {
         if (isOffline) {
             // Create a filename from the project title
             project_filename = projectData['name'].replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            projectData.code = projXMLcode;
         }
 
         utils.prompt(Blockly.Msg.DIALOG_DOWNLOAD, project_filename, function (value) {
@@ -1358,6 +1359,13 @@ function downloadCode() {
                 saveData(SVGheader + projSVGcode + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>', value + '.svg');
             }
         });
+
+        // save the project into localStorage with a timestamp - if the page is simply refreshed,
+        // this will allow the project to be reloaded.
+        if (isOffline) {
+            projectData.timestamp = this.performance.now();
+            window.localStorage.setItem('localProject', JSON.stringify(projectData));
+        }
     }
 }
 
