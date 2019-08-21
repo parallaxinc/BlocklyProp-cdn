@@ -1363,7 +1363,7 @@ function downloadCode() {
         // save the project into localStorage with a timestamp - if the page is simply refreshed,
         // this will allow the project to be reloaded.
         if (isOffline) {
-            projectData.timestamp = this.performance.now();
+            projectData.timestamp = performance.now();
             window.localStorage.setItem('localProject', JSON.stringify(projectData));
         }
     }
