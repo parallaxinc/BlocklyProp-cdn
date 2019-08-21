@@ -839,6 +839,14 @@ var setupWorkspace = function (data, callback) {
 
         // Create UI block content from project details
         renderContent('blocks');
+
+        // Set the help link to the ab-blocks or s3 reference
+        // TODO: modify blocklyc.html/jsp and use an id or class selector
+        if (projectData.board === 's3') {
+            $('[href="public/help"]').attr('href', 'https://learn.parallax.com/s3-blocks');
+        } else {
+            $('[href="public/help"]').attr('href', 'https://learn.parallax.com/ab-blocks');
+        }
     } else {
         // No, init the blockly interface
         init(Blockly);
@@ -852,6 +860,10 @@ var setupWorkspace = function (data, callback) {
 
         // Create UI block content from project details
         renderContent('propc');
+
+        // Set the help link to the prop-c reference
+        // TODO: modify blocklyc.html/jsp and use an id or class selector
+        $('[href="public/help"]').attr('href', 'https://learn.parallax.com/support/C/propeller-c-reference');
     }
 
 
