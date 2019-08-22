@@ -332,29 +332,6 @@ Blockly.propc.controls_if = function () {
     return code + '\n';
 };
 
-/*
- * Disabled/Unused
- 
- Blockly.Blocks.controls_if_return = {
- init: function () {
- this.setColour(colorPalette.getColor('programming'));
- this.appendValueInput('CONDITION')
- .appendField("if");
- this.appendDummyInput()
- .appendField("return");
- this.setInputsInline(true);
- this.setPreviousStatement(true, "Block");
- this.setNextStatement(true, null);
- }
- };
- 
- Blockly.propc.controls_if_return = function () {
- var argument = Blockly.propc.valueToCode(this, 'CONDITION', Blockly.propc.ORDER_NONE) || '0';
- 
- return 'if (' + argument + ') {return;}\n';
- };
- */
-
 Blockly.Blocks.control_repeat_for_loop = {
     init: function () {
         var block_label = 'repeat';
@@ -385,6 +362,29 @@ Blockly.Blocks.control_repeat_for_loop = {
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
         this.setInputsInline(true);
+    },
+    onchange: function (event) {
+        if (event && (event.type === Blockly.Events.CHANGE)) {
+            var warnText = null;
+            var blockStart = this.getInput('START').connection.targetBlock();
+            var blockEnd = this.getInput('END').connection.targetBlock();
+            var blockStep = this.getInput('STEP').connection.targetBlock();
+            if (blockStart && blockEnd && blockStep &&
+                    blockStart.type === 'math_number' &&
+                    blockEnd.type === 'math_number' &&
+                    blockStep.type === 'math_number') {
+                if (parseInt(blockStart.getFieldValue('NUM')) < parseInt(blockEnd.getFieldValue('NUM')) && 
+                        parseInt(blockStep.getFieldValue('NUM')) < 0) {
+                    warnText = 'WARNING: If the "step" value is negative, the "start" value should be greater than the "end" value!';
+                } else if (parseInt(blockStart.getFieldValue('NUM')) > parseInt(blockEnd.getFieldValue('NUM')) && 
+                        parseInt(blockStep.getFieldValue('NUM')) > 0) {
+                    warnText = 'WARNING: If the "step" value is positive, the "start" value should be less than the "end" value!';
+                } else if (parseInt(blockStep.getFieldValue('NUM')) === 0) {
+                    warnText = 'WARNING: The "step" value cannot be zero!';
+                } 
+            }
+            this.setWarningText(warnText);
+        }
     }
 };
 
