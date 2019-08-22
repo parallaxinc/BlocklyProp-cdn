@@ -196,6 +196,17 @@ const timestampSaveTime = (mins, resetTimer) => {
 
 
 /**
+ * Get the current time stamp
+ *
+ * @returns {number} Number of seconds since 1/1/1970
+ */
+function getTimestamp() {
+    const date = new Date();
+    return date.getTime();
+}
+
+
+/**
  *
  */
 const checkLastSavedTime = function () {
@@ -236,23 +247,28 @@ function initUploadModalLabels() {
  * Check project state to see if it has changed before leaving the page
  *
  * @returns {boolean}
+ * Return true if the project has been changed but has not been
+ * persisted to storage.
+ *
+ * @description
+ * The function assumes that the projectData global variable holds
+ * the original copy of the project, prior to any user modification.
+ * The code then compares the code in the Blockly core against the
+ * original version of the project to determine if any changes have
+ * occurred.
  *
  * TODO: We might get here if we failed to load a new project.
  */
 function checkLeave () {
     // Return if there is no project data
-    if (!projectData) {
+    if (! projectData) {
         return false;
     }
 
-    var currentXml = getXml();
-    var savedXml = projectData.code;
+    let currentXml = getXml();
+    let savedXml = projectData.code;
 
-    if (ignoreSaveCheck || savedXml === currentXml) {
-        return false;
-    } else {
-        return true;
-    }
+    return ! (ignoreSaveCheck || savedXml === currentXml);
 };
 
 
@@ -529,32 +545,36 @@ $(document).ready( () => {
             // Call checkLeave only if we are NOT loading a new project
             if (getURLParameter('openFile') === "true") {
                 return;
-            } 
-            /*
-            // This code attempts to save the current workspace into the localStorage.
-            // Testing shows that when this is implemented, the checkLeave below is never reached,
-            // preventing the dialog warning the user that their current project is not saved.
-            else {
-                // store the current project into the localStore so that if the page is
-                // being refreshed, then it will automatically be reloaded
-                projectData.timestamp = this.performance.now();
-                var pd = projectData;
-                pd.code = getXml();
-                window.localStorage.setItem('localProject', JSON.stringify(pd));
             }
-            */ 
+
+            // ------------------------------------------------------
+            // This code attempts to save the current workspace into
+            // the localStorage. Testing shows that when this is
+            // implemented, the checkLeave below is never reached,
+            // preventing the dialog warning the user that their
+            // current project is not saved.
+            // Note:
+            //   the call to this.performance.now() to get the
+            //   timestamp was failing. Replacing that call with a
+            //   generic function getTimestamp() resolves the error.
+            // ------------------------------------------------------
+
+            // Store the current project into the localStore so that
+            // if the page is being refreshed, it will automatically
+            // be reloaded
+            // ------------------------------------------------------
+            let tempProject = {};
+            Object.assign(tempProject, projectData);
+
+            tempProject.code = getXml();
+            tempProject.timestamp = getTimestamp();
+            window.localStorage.setItem('localProject', JSON.stringify(tempProject));
         }
 
         if (checkLeave()) {
             e.preventDefault();     // Cancel the event
             e.returnValue = Blockly.Msg.DIALOG_CHANGED_SINCE;
             return Blockly.Msg.DIALOG_CHANGED_SINCE;
-        } else if (isOffline) {
-            // store the current project into the localStore so that if the page is
-            // being refreshed, then it will automatically be reloaded
-            projectData.timestamp = this.performance.now();
-            projectData.code = getXml();
-            window.localStorage.setItem('localProject', JSON.stringify(projectData));
         }
     });
 
