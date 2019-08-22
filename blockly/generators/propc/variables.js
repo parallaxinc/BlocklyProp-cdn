@@ -433,7 +433,12 @@ Blockly.Blocks.array_set = {
     onchange: function () {
         var code = null;
         var elmnts = null;
-        var en = Blockly.propc.valueToCode(this, 'NUM', Blockly.propc.ORDER_NONE) || '0';
+        var en = '0';
+        var targetBlock = this.getInput('NUM').connection.targetBlock();
+        if (targetBlock && targetBlock.type === 'math_number') {
+            en = targetBlock.getFieldValue('NUM') || '0';
+        }
+        //Blockly.propc.valueToCode(this, 'NUM', Blockly.propc.ORDER_NONE) || '0';
         if (en.replace(/[^0-9]+/g, "") === en) {
             elmnts = parseInt(en);
         }
@@ -474,7 +479,7 @@ Blockly.propc.array_set = function () {
         }
         if (element.replace(/[^0-9]+/g, "") === element) {
             if (parseInt(element) >= parseInt(initStr, 10) || parseInt(element) < 0) {
-                code = 'WARNING: You are trying to set an element\nin your array that does not exist!\n';
+                code = '// WARNING: You are trying to set an element in your array that does not exist!\n';
             }
         } else {
             code = varName + '[constrainInt(' + element + ', 0, ';
@@ -482,7 +487,7 @@ Blockly.propc.array_set = function () {
             code += ')] = ' + value + ';\n';
         }
     } else {
-        code = 'WARNING: The array "' + this.getFieldValue('VAR') + '" has not been initialized!\n';
+        code = '// WARNING: The array "' + this.getFieldValue('VAR') + '" has not been initialized!\n';
     }
     return code;
 };
