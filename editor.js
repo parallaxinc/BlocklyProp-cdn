@@ -188,31 +188,13 @@ function checkLeave () {
         return false;
     }
 
-    var currentXml = '';
-    var savedXml = projectData['code'];
+    var currentXml = getXml();
+    var savedXml = projectData.code;
 
-    if (ignoreSaveCheck) {
+    if (ignoreSaveCheck || savedXml === currentXml) {
         return false;
-    }
-    if (projectData['board'] === 'propcfile') {
-        currentXml = propcAsBlocksXml();
     } else {
-        currentXml = getXml();
-    }
-
-    // TODO: We're checking for a null projectData object above; why are we testing again?
-    if (projectData === null) {
-        if (currentXml === '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>') {
-            return false;
-        } else {
-            return true;
-        }
-    } else {
-        if (savedXml === currentXml) {
-            return false;
-        } else {
-            return true;
-        }
+        return true;
     }
 };
 
@@ -298,7 +280,8 @@ function initEditorIcons() {
     // contains a 'data-icon' attribute. Itereate through each
     // match and draw the custom icons into the specified element
     // --------------------------------------------------------------
-    $('.bpIcon[data-icon]').each( () => {
+    // TODO: not sure why, but the ES6 shorthand function notation breaks this...
+    $('.bpIcon[data-icon]').each(function () {
         $(this).html(bpIcons[$(this).attr('data-icon')]);
     });
 }
@@ -480,7 +463,20 @@ $(document).ready( () => {
             // Call checkLeave only if we are NOT loading a new project
             if (getURLParameter('openFile') === "true") {
                 return;
+            } 
+            /*
+            // This code attempts to save the current workspace into the localStorage.
+            // Testing shows that when this is implemented, the checkLeave below is never reached,
+            // preventing the dialog warning the user that their current project is not saved.
+            else {
+                // store the current project into the localStore so that if the page is
+                // being refreshed, then it will automatically be reloaded
+                projectData.timestamp = this.performance.now();
+                var pd = projectData;
+                pd.code = getXml();
+                window.localStorage.setItem('localProject', JSON.stringify(pd));
             }
+            */ 
         }
 
         if (checkLeave()) {
@@ -491,6 +487,7 @@ $(document).ready( () => {
             // store the current project into the localStore so that if the page is
             // being refreshed, then it will automatically be reloaded
             projectData.timestamp = this.performance.now();
+            projectData.code = getXml();
             window.localStorage.setItem('localProject', JSON.stringify(projectData));
         }
     });
@@ -592,8 +589,8 @@ $(document).ready( () => {
         } else if (window.localStorage.getItem('localProject')) {
             var pd = JSON.parse(window.localStorage.getItem('localProject'));
             // load the project from the browser store
-            // check to make sure the project in localStorage is less than 10 seconds old.
-            if (pd.timestamp && ((performance.now() - pd.timestamp) < 10000)) {
+            // check to make sure the project in localStorage is less than 15 seconds old.
+            if (pd.timestamp && ((performance.now() - pd.timestamp) < 15000)) {
                 setupWorkspace(pd, function () {
                     window.localStorage.removeItem('localProject');
                 });
@@ -739,11 +736,7 @@ var showNewProjectModal = function(openModal) {
 
             // If editing details, preserve the code, otherwise start over
             if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
-                if (projectData['board'] === 'propcfile') {
-                    code = propcAsBlocksXml();
-                } else {
-                    code = getXml();
-                }
+                code = getXml();
             } else {
                 code = EmptyProjectCodeHeader;
             }
@@ -965,12 +958,7 @@ function showInfo(data) {
  */
 var saveProject = function () {
     if (projectData['yours']) {
-        var code = '';
-        if (projectData['board'] === 'propcfile') {
-            code = propcAsBlocksXml();
-        } else {
-            code = getXml();
-        }
+        var code = getXml();
         projectData['code'] = code;
         $.post(baseUrl + 'rest/project/code', projectData, function (data) {
             var previousOwner = projectData['yours'];
@@ -1172,11 +1160,7 @@ var editProjectDetails = function () {
     if(isOffline) {
         // Save the current code
         projectData.modified = new Date();
-        if (projectData['board'] === 'propcfile') {
-            projectData.code = propcAsBlocksXml();
-        } else {
-            projectData.code = getXml();
-        }
+        projectData.code = getXml();
 
         $('#new-project-board-dropdown').addClass('hidden');
         $('#edit-project-details-static').removeClass('hidden');
@@ -1266,24 +1250,16 @@ function downloadCode() {
     if (projectData && projectData['board'] !== 'propcfile' && getXml().length < 50) {
         alert('You can\'t save an empty project!');
     } else {
-        var projXMLcode = '';
-        
-        if (projectData && projectData['board'] === 'propcfile') {
-            projXMLcode = propcAsBlocksXml();
-        } else {
-            projXMLcode = getXml();
-        }
-
-        projXMLcode = projXMLcode.substring(42, projXMLcode.length);
-        projXMLcode = projXMLcode.substring(0, (projXMLcode.length - 6));
-
+        var projXMLcode = getXml();
         var project_filename = 'Project' + idProject;
 
         if (isOffline) {
             // Create a filename from the project title
             project_filename = projectData['name'].replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            projectData.code = projXMLcode;
         }
+
+        projXMLcode = projXMLcode.substring(42, projXMLcode.length);
+        projXMLcode = projXMLcode.substring(0, (projXMLcode.length - 6));
 
         utils.prompt(Blockly.Msg.DIALOG_DOWNLOAD, project_filename, function (value) {
             if (value) {
@@ -1363,8 +1339,13 @@ function downloadCode() {
         // save the project into localStorage with a timestamp - if the page is simply refreshed,
         // this will allow the project to be reloaded.
         if (isOffline) {
+            // make the projecData object reflect the current workspace and save it into localStorage
             projectData.timestamp = performance.now();
+            projectData.code = EmptyProjectCodeHeader + projXMLcode + '</xml>';
             window.localStorage.setItem('localProject', JSON.stringify(projectData));
+
+            // Mark the time when saved, add 20 minutes to it.
+            timestampSaveTime(20, true);
         }
     }
 }
@@ -1701,7 +1682,9 @@ function loadToolbox(xmlText) {
  * @returns {string}
  */
 function getXml() {
-    if (Blockly.Xml && Blockly.mainWorkspace) {
+    if (projectData && projectData.board === 'propcfile') {
+        return propcAsBlocksXml();
+    } else if (Blockly.Xml && Blockly.mainWorkspace) {
         var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
         return Blockly.Xml.domToText(xml);
     } else if (projectData && projectData.code) {
