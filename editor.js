@@ -155,13 +155,70 @@ bpIcons = {
  * Ping the Rest API every 60 seconds
  * @type {number}
  */
-let pingInterval = setInterval(() => {
+const pingInterval = setInterval(() => {
     $.get(baseUrl + 'ping');
     },
     60000
 );
 
 
+/**
+ *  Clears the fields in the new project modal.
+ *  Callback
+ */
+const clearNewProjectModal = () => {
+    // Reset the values in the form to defaults
+    $('#new-project-name').val('');
+    $('#new-project-description').val('');
+    $('#new-project-dialog-title').html(page_text_label['editor_newproject_title']);
+}
+
+
+/**
+ *
+ * @param mins
+ * @param resetTimer
+ */
+const timestampSaveTime = (mins, resetTimer) => {
+    // Mark the time when the project was opened, add 20 minutes to it.
+    const d_save = new Date();
+
+    // If the proposed delay is less than the delay that's already in
+    // process, don't update the delay to a new shorter time.
+    if (d_save.getTime() + (mins * 60000) > last_saved_timestamp) {
+        last_saved_timestamp = d_save.getTime() + (mins * 60000);
+
+        if (resetTimer) {
+            last_saved_time = d_save.getTime();
+        }
+    }
+};
+
+
+/**
+ *
+ */
+const checkLastSavedTime = function () {
+    const d_now = new Date();
+    const t_now = d_now.getTime();
+    const s_save = Math.round((d_now.getTime() - last_saved_time) / 60000);
+
+    $('#save-check-warning-time').html(s_save.toString(10));
+
+    //if (s_save > 58) {
+    // TODO: It's been to long - autosave, then close/set URL back to login page.
+    //}
+
+    if (t_now > last_saved_timestamp && checkLeave() && user_authenticated) {
+        // It's time to pop up a modal to remind the user to save.
+        $('#save-check-dialog').modal({keyboard: false, backdrop: 'static'});
+    }
+};
+
+
+/**
+ *
+ */
 function initUploadModalLabels() {
 
     // set the upload modal's title to "import" if offline
@@ -228,7 +285,6 @@ function validateNewProjectForm() {
 
     return project.valid() ? true : false;
 }
-
 
 
 /**
@@ -326,9 +382,9 @@ function initEventHandlers() {
             uploadHandler(e.data.fileValue);
     });
 */
-
-    $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false);  });
-    $('#selectfile-append').on('click',     function () {  uploadMergeCode(true);  });
+    // Hamburger menu items
+    $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false); });
+    $('#selectfile-append').on('click',     function () {  uploadMergeCode(true); });
 
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo(true);  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
@@ -340,7 +396,13 @@ function initEventHandlers() {
             saveProject();
         }
     });
-    $('#new-project-menu-item').on('click', function () {  clearNewProjectModal(); showNewProjectModal('open'); });// window.location = 'blocklyc.html?newProject=true'  });
+
+    // Load a new project
+    $('#new-project-menu-item').on('click', function () {
+        clearNewProjectModal();
+        showNewProjectModal('open');
+    });// window.location = 'blocklyc.html?newProject=true'  });
+
     $('#btn-graph-play').on('click',        function () {  graph_play();  });
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
     $('#btn-graph-csv').on('click',         function () {  downloadCSV();  });
@@ -352,11 +414,15 @@ function initEventHandlers() {
 
     $('#save-as-board-btn').on('click',     function () {  saveProjectAs();  });
 
-    for (var k = 1; k < 4; k++) {
-        $('#mac' + k + '-btn').on('click',  function () {  showStep('mac', k, 4);  });
-        $('#win' + k + '-btn').on('click',  function () {  showStep('win', k, 3);  });
-        $('#chr' + k + '-btn').on('click',  function () {  showStep('chr', k, 3);  });
-    }
+    $('#win1-btn').on('click',              function () {  showStep('win', 1, 3);  });
+    $('#win2-btn').on('click',              function () {  showStep('win', 2, 3);  });
+    $('#win3-btn').on('click',              function () {  showStep('win', 3, 3);  });
+    $('#chr1-btn').on('click',              function () {  showStep('chr', 1, 3);  });
+    $('#chr2-btn').on('click',              function () {  showStep('chr', 2, 3);  });
+    $('#chr3-btn').on('click',              function () {  showStep('chr', 3, 3);  });
+    $('#mac1-btn').on('click',              function () {  showStep('mac', 1, 4);  });
+    $('#mac2-btn').on('click',              function () {  showStep('mac', 2, 4);  });
+    $('#mac3-btn').on('click',              function () {  showStep('mac', 3, 4);  });
     $('#mac4-btn').on('click',              function () {  showStep('mac', 4, 4);  });
     $('.show-os-win').on('click',           function () {  showOS('Windows');  });
     $('.show-os-mac').on('click',           function () {  showOS('MacOS');  });
@@ -561,6 +627,8 @@ $(document).ready( () => {
         $("#save-as-board-type").empty();
 
         // populate the board type drop down list
+        // TODO: Make this a function
+        // Change the id to a class reference
         for (key in profile) {
             $("#save-as-board-type").append($('<option />').val(key).text(profile[key].description));
         }
@@ -628,7 +696,7 @@ $(document).ready( () => {
 
         // Set up the click even handler for the "New Project" modal dialog
         // return to the splash screen if the user clicks the cancel button
-        $('#new-project-cancel').on('click', function(e) {
+        $('#new-project-cancel').on('click', () => {
 
             // if the project is being edited, clear the fields and close the modal
             if ($('#open-modal-sender').html() === 'open') {
@@ -646,7 +714,7 @@ $(document).ready( () => {
 
             } else {
                 // otherwise, return to the splash page
-                window.location = 'index.html';
+                window.location = '/';
             }
         });
 
@@ -657,24 +725,13 @@ $(document).ready( () => {
     resetToolBoxSizing(250);
 });
 
-/**
- *  Clears the fields in the new project modal.
- * 
- */
-var clearNewProjectModal = function() {
-    // Reset the values in the form to defaults
-    $('#new-project-name').val('');
-    $('#new-project-description').val('');
-    $('#new-project-dialog-title').html(page_text_label['editor_newproject_title']);
-}
 
 /**
  *  Displays the new project modal.  Sets events and clears the fields.
  * 
  *  @param openModal force the modal to open when set to 'open'
  */
-var showNewProjectModal = function(openModal) {
-
+function showNewProjectModal(openModal) {
     // Clear out the board type dropdown menu
     $("#new-project-board-type").empty();
 
@@ -687,14 +744,11 @@ var showNewProjectModal = function(openModal) {
         .attr('selected','selected')
     );
 
-    // If the editor is passed the 'newProject' parameter, open the modal
+    // If the editor is passed the 'newProject' parameter, open the
+    // New Project modal
     if (getURLParameter('newProject') || openModal === 'open') {
-        // trap modal closing
-        $("#new-project-dialog").on('hidden.bs.modal', function(){
-            alert("Hello World!");
-        });
-
         // Show the New Project modal dialog box
+
         $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
 
         // Populate the time stamp fields
@@ -813,9 +867,10 @@ function resetToolBoxSizing(resizeDelay) {
 /**
  * Populate the projectData global
  *
- * @param data
+ * @param data, callback
+ *
  */
-var setupWorkspace = function (data, callback) {
+function setupWorkspace(data, callback) {
     projectData = data;
 
     // Update the UI with project related details
@@ -844,6 +899,14 @@ var setupWorkspace = function (data, callback) {
 
         // Create UI block content from project details
         renderContent('blocks');
+
+        // Set the help link to the ab-blocks or s3 reference
+        // TODO: modify blocklyc.html/jsp and use an id or class selector
+        if (projectData.board === 's3') {
+            $('#online-help').attr('href', 'https://learn.parallax.com/s3-blocks');
+        } else {
+            $('#online-help').attr('href', 'https://learn.parallax.com/ab-blocks');
+        }
     } else {
         // No, init the blockly interface
         init(Blockly);
@@ -857,6 +920,10 @@ var setupWorkspace = function (data, callback) {
 
         // Create UI block content from project details
         renderContent('propc');
+
+        // Set the help link to the prop-c reference
+        // TODO: modify blocklyc.html/jsp and use an id or class selector
+        $('#online-help').attr('href', 'https://learn.parallax.com/support/C/propeller-c-reference');
     }
 
 
@@ -876,46 +943,6 @@ var setupWorkspace = function (data, callback) {
         callback();
     }
 }
-
-
-/**
- *
- * @param mins
- * @param resetTimer
- */
-var timestampSaveTime = function (mins, resetTimer) {
-    // Mark the time when the project was opened, add 20 minutes to it.
-    var d_save = new Date();
-
-    // If the proposed delay is less than the delay that's already in 
-    // process, don't update the delay to a new shorter time.
-    if (d_save.getTime() + (mins * 60000) > last_saved_timestamp) {
-        last_saved_timestamp = d_save.getTime() + (mins * 60000);
-        if (resetTimer) {
-            last_saved_time = d_save.getTime();
-        }
-    }
-};
-
-
-/**
- *
- */
-var checkLastSavedTime = function () {
-    var d_now = new Date();
-    var t_now = d_now.getTime();
-    var s_save = Math.round((d_now.getTime() - last_saved_time) / 60000);
-    $('#save-check-warning-time').html(s_save.toString(10));
-
-    //if (s_save > 58) {
-    // TODO: It's been to long - autosave, then close/set URL back to login page.
-    //}
-
-    if (t_now > last_saved_timestamp && checkLeave() && user_authenticated) {
-        // It's time to pop up a modal to remind the user to save.
-        $('#save-check-dialog').modal({keyboard: false, backdrop: 'static'});
-    }
-};
 
 
 /**
@@ -956,10 +983,11 @@ function showInfo(data) {
 /**
  *
  */
-var saveProject = function () {
+function saveProject() {
     if (projectData['yours']) {
         var code = getXml();
         projectData['code'] = code;
+
         $.post(baseUrl + 'rest/project/code', projectData, function (data) {
             var previousOwner = projectData['yours'];
             projectData = data;
@@ -1022,7 +1050,7 @@ var saveProject = function () {
 /**
  *
  */
-var saveAsDialog = function () {
+function saveAsDialog () {
     // Production still uses the uses the plain 'save-as' endpoint for now.
     if (inDemo !== 'demo') {     // if (1 === 1) {
 
@@ -1080,7 +1108,7 @@ var saveAsDialog = function () {
  *
  * @param requestor
  */
-var checkBoardType = function (requestor) {
+function checkBoardType (requestor) {
     if (requestor !== 'offline') {
         var current_type = projectData['board'];
         var save_as_type = $('#save-as-board-type').val();
@@ -1099,7 +1127,7 @@ var checkBoardType = function (requestor) {
  *
  * @param requestor
  */
-var saveProjectAs = function (requestor) {
+function saveProjectAs (requestor) {
     // Retrieve the field values
     var p_type = $('#save-as-board-type').val();
     var p_name = $('#save-as-project-name').val();
@@ -1156,7 +1184,7 @@ var saveProjectAs = function (requestor) {
 /**
  *
  */
-var editProjectDetails = function () {
+function editProjectDetails() {
     if(isOffline) {
         // Save the current code
         projectData.modified = new Date();
