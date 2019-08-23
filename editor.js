@@ -425,7 +425,7 @@ function initEventHandlers() {
             }
         }
         clearNewProjectModal();
-        showNewProjectModal({keyboard: false, backdrop: 'static'});
+        showNewProjectModal('open');
 
     });// window.location = 'blocklyc.html?newProject=true'  });
 
