@@ -211,7 +211,7 @@ function getTimestamp() {
  */
 const checkLastSavedTime = function () {
     const t_now = getTimestamp();
-    const s_save = Math.round((d_now.getTime() - last_saved_time) / 60000);
+    const s_save = Math.round((t_now - last_saved_time) / 60000);
 
     $('#save-check-warning-time').html(s_save.toString(10));
 
