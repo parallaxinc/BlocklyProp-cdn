@@ -414,9 +414,20 @@ function initEventHandlers() {
     });
 
     // Load a new project
-    $('#new-project-menu-item').on('click', function () {
+    $('#new-project-menu-item').on('click', () => {
+        // If the current project has been modified, give the user
+        // an opportunity to abort the new project process.
+        if (checkLeave()) {
+            const message =
+                'The current project has been modified. Click OK to\n' +
+                'discard the current changes and create a new project.';
+            if (! confirm(message)) {
+                return;
+            }
+        }
         clearNewProjectModal();
-        showNewProjectModal('open');
+        showNewProjectModal({keyboard: false, backdrop: 'static'});
+
     });// window.location = 'blocklyc.html?newProject=true'  });
 
     $('#btn-graph-play').on('click',        function () {  graph_play();  });
@@ -519,6 +530,28 @@ function initCdnImageUrls() {
 
 
 /**
+ * Initialize the UI elements that display the users logged-in state
+ * in the production BlocklyProp system. These elements do not exist
+ * in the BlocklyProp Solo or BlocklyProp Local systems.
+ */
+function initLoginUiElement() {
+    // Offline has no concept of authentication
+    if (isOffline) {
+        return;
+    }
+
+    if (user_authenticated) {
+        $('.auth-true').css('display', $(this).attr('data-displayas'));
+        $('.auth-false').css('display', 'none');
+    } else {
+        $('.auth-false').css('display', $(this).attr('data-displayas'));
+        $('.auth-true').css('display', 'none');
+    }
+}
+
+
+
+/**
  * Execute this code as soon as the DOM becomes ready.
  */
 $(document).ready( () => {
@@ -587,14 +620,9 @@ $(document).ready( () => {
     // Reset the upload/import modal to its default state when closed
     $('#upload-dialog').on('hidden.bs.modal', resetUploadImportModalDialog());
 
+    // Set up login/guest user UI elements
+    initLoginUiElement();
 
-    if (user_authenticated) {
-        $('.auth-true').css('display', $(this).attr('data-displayas'));
-        $('.auth-false').css('display', 'none');
-    } else {
-        $('.auth-false').css('display', $(this).attr('data-displayas'));
-        $('.auth-true').css('display', 'none');
-    }
 
     $('.url-prefix').attr('href', function (idx, cur) {
         return baseUrl + cur;
