@@ -850,6 +850,8 @@ function showNewProjectModal(openModal) {
  * @param resizeDelay milliseconds to delay the resizing, especially
  * if used after a change in the window's location or a during page
  * reload.
+ * @param centerProject boolean when set to true calls the scrollCenter() function
+ * to center the current project in the workspace.
  */
 function resetToolBoxSizing(resizeDelay, centerProject) {
     // Vanilla Javascript is used here for speed - jQuery
