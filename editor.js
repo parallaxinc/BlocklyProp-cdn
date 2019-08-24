@@ -851,11 +851,11 @@ function showNewProjectModal(openModal) {
  * if used after a change in the window's location or a during page
  * reload.
  */
-function resetToolBoxSizing(resizeDelay) {
+function resetToolBoxSizing(resizeDelay, centerProject) {
     // Vanilla Javascript is used here for speed - jQuery
     // could probably be used, but this is faster. Force
     // the toolbox to render correctly
-    setTimeout(() => {
+    setTimeout((centerProject) => {
         // find the height of just the blockly workspace by
         // subtracting the height of the navigation bar
         let navTop = document.getElementById('editor').offsetHeight;
@@ -880,8 +880,11 @@ function resetToolBoxSizing(resizeDelay) {
         // Update the Blockly editor canvas to use the new space
         if (Blockly.mainWorkspace && blocklyDiv[0].style.display !== 'none') {
             Blockly.svgResize(Blockly.mainWorkspace);
+            if (centerProject) {
+                Blockly.mainWorkspace.scrollCenter();
+            }
         }
-    }, resizeDelay || 10);  // 10 millisecond delay
+    }, resizeDelay || 10, centerProject);  // 10 millisecond delay
 }
 
 /**
@@ -954,7 +957,7 @@ function setupWorkspace(data, callback) {
         $('#edit-project-details').html(page_text_label['editor_edit-details']);
     }
 
-    resetToolBoxSizing();
+    resetToolBoxSizing(10, true);  // center the project in the workspace.
     timestampSaveTime(20, true);
     setInterval(checkLastSavedTime, 60000);
 
