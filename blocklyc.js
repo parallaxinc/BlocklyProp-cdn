@@ -251,7 +251,11 @@ function renderContent(id) {
     // Select the active tab.
     const selectedTab = id.replace('tab_', '');
     const isPropcOnlyProject = (projectData['board'] === 'propcfile');
-    const isDebug = getURLParameter('debug');
+
+    let isDebug = getURLParameter('debug');
+    if (!isDebug) {
+        isDebug = false;
+    }
 
     if (isPropcOnlyProject) {
         id = 'propc';
@@ -272,6 +276,7 @@ function renderContent(id) {
         if ((isDebug || isOffline) && codeXml.getValue().length > 40) {
             Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.Xml.textToDom(codeXml.getValue()), Blockly.mainWorkspace);
         } else {
+            Blockly.svgResize(Blockly.mainWorkspace);
             Blockly.mainWorkspace.render();
         }
         break;
