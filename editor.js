@@ -595,12 +595,16 @@ $(document).ready( () => {
             // if the page is being refreshed, it will automatically
             // be reloaded
             // ------------------------------------------------------
-            let tempProject = {};
-            Object.assign(tempProject, projectData);
+            if (projectData) {
+                if (projectData['name'] !== "undefined") {
+                    let tempProject = {};
+                    Object.assign(tempProject, projectData);
 
-            tempProject.code = getXml();
-            tempProject.timestamp = getTimestamp();
-            window.localStorage.setItem('localProject', JSON.stringify(tempProject));
+                    tempProject.code = getXml();
+                    tempProject.timestamp = getTimestamp();
+                    window.localStorage.setItem('localProject', JSON.stringify(tempProject));
+                }
+            }
         }
 
         if (checkLeave()) {
@@ -974,7 +978,7 @@ function setupWorkspace(data, callback) {
     }
 
 
-
+    // View or edit project details menu item
     if (projectData && projectData['yours'] === false) {
         $('#edit-project-details').html(page_text_label['editor_view-details'])
     } else {
