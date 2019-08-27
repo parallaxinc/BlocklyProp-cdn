@@ -701,6 +701,9 @@ $(document).ready( () => {
             if (projectData) {
                 setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
             }
+        } else if (getURLParameter('newProject') === "true") {
+            // Open save-as modal (used as a new-project modal)
+            $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
         } else if (window.localStorage.getItem('localProject')) {
             var pd = JSON.parse(window.localStorage.getItem('localProject'));
             // load the project from the browser store
@@ -714,9 +717,6 @@ $(document).ready( () => {
                 window.localStorage.removeItem('localProject');
                 window.location.href = (isOffline) ? 'index.html' : baseUrl;
             }
-        } else if (getURLParameter('newProject') === "true") {
-            // Open save-as modal (used as a new-project modal)
-            $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
         } else {
             // No viable project available, so redirect to index page.
             window.location.href = (isOffline) ? 'index.html' : baseUrl;
