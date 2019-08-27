@@ -181,15 +181,15 @@ const clearNewProjectModal = () => {
  */
 const timestampSaveTime = (mins, resetTimer) => {
     // Mark the time when the project was opened, add 20 minutes to it.
-    const d_save = new Date();
+    const d_save = getTimestamp();
 
     // If the proposed delay is less than the delay that's already in
     // process, don't update the delay to a new shorter time.
-    if (d_save.getTime() + (mins * 60000) > last_saved_timestamp) {
-        last_saved_timestamp = d_save.getTime() + (mins * 60000);
+    if (d_save + (mins * 60000) > last_saved_timestamp) {
+        last_saved_timestamp = d_save + (mins * 60000);
 
         if (resetTimer) {
-            last_saved_time = d_save.getTime();
+            last_saved_time = d_save;
         }
     }
 };
@@ -210,9 +210,8 @@ function getTimestamp() {
  *
  */
 const checkLastSavedTime = function () {
-    const d_now = new Date();
-    const t_now = d_now.getTime();
-    const s_save = Math.round((d_now.getTime() - last_saved_time) / 60000);
+    const t_now = getTimestamp();
+    const s_save = Math.round((t_now - last_saved_time) / 60000);
 
     $('#save-check-warning-time').html(s_save.toString(10));
 
@@ -414,9 +413,20 @@ function initEventHandlers() {
     });
 
     // Load a new project
-    $('#new-project-menu-item').on('click', function () {
+    $('#new-project-menu-item').on('click', () => {
+        // If the current project has been modified, give the user
+        // an opportunity to abort the new project process.
+        if (checkLeave()) {
+            const message =
+                'The current project has been modified. Click OK to\n' +
+                'discard the current changes and create a new project.';
+            if (! confirm(message)) {
+                return;
+            }
+        }
         clearNewProjectModal();
         showNewProjectModal('open');
+
     });// window.location = 'blocklyc.html?newProject=true'  });
 
     $('#btn-graph-play').on('click',        function () {  graph_play();  });
@@ -519,6 +529,28 @@ function initCdnImageUrls() {
 
 
 /**
+ * Initialize the UI elements that display the users logged-in state
+ * in the production BlocklyProp system. These elements do not exist
+ * in the BlocklyProp Solo or BlocklyProp Local systems.
+ */
+function initLoginUiElement() {
+    // Offline has no concept of authentication
+    if (isOffline) {
+        return;
+    }
+
+    if (user_authenticated) {
+        $('.auth-true').css('display', $(this).attr('data-displayas'));
+        $('.auth-false').css('display', 'none');
+    } else {
+        $('.auth-false').css('display', $(this).attr('data-displayas'));
+        $('.auth-true').css('display', 'none');
+    }
+}
+
+
+
+/**
  * Execute this code as soon as the DOM becomes ready.
  */
 $(document).ready( () => {
@@ -587,14 +619,9 @@ $(document).ready( () => {
     // Reset the upload/import modal to its default state when closed
     $('#upload-dialog').on('hidden.bs.modal', resetUploadImportModalDialog());
 
+    // Set up login/guest user UI elements
+    initLoginUiElement();
 
-    if (user_authenticated) {
-        $('.auth-true').css('display', $(this).attr('data-displayas'));
-        $('.auth-false').css('display', 'none');
-    } else {
-        $('.auth-false').css('display', $(this).attr('data-displayas'));
-        $('.auth-true').css('display', 'none');
-    }
 
     $('.url-prefix').attr('href', function (idx, cur) {
         return baseUrl + cur;
@@ -678,7 +705,7 @@ $(document).ready( () => {
             var pd = JSON.parse(window.localStorage.getItem('localProject'));
             // load the project from the browser store
             // check to make sure the project in localStorage is less than 15 seconds old.
-            if (pd.timestamp && ((performance.now() - pd.timestamp) < 15000)) {
+            if (pd.timestamp && ((getTimestamp() - pd.timestamp) < 15000)) {
                 setupWorkspace(pd, function () {
                     window.localStorage.removeItem('localProject');
                 });
@@ -830,7 +857,7 @@ function showNewProjectModal(openModal) {
                 'type': "PROPC",
                 'user': "offline",
                 'yours': true,
-                'timestamp': performance.now(),
+                'timestamp': getTimestamp(),
             }
 
             // then load the toolbox using the projectData
@@ -1192,7 +1219,7 @@ function saveProjectAs (requestor) {
             'type': "PROPC",
             'user': "offline",
             'yours': true,
-            'timestamp': performance.now(),
+            'timestamp': getTimestamp(),
         }
 
         window.localStorage.setItem('localProject', JSON.stringify(pd));
@@ -1388,7 +1415,7 @@ function downloadCode() {
         // this will allow the project to be reloaded.
         if (isOffline) {
             // make the projecData object reflect the current workspace and save it into localStorage
-            projectData.timestamp = performance.now();
+            projectData.timestamp = getTimestamp();
             projectData.code = EmptyProjectCodeHeader + projXMLcode + '</xml>';
             window.localStorage.setItem('localProject', JSON.stringify(projectData));
 
@@ -1498,7 +1525,7 @@ function uploadHandler(files) {
             	    'type': "PROPC",
             	    'user': "offline",
             	    'yours': true,
-                    'timestamp': performance.now(),
+                    'timestamp': getTimestamp(),
 		        }
 
                 projectData = pd;
@@ -1564,7 +1591,7 @@ function uploadMergeCode(append) {
         // the offline app, load the selected project
         if (!append && getURLParameter('openFile') === 'true') {
             // Set a timestamp to note when the project was saved into localStorage
-            projectData.timestamp = performance.now();
+            projectData.timestamp = getTimestamp();
             window.localStorage.setItem('localProject', JSON.stringify(projectData));
             window.location = 'blocklyc.html';
         }
