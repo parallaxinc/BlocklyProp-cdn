@@ -503,11 +503,22 @@ function resetUploadImportModalDialog() {
 
 
 /**
- * Set the client download links
+ * Set the BlocklyProp Client download links
+ *
+ * Set the href for each of the client links to point to the correct files
+ * available on the downloads.parallax.com S3 site. The URL is stored in a
+ * HTML meta tag.
  */
 function initClientDownloadLinks() {
+    // Windows 32-bit
     $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
+    $('.client-win32zip-link').attr('href', $("meta[name=win32zipclient]").attr("content"));
+
+    // Windows 64-bit
     $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
+    $('.client-win64zip-link').attr('href', $("meta[name=win64zipclient]").attr("content"));
+
+    // MacOS
     $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
 }
 
