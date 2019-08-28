@@ -503,11 +503,22 @@ function resetUploadImportModalDialog() {
 
 
 /**
- * Set the client download links
+ * Set the BlocklyProp Client download links
+ *
+ * Set the href for each of the client links to point to the correct files
+ * available on the downloads.parallax.com S3 site. The URL is stored in a
+ * HTML meta tag.
  */
 function initClientDownloadLinks() {
+    // Windows 32-bit
     $('.client-win32-link').attr('href', $("meta[name=win32client]").attr("content"));
+    $('.client-win32zip-link').attr('href', $("meta[name=win32zipclient]").attr("content"));
+
+    // Windows 64-bit
     $('.client-win64-link').attr('href', $("meta[name=win64client]").attr("content"));
+    $('.client-win64zip-link').attr('href', $("meta[name=win64zipclient]").attr("content"));
+
+    // MacOS
     $('.client-mac-link').attr('href', $("meta[name=macOSclient]").attr("content"));
 }
 
@@ -595,12 +606,16 @@ $(document).ready( () => {
             // if the page is being refreshed, it will automatically
             // be reloaded
             // ------------------------------------------------------
-            let tempProject = {};
-            Object.assign(tempProject, projectData);
+            if (projectData) {
+                if (projectData['name'] !== "undefined") {
+                    let tempProject = {};
+                    Object.assign(tempProject, projectData);
 
-            tempProject.code = getXml();
-            tempProject.timestamp = getTimestamp();
-            window.localStorage.setItem('localProject', JSON.stringify(tempProject));
+                    tempProject.code = getXml();
+                    tempProject.timestamp = getTimestamp();
+                    window.localStorage.setItem('localProject', JSON.stringify(tempProject));
+                }
+            }
         }
 
         if (checkLeave()) {
@@ -701,6 +716,9 @@ $(document).ready( () => {
             if (projectData) {
                 setupWorkspace(JSON.parse(window.localStorage.getItem('localProject')));
             }
+        } else if (getURLParameter('newProject') === "true") {
+            // Open save-as modal (used as a new-project modal)
+            $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
         } else if (window.localStorage.getItem('localProject')) {
             var pd = JSON.parse(window.localStorage.getItem('localProject'));
             // load the project from the browser store
@@ -714,9 +732,6 @@ $(document).ready( () => {
                 window.localStorage.removeItem('localProject');
                 window.location.href = (isOffline) ? 'index.html' : baseUrl;
             }
-        } else if (getURLParameter('newProject') === "true") {
-            // Open save-as modal (used as a new-project modal)
-            $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
         } else {
             // No viable project available, so redirect to index page.
             window.location.href = (isOffline) ? 'index.html' : baseUrl;
@@ -974,7 +989,7 @@ function setupWorkspace(data, callback) {
     }
 
 
-
+    // View or edit project details menu item
     if (projectData && projectData['yours'] === false) {
         $('#edit-project-details').html(page_text_label['editor_view-details'])
     } else {
