@@ -384,19 +384,21 @@ function initEventHandlers() {
     $('#download-side').on('click',         function () {  downloadPropC();  });
     $('#term-graph-setup').on('click',      function () {  configure_term_graph();  });
     $('#client-setup').on('click',          function () {  configure_client();  });
-    $('#propc-find-btn').on('click',        function () {  codePropC.find(document.getElementById('propc-find').value, {}, true);  });
-    $('#propc-replace-btn').on('click',     function () {  codePropC.replace(document.getElementById('propc-replace').value, {needle: document.getElementById('propc-find').value}, true);  });
+
+    $('#propc-find-btn').on('click',        function () {
+        codePropC.find(document.getElementById('propc-find').value, {}, true);
+    });
+
+    $('#propc-replace-btn').on('click',     function () {
+        codePropC.replace(document.getElementById(
+            'propc-replace').value,
+            {needle: document.getElementById('propc-find').value},
+            true);
+    });
+
     $('#find-replace-close').on('click',    function () {  findReplaceCode();  });
     $('#upload-close').on('click',          function () {  clearUploadInfo(false);  });
 
-/*
-    $('#selectfile').on('change',
-        {fileValue: this.files},
-        function (e) {
-            console.log(e.data.fileValue);
-            uploadHandler(e.data.fileValue);
-    });
-*/
     // Hamburger menu items
     $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false); });
     $('#selectfile-append').on('click',     function () {  uploadMergeCode(true); });
@@ -592,14 +594,7 @@ $(document).ready( () => {
 
             // ------------------------------------------------------
             // This code attempts to save the current workspace into
-            // the localStorage. Testing shows that when this is
-            // implemented, the checkLeave below is never reached,
-            // preventing the dialog warning the user that their
-            // current project is not saved.
-            // Note:
-            //   the call to this.performance.now() to get the
-            //   timestamp was failing. Replacing that call with a
-            //   generic function getTimestamp() resolves the error.
+            // the localStorage.
             // ------------------------------------------------------
 
             // Store the current project into the localStore so that
@@ -613,6 +608,7 @@ $(document).ready( () => {
 
                     tempProject.code = getXml();
                     tempProject.timestamp = getTimestamp();
+
                     window.localStorage.setItem('localProject', JSON.stringify(tempProject));
                 }
             }
@@ -789,22 +785,55 @@ $(document).ready( () => {
 
 
 /**
+ * Populate the UI Project board type drop-down list
+ * @constructor
+ */
+function PopulateProjectBoardTypesUIElement() {
+    let element = $("#new-project-board-type");
+
+    if (element) {
+        // Clear out the board type dropdown menu
+        element.empty();
+
+        // Populate the board type dropdown menu with a header first,
+
+        element.append($('<option />')
+                .val('')
+                .text(page_text_label['project_create_board_type_select'])
+                .attr('disabled','disabled')
+                .attr('selected','selected')
+            );
+
+        // then populate the dropdown with the board types
+        // defined in propc.js in the 'profile' object
+        // (except 'default', which is where the current project's type is stored)
+        for(let boardTypes in profile) {
+            if (boardTypes !== 'default' && boardTypes !== 'propcfile') {
+                $("#new-project-board-type")
+                    .append($('<option />')
+                        .val(boardTypes)
+                        .text(profile[boardTypes].description));
+            }
+        }
+
+        // TODO: only show the code-only project option if in Demo/experimental
+        if (inDemo) {
+            $("#new-project-board-type")
+                .append($('<option />')
+                    .val('propcfile')
+                    .text(profile['propcfile'].description));
+        }
+    }
+}
+
+
+/**
  *  Displays the new project modal.  Sets events and clears the fields.
  * 
  *  @param openModal force the modal to open when set to 'open'
  */
 function showNewProjectModal(openModal) {
-    // Clear out the board type dropdown menu
-    $("#new-project-board-type").empty();
-
-    // Populate the board type dropdown menu with a header first,
-    $("#new-project-board-type")
-        .append($('<option />')
-        .val('')
-        .text(page_text_label['project_create_board_type_select'])
-        .attr('disabled','disabled')
-        .attr('selected','selected')
-    );
+    PopulateProjectBoardTypesUIElement();
 
     // If the editor is passed the 'newProject' parameter, open the
     // New Project modal
@@ -823,25 +852,6 @@ function showNewProjectModal(openModal) {
     // hits cancel they don't lose their work
     if (openModal === 'open') {
         $('#open-modal-sender').html('open');
-    }
-
-    // then populate the dropdown with the board types 
-    // defined in propc.js in the 'profile' object
-    // (except 'default', which is where the current project's type is stored)
-    for(var boardTypes in profile) {
-        if (boardTypes !== 'default' && boardTypes !== 'propcfile') {
-            $("#new-project-board-type")
-                    .append($('<option />')
-                    .val(boardTypes)
-                    .text(profile[boardTypes].description));
-        }
-    }
-    // TODO: only show the code-only project option if in Demo/experimental
-    if (inDemo) {
-        $("#new-project-board-type")
-        .append($('<option />')
-        .val('propcfile')
-        .text(profile['propcfile'].description));
     }
 
     // when the user clicks the 'Continue' button, validate the form
@@ -877,6 +887,7 @@ function showNewProjectModal(openModal) {
 
             // then load the toolbox using the projectData
             window.localStorage.setItem('localProject', JSON.stringify(pd));
+
             window.location = 'blocklyc.html';
         }
         resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary) 
