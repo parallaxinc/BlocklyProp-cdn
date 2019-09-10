@@ -300,28 +300,6 @@ function ShowProjectTimerDialog() {
  */
 $(document).ready( () => {
     /* -- Set up amy event handlers once the DOM is ready -- */
-    let testing = false;
-    if (isOffline && testing) {
-        let query = window.location.search;
-
-        if (query) {
-            // Open a new project
-            if (query.substring(1).toLowerCase() === "openfile=true") {
-                console.log("Opening a project file.");
-                if (! OpenOfflineProject()) {
-                    return;
-                }
-            }
-            // Create a new project
-            else if (query.substring(1).toLowerCase() === "newproject=true") {
-                console.log("Creating a new project");
-                if (! CreateNewProject()) {
-                    return;
-                }
-            }
-        }
-    }
-
 
     // Update the blockly workspace to ensure that it takes
     // the remainder of the window. This is an async call.
@@ -504,8 +482,13 @@ $(document).ready( () => {
         // show the new project modal
         showNewProjectModal();
 
-        // Set up the click even handler for the "New Project" modal dialog
-        // return to the splash screen if the user clicks the cancel button
+        // Set up the click even handler for the "New Project" modal
+        // dialog return to the splash screen if the user clicks the
+        // cancel button
+        // ----------------------------------------------------------
+        // This is also handling the 'Edit Project Details' modal
+        // dialog box
+        // ----------------------------------------------------------
         $('#new-project-cancel').on('click', () => {
 
             // if the project is being edited, clear the fields and close the modal
@@ -585,7 +568,7 @@ function checkLeave () {
     }
 
     let currentXml = getXml();
-    let savedXml = projectData.code;
+    let savedXml = projectData['code'];
 
     return ! (ignoreSaveCheck || savedXml === currentXml);
 };
@@ -618,7 +601,7 @@ function validateNewProjectForm() {
         }
     });
 
-    return project.valid() ? true : false;
+    return !!project.valid();
 }
 
 
@@ -671,7 +654,11 @@ function initEditorIcons() {
     // contains a 'data-icon' attribute. Itereate through each
     // match and draw the custom icons into the specified element
     // --------------------------------------------------------------
-    // TODO: not sure why, but the ES6 shorthand function notation breaks this...
+    // TODO: not sure why, but the ES6 shorthand function notation
+    //      breaks this...
+    //      ... because the arrow function does not set the 'this'
+    //          value whereas an anonymous function does.
+    // --------------------------------------------------------------
     $('.bpIcon[data-icon]').each(function () {
         $(this).html(bpIcons[$(this).attr('data-icon')]);
     });
@@ -700,6 +687,7 @@ function initEventHandlers() {
     $('#btn-view-propc').on('click',        function () {  renderContent('tab_propc');  });
     $('#btn-view-blocks').on('click',       function () {  renderContent('tab_blocks');  });
     $('#btn-view-xml').on('click',          function () {  renderContent('tab_xml');  });
+
     $('#edit-project-details').on('click',  function () {  editProjectDetails();  });
     $('#download-side').on('click',         function () {  downloadPropC();  });
     $('#term-graph-setup').on('click',      function () {  configure_term_graph();  });
@@ -882,27 +870,29 @@ function initCdnImageUrls() {
  */
 function initLoginUiElement() {
     // Offline has no concept of authentication
-    if (isOffline) {
-        return;
-    }
-
-    if (user_authenticated) {
-        $('.auth-true').css('display', $(this).attr('data-displayas'));
-        $('.auth-false').css('display', 'none');
-    } else {
-        $('.auth-false').css('display', $(this).attr('data-displayas'));
-        $('.auth-true').css('display', 'none');
+    if (! isOffline) {
+        if (user_authenticated) {
+            $('.auth-true').css('display', $(this).attr('data-displayas'));
+            $('.auth-false').css('display', 'none');
+        } else {
+            $('.auth-false').css('display', $(this).attr('data-displayas'));
+            $('.auth-true').css('display', 'none');
+        }
     }
 }
 
 
-
 /**
  * Populate the UI Project board type drop-down list
- * @constructor
+ *
+ * @param element is the <select> HTML element that will be populated
+ * with a collection of possible board types
+ *
+ * @param selected is an optional string parameter containing the
+ * board type in the list that should be designated as the selected
+ * board type.
  */
-function PopulateNewProjectBoardTypesUIElement() {
-    let element = $("#new-project-board-type");
+function PopulateProjectBoardTypesUIElement(element, selected = null) {
 
     if (element) {
         // Clear out the board type dropdown menu
@@ -922,19 +912,16 @@ function PopulateNewProjectBoardTypesUIElement() {
         // (except 'default', which is where the current project's type is stored)
         for(let boardTypes in profile) {
             if (boardTypes !== 'default' && boardTypes !== 'propcfile') {
-                $("#new-project-board-type")
-                    .append($('<option />')
-                        .val(boardTypes)
-                        .text(profile[boardTypes].description));
-            }
-        }
 
-        // TODO: only show the code-only project option if in Demo/experimental
-        if (inDemo) {
-            $("#new-project-board-type")
-                .append($('<option />')
-                    .val('propcfile')
-                    .text(profile['propcfile'].description));
+                element.append($('<option />')
+                    .val(boardTypes)
+                    .text(profile[boardTypes].description));
+            }
+
+            // Optionally set the selected option element
+            if (selected && boardTypes === selected) {
+                $(element).val(selected);
+            }
         }
     }
 }
@@ -946,7 +933,10 @@ function PopulateNewProjectBoardTypesUIElement() {
  *  @param openModal force the modal to open when set to 'open'
  */
 function showNewProjectModal(openModal) {
-    PopulateNewProjectBoardTypesUIElement();
+
+    let dialog = $("#new-project-board-type");
+
+    PopulateProjectBoardTypesUIElement(dialog);
 
     // If the editor is passed the 'newProject' parameter, open the
     // New Project modal
@@ -961,13 +951,18 @@ function showNewProjectModal(openModal) {
         $('#edit-project-last-modified').html(projectTimestamp);
     }
 
-    // if the newProject modal was opened from the editor, flag it so if the user
-    // hits cancel they don't lose their work
+    // if the newProject modal was opened from the editor, flag it
+    // so if the user hits cancel they don't lose their work. This
+    // element is persisted in the DOM as a hidden field in the modal
+    // dialog box
+    // --------------------------------------------------------------
     if (openModal === 'open') {
         $('#open-modal-sender').html('open');
     }
 
-    // when the user clicks the 'Continue' button, validate the form
+    // Click event handler. When the user clicks the 'Continue'
+    // button, validate the form
+    // --------------------------------------------------------------
     $('#new-project-continue').on('click', function () {
         // verify that the project contains a valid board type and project name
         if (validateNewProjectForm()) {
@@ -1005,7 +1000,7 @@ function showNewProjectModal(openModal) {
             showInfo(pd);
 
             // Redirect to the editor page
-            window.location = 'blocklyc.html';
+            // window.location = 'blocklyc.html';
         }
         resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary) 
     });
@@ -1368,39 +1363,106 @@ function saveProjectAs (requestor) {
         window.localStorage.setItem(localProjectStoreName, JSON.stringify(pd));
         window.location = 'blocklyc.html';
     }  
-};
+}
 
 
 /**
+ *  Edit Project Details - Continue button onClick event handler
+ */
+function setEditOfflineProjectDetailsContinueHandler() {
+    if (isOffline) {
+        $('#edit-project-continue').on('click', function () {
+            // verify that the project contains a valid board type and project name
+            if (validateNewProjectForm()) {
+
+                // Hide the Edit Project modal dialog
+                $('#edit-project-dialog').modal('hide');
+
+                let newName = $('#edit-project-name').val();
+                if ( !(projectData['name'] === newName)) {
+                    projectData['name'] = newName;
+                }
+
+                let newDescription = $('#edit-project-description').val();
+                if (! (projectData['description'] === newDescription)) {
+                    projectData['description'] = newDescription;
+                }
+
+                // Update the UI with the new project name
+                showInfo(projectData);
+
+                // Redirect to the editor page
+                // window.location = 'blocklyc.html';
+            }
+//            resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary)
+        });
+
+    }
+}
+
+
+/**
+ *  Edit Project Details - Cancel button onClick event handler
+ */
+function setEditOfflineProjectDetailsCancelHandler() {
+    if (isOffline) {
+        $('#edit-project-cancel').on('click', () => {
+            // if the project is being edited, clear the fields and close the modal
+            $('#edit-project-board-dropdown').removeClass('hidden');
+            $('#edit-project-details-ro').addClass('hidden');
+            $('#edit-project-board-type-select').val('');
+
+            $('#edit-project-board-type-ro').html('');
+            $('#edit-project-created-date-ro').html('');
+            $('#edit-project-last-modified-ro').html('');
+
+            // Hide the Edit Project modal dialog
+            $('#edit-project-dialog').modal('hide');
+        });
+    }
+}
+
+
+/**
+ *  Present the Edit Project Details modal dialog box
+ *
+ *  The onClick event handlers for the Cancel and Continue buttons
+ *  will manage the project state as required.
+ */
+function EditOfflineProjectDetails() {
+    if (isOffline) {
+        // Set the dialog buttons click event handlers
+        setEditOfflineProjectDetailsContinueHandler();
+        setEditOfflineProjectDetailsCancelHandler();
+
+        // Load the current project details into the html form data
+        $('#edit-project-name').val(projectData.name);
+        $('#edit-project-board-type-ro').val(projectData.board);
+        $('#edit-project-board-type-ro').html(profile.default.description);
+        $('#edit-project-created-date-ro').html(projectData.created);
+        $('#edit-project-last-modified-ro').html(projectData.modified);
+        $('#edit-project-description').val(projectData['description']);
+
+        // Load the current project details into the dialog
+        // PopulateProjectBoardTypesUIElement($('#edit-project-board-type-select'), 'flip');
+
+        // Show the dialog
+        $('#edit-project-dialog').modal({keyboard: false, backdrop: 'static'});
+    }
+}
+
+
+/**
+ * Dialog box to allow editing project name and description
  *
  */
 function editProjectDetails() {
-    if(isOffline) {
-        // Save the current code
-        projectData.modified = new Date();
-        projectData.code = getXml();
 
-        $('#new-project-board-dropdown').addClass('hidden');
-        $('#edit-project-details-static').removeClass('hidden');
-        $('#new-project-dialog-title').html(page_text_label['editor_edit-details']);
-
-        $('#new-project-name').val(projectData.name);
-        $('#new-project-board-type').val(projectData.board);
-        $('#edit-project-board-type').html(profile.default.description);
-        $('#edit-project-created-date').html(projectData.created);
-        $('#edit-project-last-modified').html(projectData.modified);
-
-        // simplemde.value(projectData.description);
-        $("#new-project-description").val(projectData.description)
-
-        // Since this modal is being opened from the editor, flag it
-        // so that if the user cancels, they don't lose their work.
-        $('#open-modal-sender').html('open');
-
-        // show the modal
-        $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
-
-    } else {
+    if (isOffline) {
+        EditOfflineProjectDetails();
+    }
+    else {
+        // Redirect to the my projects page
         window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
     }
 }
@@ -1412,7 +1474,7 @@ function editProjectDetails() {
  * @returns {number}
  */
 function hashCode(str) {
-    var hash = 0, i = 0, len = str.length;
+    let hash = 0, i = 0, len = str.length;
     while (i < len) {
         hash = ((hash << 5) - hash + str.charCodeAt(i++)) << 0;
     }
@@ -1460,6 +1522,7 @@ function decodeFromValidXml(str) {
         .replace(/&#xD;/g, '\r')
     );
 }
+
 
 /**
  *
