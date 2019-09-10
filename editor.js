@@ -168,6 +168,49 @@ const tempProjectStoreName = "tempProject";
 const localProjectStoreName = 'localProject';
 
 
+/**
+ * Project class implementation
+ */
+class Project {
+
+    id = 0;
+    user = '';
+    name = '';
+    yours = true;
+    description = '';
+    htmlDescription = '';
+    boardType = '';
+    code = '';
+    private = true;
+    shared = false;
+    createDate = null;
+    lastUpdated = null;
+
+    constructor() {
+
+    }
+
+
+    getCreated() {
+        return this.createDate;
+    }
+
+    setCreated(value) {
+        this.createDate = value;
+    }
+
+    getTimestamp() {
+        return this.lastUpdated;
+    }
+
+    setTimestamp(value) {
+        this.lastUpdated = value;
+    }
+
+
+
+}
+
 
 // TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
 
@@ -559,7 +602,8 @@ function initUploadModalLabels() {
  * original version of the project to determine if any changes have
  * occurred.
  *
- * TODO: We might get here if we failed to load a new project.
+ * This only examines the project data. This code should also check
+ * the project name and descriptions for changes.
  */
 function checkLeave () {
     // Return if there is no project data
@@ -766,9 +810,13 @@ function initEventHandlers() {
     $('.show-os-chr').on('click',           function () {  showOS('ChromeOS');  });
     $('.show-os-lnx').on('click',           function () {  showOS('Linux');  });
 
-
+    // Save-As Project
     $('#save-project-as').on('click',      function () {  saveAsDialog();  });
+
+    // download to disk
     $('#download-project').on('click',     function () {  downloadCode();  });
+
+    // upload from disk
     $('#upload-project').on('click',       function () {  uploadCode();    });
 
 
@@ -1633,9 +1681,21 @@ function downloadCode() {
 
 
 /**
- *
+ * Import project file from disk
  */
 function uploadCode() {
+    if (isOffline) {
+        if (checkLeave()) {
+            utils.showMessage(
+                Blockly.Msg.DIALOG_UNSAVED_PROJECT,
+                Blockly.Msg.DIALOG_SAVE_BEFORE_ADD_BLOCKS);
+        }
+        else {
+            $('#upload-dialog').modal({keyboard: false, backdrop: 'static'});
+        }
+        return;
+    }
+
     if (checkLeave() && !isOffline) {
         utils.showMessage(
             Blockly.Msg.DIALOG_UNSAVED_PROJECT,
