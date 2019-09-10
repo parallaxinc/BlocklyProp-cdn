@@ -21,6 +21,13 @@
  */
 
 
+/**
+ * CDN version number
+ *
+ * @type {string}
+ */
+const Version = "1.3.1";
+
 
 /**
  * Project language types
