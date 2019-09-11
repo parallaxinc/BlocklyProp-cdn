@@ -58,16 +58,6 @@ var user_authenticated = ($("meta[name=user-auth]").attr("content") === 'true') 
 var isOffline = ($("meta[name=isOffline]").attr("content") === 'true') ? true : false;
 
 
-/**
- * Global variable that holds the original version of the loaded
- * project.
- *
- * This should be updated with a current copy of the project after
- * every save and save-as operation.
- *
- * @type {string}
- */
-var projectData = null;
 
 
 /**
@@ -367,20 +357,8 @@ $(document).ready( () => {
         // and the code is running in the online mode
         window.location = baseUrl;
 
-    } else if (!idProject && isOffline) {
-        // Offline mode
-
-        // ----------------------------------------------------------
-        // If the project id is not provided and the code is
-        // operating in the offline mode, open a modal window to
-        // prompt the user to load a project form local storage.
-        // ----------------------------------------------------------
-
-        // Disable the login link for the BP Client status area
-        // This does not apply to offline mode
-        // $('#unauth-login-anchor').attr('href', '#');
-
-        // TODO: Use the ping endpoint to see if we are offline.
+    } else if (isOffline) {
+        // TODO: Use the ping endpoint to verify that we are offline.
 
         // Stop pinging the Rest API
         clearInterval(pingInterval);
@@ -389,45 +367,28 @@ $(document).ready( () => {
         $('.online-only').addClass('hidden');
         $('.offline-only').removeClass('hidden');
 
-        $("#save_as_dialog_title_text").html('Choose a project name and board type');
-        $("#save_as_dialog_button").html('Continue');
-        $(".save-as-close").addClass('hidden');
-
-
-        $('#save-as-project-name').val('MyProject');
-        $("#saveAsDialogSender").html('offline');
-        $("#save-as-board-type").empty();
+        SetupSaveAsModalDialog();
 
         // populate the board type drop down list
         // TODO: Make this a function
         //  see PopulateProjectBoardTypesUIElement()
 
-        // Change the id to a class reference
-        for (key in profile) {
-            $("#save-as-board-type").append($('<option />').val(key).text(profile[key].description));
-        }
 
         // Load a project file from local storage
-        if (getURLParameter('openFile') === "true" && isOffline) {
+        if (getURLParameter('openFile') === "true") {
             console.log("Calling OpenProjectFileDialog() from document.ready()");
             OpenProjectFileDialog();
         }
         else if (getURLParameter('newProject') === "true") {
             NewProjectModal();
-
-            // Open save-as modal (used as a new-project modal)
-            // TODO: Refactor a save-as modal dialog
-            // $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
         }
         // Load a project from localStorage if available
         else if (window.localStorage.getItem(localProjectStoreName)) {
-            // Get a copy of the last know state of the current project
             try {
-                let pd = JSON.parse(window.localStorage.getItem(localProjectStoreName));
-
-                // load the project from the browser store
-                // check to make sure the project in localStorage is less than 15 seconds old.
-                setupWorkspace(pd, function () {
+                // Get a copy of the last know state of the current project
+                let localProject = JSON.parse(window.localStorage.getItem(localProjectStoreName));
+                setupWorkspace( localProject,
+                    function () {
                     console.log('Removing the localProject from browser localStorage');
                     window.localStorage.removeItem(localProjectStoreName);
                 });
@@ -435,6 +396,7 @@ $(document).ready( () => {
             catch (objError) {
                     if (objError instanceof SyntaxError) {
                         console.error(objError.name);
+                        alert(objError.message);
                     } else {
                         console.error(objError.message);
                     }
@@ -512,14 +474,14 @@ function initUploadModalLabels() {
  */
 function checkLeave () {
     // Return if there is no project data
-    if (! projectData) {
+    if (! projectData || projectData.length === 0) {
         return false;
     }
 
     let currentXml = getXml();
     let savedXml = projectData['code'];
 
-    return ! (ignoreSaveCheck || savedXml === currentXml);
+    return ! (savedXml === currentXml);
 };
 
 
@@ -821,50 +783,6 @@ function initLoginUiElement() {
     }
 }
 
-
-/**
- * Populate the UI Project board type drop-down list
- *
- * @param element is the <select> HTML element that will be populated
- * with a collection of possible board types
- *
- * @param selected is an optional string parameter containing the
- * board type in the list that should be designated as the selected
- * board type.
- */
-function PopulateProjectBoardTypesUIElement(element, selected = null) {
-
-    if (element) {
-        // Clear out the board type dropdown menu
-        element.empty();
-
-        // Populate the board type dropdown menu with a header first,
-
-        element.append($('<option />')
-                .val('')
-                .text(page_text_label['project_create_board_type_select'])
-                .attr('disabled','disabled')
-                .attr('selected','selected')
-            );
-
-        // then populate the dropdown with the board types
-        // defined in propc.js in the 'profile' object
-        // (except 'default', which is where the current project's type is stored)
-        for(let boardTypes in profile) {
-            if (boardTypes !== 'default' && boardTypes !== 'propcfile') {
-
-                element.append($('<option />')
-                    .val(boardTypes)
-                    .text(profile[boardTypes].description));
-            }
-
-            // Optionally set the selected option element
-            if (selected && boardTypes === selected) {
-                $(element).val(selected);
-            }
-        }
-    }
-}
 
 
 /**

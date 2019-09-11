@@ -25,11 +25,11 @@
  *                       Modal dialog boxes
  *                  ----------------------------
  *
- *  New Project
- *  Open (Upload) Existing Project
- *  Update Project Details
- *  Save Current Project
- *  Save Current Project Timer
+ *  [done]  New Project
+ *  [wip ]  Open (Upload) Existing Project
+ *          Update Project Details
+ *  [wip ]  Save Current Project
+ *          Save Current Project Timer
  * ----------------------------------------------------------------*/
 
 
@@ -58,7 +58,7 @@ function NewProjectModal() {
     $('#new-project-description').val('');
     $('#new-project-dialog-title').html(page_text_label['editor_newproject_title']);
 
-    showNewProjectModal('open');
+    showNewProjectModal();
 }
 
 
@@ -81,9 +81,8 @@ function showNewProjectModal() {
     NewProjectModalCancelClick();
     NewProjectModalAcceptClick();
 
-    let dialog = $("#new-project-board-type");
-
-    PopulateProjectBoardTypesUIElement(dialog);
+    // let dialog = $("#new-project-board-type");
+    PopulateProjectBoardTypesUIElement($("#new-project-board-type"));
 
     // Show the New Project modal dialog box
     $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
@@ -136,20 +135,14 @@ function NewProjectModalAcceptClick() {
                 'timestamp': getTimestamp(),
             }
 
-            setupWorkspace(JSON.parse(projectData['code']));
-
-            // then load the toolbox using the projectData
+            // Save the project to the browser local store for the
+            // page transition
             window.localStorage.setItem(localProjectStoreName, JSON.stringify(projectData));
 
-            // Update the UI with the new project name
-            showInfo(pd);
-
             // Redirect to the editor page
-            // window.location = 'blocklyc.html';
-
-            // Load up an empty Project
-            // TODO: Load an empty project
+            window.location = 'blocklyc.html';
         }
+        // TODO: Add test for existing project before resizing
         resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary)
     });
 }
@@ -210,3 +203,70 @@ function OpenProjectFileDialog() {
         setupWorkspace(JSON.parse(window.localStorage.getItem(localProjectStoreName)));
     }
 }
+
+
+
+function SetupSaveAsModalDialog() {
+// Set up Save-As modal dialog prompts
+    $("#save_as_dialog_title_text").html('Choose a project name and board type');
+    $("#save_as_dialog_button").html('Continue');
+    $(".save-as-close").addClass('hidden');
+    $('#save-as-project-name').val('MyProject');
+    $("#saveAsDialogSender").html('offline');
+    $("#save-as-board-type").empty();
+}
+
+function SaveAsProjectModal() {
+    PopulateProjectBoardTypesUIElement($("#save-as-board-type"));
+
+    $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
+}
+
+
+
+// HELPER FUNCTIONS
+
+/**
+ * Populate the UI Project board type drop-down list
+ *
+ * @param element is the <select> HTML element that will be populated
+ * with a collection of possible board types
+ *
+ * @param selected is an optional string parameter containing the
+ * board type in the list that should be designated as the selected
+ * board type.
+ */
+function PopulateProjectBoardTypesUIElement(element, selected = null) {
+
+    if (element) {
+        // Clear out the board type dropdown menu
+        element.empty();
+
+        // Populate the board type dropdown menu with a header first,
+
+        element.append($('<option />')
+            .val('')
+            .text(page_text_label['project_create_board_type_select'])
+            .attr('disabled','disabled')
+            .attr('selected','selected')
+        );
+
+        // then populate the dropdown with the board types
+        // defined in propc.js in the 'profile' object
+        // (except 'default', which is where the current project's type is stored)
+        for(let boardTypes in profile) {
+            if (boardTypes !== 'default' && boardTypes !== 'propcfile') {
+
+                element.append($('<option />')
+                    .val(boardTypes)
+                    .text(profile[boardTypes].description));
+            }
+
+            // Optionally set the selected option element
+            if (selected && boardTypes === selected) {
+                $(element).val(selected);
+            }
+        }
+    }
+}
+
