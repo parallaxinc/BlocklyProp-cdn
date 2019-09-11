@@ -22,6 +22,16 @@
 
 
 /**
+ * CDN version number
+ *
+ * @type {string}
+ */
+const Version = "1.3.2";
+
+
+
+
+/**
  * Global variable that holds the original version of the loaded
  * project.
  *

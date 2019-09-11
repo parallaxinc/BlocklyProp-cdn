@@ -22,14 +22,6 @@
 
 
 /**
- * CDN version number
- *
- * @type {string}
- */
-const Version = "1.3.1";
-
-
-/**
  * Project language types
  *
  * @type is an array of project language types
