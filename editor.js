@@ -28,7 +28,7 @@
  *
  * @type {*|jQuery}
  */
-var baseUrl = $("meta[name=base]").attr("content");
+var baseUrl = $('meta[name=base]').attr("content");
 
 
 /*
@@ -41,7 +41,7 @@ var baseUrl = $("meta[name=base]").attr("content");
  *
  * @type {*|jQuery}
  */
-var cdnUrl = $("meta[name=cdn]").attr("content");
+var cdnUrl = $('meta[name=cdn]').attr("content");
 
 
 /**
@@ -190,7 +190,6 @@ class Project {
 
     }
 
-
     getCreated() {
         return this.createDate;
     }
@@ -206,9 +205,6 @@ class Project {
     setTimestamp(value) {
         this.lastUpdated = value;
     }
-
-
-
 }
 
 
@@ -217,6 +213,7 @@ class Project {
 
 /**
  * Ping the Rest API every 60 seconds
+ *
  * @type {number}
  */
 const pingInterval = setInterval(() => {
@@ -225,17 +222,6 @@ const pingInterval = setInterval(() => {
     60000
 );
 
-
-/**
- *  Clears the fields in the new project modal.
- *  Callback
- */
-const clearNewProjectModal = () => {
-    // Reset the values in the form to defaults
-    $('#new-project-name').val('');
-    $('#new-project-description').val('');
-    $('#new-project-dialog-title').html(page_text_label['editor_newproject_title']);
-}
 
 
 /**
@@ -273,7 +259,7 @@ const checkLastSavedTime = function () {
     const s_save = Math.round((t_now - last_saved_time) / 60000);
 
     // Write the timestamp to the DOM
-    $('#save-check-warning-time').html(s_save.toString(10));
+    // $('#save-check-warning-time').html(s_save.toString(10));
 
     //if (s_save > 58) {
     // TODO: It's been to long - autosave, then close/set URL back to login page.
@@ -281,60 +267,11 @@ const checkLastSavedTime = function () {
 
     if (t_now > last_saved_timestamp && checkLeave() && user_authenticated) {
         // It's time to pop up a modal to remind the user to save.
-        ShowProjectTimerDialog();
+        ShowProjectTimerModalDialog();
     }
 };
 
 
-/* ------------------------------------------------------------------
- *                       Modal dialog boxes
- *                  ----------------------------
- *
- *  New Project
- *  Open (Upload) Existing Project
- *  Update Project Details
- *  Save Current Project
- *  Save Current Project Timer
- * ----------------------------------------------------------------*/
-
-/**
- *  Open the Open Project File dialog
- */
-function OpenProjectFileDialog() {
-    console.log("Entering OpenProjectFileDialog()");
-
-    // set title to Open file
-    $('#upload-dialog-title').html(page_text_label['editor_open']);
-
-    // hide "append" button
-    $('#selectfile-append').addClass('hidden');
-
-    // change color of the "replace" button to blue and change text to "Open"
-    let replace = $('#selectfile-replace');
-    if (replace) {
-        replace.removeClass('btn-danger').addClass('btn-primary');
-        replace.html(page_text_label['editor_button_open']);
-    }
-
-    // Import a project .SVG file
-    $('#upload-dialog').modal({keyboard: false, backdrop: 'static'});
-
-    // TODO: what is this doing here? Shouldn't we be setting up projectData instead of localStore?
-    //       Or can this simply be deleted, because the openFile functions will take care of this?
-    if (projectData) {
-        console.log("Loading workspace with project %s", localProjectStoreName);
-        setupWorkspace(JSON.parse(window.localStorage.getItem(localProjectStoreName)));
-    }
-}
-
-
-/**
- * Display the Timed Save Project modal dialog
- *
- */
-function ShowProjectTimerDialog() {
-    $('#save-check-dialog').modal({keyboard: false, backdrop: 'static'});
-}
 
 
 
@@ -440,12 +377,12 @@ $(document).ready( () => {
         // ----------------------------------------------------------
 
         // Disable the login link for the BP Client status area
-        $('#unauth-login-anchor').attr('href', '#');
+        // This does not apply to offline mode
+        // $('#unauth-login-anchor').attr('href', '#');
 
         // TODO: Use the ping endpoint to see if we are offline.
 
         // Stop pinging the Rest API
-        // TODO: Why is this necessary?
         clearInterval(pingInterval);
 
         // hide save interaction elements
@@ -463,6 +400,8 @@ $(document).ready( () => {
 
         // populate the board type drop down list
         // TODO: Make this a function
+        //  see PopulateProjectBoardTypesUIElement()
+
         // Change the id to a class reference
         for (key in profile) {
             $("#save-as-board-type").append($('<option />').val(key).text(profile[key].description));
@@ -474,8 +413,11 @@ $(document).ready( () => {
             OpenProjectFileDialog();
         }
         else if (getURLParameter('newProject') === "true") {
+            NewProjectModal();
+
             // Open save-as modal (used as a new-project modal)
-            $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
+            // TODO: Refactor a save-as modal dialog
+            // $('#save-as-type-dialog').modal({keyboard: false, backdrop: 'static'});
         }
         // Load a project from localStorage if available
         else if (window.localStorage.getItem(localProjectStoreName)) {
@@ -519,43 +461,6 @@ $(document).ready( () => {
                 });
             });
     }
-
-    // these are only set up for the offline editor
-    if (isOffline) {
-        // show the new project modal
-        showNewProjectModal();
-
-        // Set up the click even handler for the "New Project" modal
-        // dialog return to the splash screen if the user clicks the
-        // cancel button
-        // ----------------------------------------------------------
-        // This is also handling the 'Edit Project Details' modal
-        // dialog box
-        // ----------------------------------------------------------
-        $('#new-project-cancel').on('click', () => {
-
-            // if the project is being edited, clear the fields and close the modal
-            if ($('#open-modal-sender').html() === 'open') {
-
-                $('#new-project-board-dropdown').removeClass('hidden');
-                $('#edit-project-details-static').addClass('hidden');
-
-                $('#new-project-board-type').val('');
-                $('#edit-project-board-type').html('');
-                $('#edit-project-created-date').html('');
-                $('#edit-project-last-modified').html('');
-                $('#open-modal-sender').html('');
-
-                $('#new-project-dialog').modal('hide');
-
-            } else {
-                // otherwise, return to the splash page
-                window.location = '/';
-            }
-        });
-
-
-    } // isOffline
 
     // Make sure the toolbox appears correctly, just for good measure.
     resetToolBoxSizing(250);
@@ -767,22 +672,9 @@ function initEventHandlers() {
         }
     });
 
-    // Load a new project
-    $('#new-project-menu-item').on('click', () => {
-        // If the current project has been modified, give the user
-        // an opportunity to abort the new project process.
-        if (checkLeave()) {
-            const message =
-                'The current project has been modified. Click OK to\n' +
-                'discard the current changes and create a new project.';
-            if (! confirm(message)) {
-                return;
-            }
-        }
-        clearNewProjectModal();
-        showNewProjectModal('open');
-
-    });// window.location = 'blocklyc.html?newProject=true'  });
+    // Load a new project menu click handler
+    // window.location = 'blocklyc.html?newProject=true'  });
+    $('#new-project-menu-item').on('click',          () => { NewProjectModal(); });
 
     $('#btn-graph-play').on('click',        function () {  graph_play();  });
     $('#btn-graph-snapshot').on('click',    function () {  downloadGraph();  });
@@ -976,83 +868,18 @@ function PopulateProjectBoardTypesUIElement(element, selected = null) {
 
 
 /**
- *  Displays the new project modal.  Sets events and clears the fields.
- * 
- *  @param openModal force the modal to open when set to 'open'
+ * Display the Timed Save Project modal dialog
+ *
  */
-function showNewProjectModal(openModal) {
+function ShowProjectTimerModalDialog() {
 
-    let dialog = $("#new-project-board-type");
-
-    PopulateProjectBoardTypesUIElement(dialog);
-
-    // If the editor is passed the 'newProject' parameter, open the
-    // New Project modal
-    if (getURLParameter('newProject') || openModal === 'open') {
-        // Show the New Project modal dialog box
-
-        $('#new-project-dialog').modal({keyboard: false, backdrop: 'static'});
-
-        // Populate the time stamp fields
-        let projectTimestamp = new Date();
-        $('#edit-project-created-date').html(projectTimestamp);
-        $('#edit-project-last-modified').html(projectTimestamp);
-    }
-
-    // if the newProject modal was opened from the editor, flag it
-    // so if the user hits cancel they don't lose their work. This
-    // element is persisted in the DOM as a hidden field in the modal
-    // dialog box
-    // --------------------------------------------------------------
-    if (openModal === 'open') {
-        $('#open-modal-sender').html('open');
-    }
-
-    // Click event handler. When the user clicks the 'Continue'
-    // button, validate the form
-    // --------------------------------------------------------------
-    $('#new-project-continue').on('click', function () {
-        // verify that the project contains a valid board type and project name
-        if (validateNewProjectForm()) {
-            var code = '';
-
-            // If editing details, preserve the code, otherwise start over
-            if (projectData && $('#new-project-dialog-title').html() === page_text_label['editor_edit-details']) {
-                code = getXml();
-            } else {
-                code = EmptyProjectCodeHeader;
-            }
-    
-            // save the form fields into the projectData object       
-            pd = {
-                'board': $('#new-project-board-type').val(),
-                'code': code,
-                'created': $('#edit-project-created-date').html(),
-                'description': $("#new-project-description").val(),        // simplemde.value(),
-                'description-html': $("#new-project-description").val(),   // simplemde.options.previewRender(simplemde.value()),
-                'id': 0,
-                'modified': $('#edit-project-created-date').html(),
-                'name': $('#new-project-name').val(),
-                'private': true,
-                'shared': false,
-                'type': "PROPC",
-                'user': "offline",
-                'yours': true,
-                'timestamp': getTimestamp(),
-            }
-
-            // then load the toolbox using the projectData
-            window.localStorage.setItem(localProjectStoreName, JSON.stringify(pd));
-
-            // Update the UI with the new project name
-            showInfo(pd);
-
-            // Redirect to the editor page
-            // window.location = 'blocklyc.html';
-        }
-        resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary) 
-    });
+    $('#save-check-dialog').modal({keyboard: false, backdrop: 'static'});
 }
+
+
+
+
+
 
 /**
  * Reset the sizing of blockly's toolbox and canvas.
@@ -1169,6 +996,8 @@ function setupWorkspace(data, callback) {
 
     resetToolBoxSizing();
     timestampSaveTime(20, true);
+
+    // Save project reminder timer. Check every 60 seconds
     setInterval(checkLastSavedTime, 60000);
 
     // Execute the callback function if one was provided

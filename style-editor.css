@@ -61,6 +61,16 @@ html, body {
     cursor: pointer;
 }
 
+
+/* Style form validation error message */
+.error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    padding:1px 20px 1px 20px;
+}
+
+
 .field_code {
     background-color: #fff;
     height: 200px;
