@@ -159,6 +159,12 @@ const localProjectStoreName = 'localProject';
 
 
 /**
+ * This is the object returned from the call to Blockly.inject()
+ */
+var blocklyWorkSpace;
+
+
+/**
  * Project class implementation
  */
 class Project {
@@ -367,7 +373,7 @@ $(document).ready( () => {
         $('.online-only').addClass('hidden');
         $('.offline-only').removeClass('hidden');
 
-        SetupSaveAsModalDialog();
+//        SetupSaveAsModalDialog();
 
         // populate the board type drop down list
         // TODO: Make this a function
@@ -387,6 +393,12 @@ $(document).ready( () => {
             try {
                 // Get a copy of the last know state of the current project
                 let localProject = JSON.parse(window.localStorage.getItem(localProjectStoreName));
+
+                // **************************************************
+                // This should clear out the existing blockly project
+                // and reset Blockly core for a new project. That
+                // not appear to be happening.
+                // **************************************************
                 setupWorkspace( localProject,
                     function () {
                     console.log('Removing the localProject from browser localStorage');
@@ -415,7 +427,10 @@ $(document).ready( () => {
         // and the project detail are being passed in the Request body
         // TODO: Create a new project from details passed in from the new-project page
         // ----------------------------------------------------------------------------
-        $.get(baseUrl + 'rest/shared/project/editor/' + idProject, function(data) { setupWorkspace(data) })
+        $.get(baseUrl + 'rest/shared/project/editor/' + idProject,
+            function(data) {
+                setupWorkspace(data)
+            })
             .fail(function () {
                 // Failed to load project - this probably means that it belongs to another user and is not shared.
                 utils.showMessage('Unable to Access Project', 'The BlocklyProp Editor was unable to access the project you requested.  If you are sure the project exists, you may need to contact the project\'s owner and ask them to share their project before you will be able to view it.', function () {
@@ -599,7 +614,6 @@ function initEventHandlers() {
     $('#btn-view-blocks').on('click',       function () {  renderContent('tab_blocks');  });
     $('#btn-view-xml').on('click',          function () {  renderContent('tab_xml');  });
 
-    $('#edit-project-details').on('click',  function () {  editProjectDetails();  });
     $('#download-side').on('click',         function () {  downloadPropC();  });
     $('#term-graph-setup').on('click',      function () {  configure_term_graph();  });
     $('#client-setup').on('click',          function () {  configure_client();  });
@@ -622,6 +636,7 @@ function initEventHandlers() {
 //    $('#selectfile-replace').on('click',    function () {  uploadMergeCode(false); });
 //    $('#selectfile-append').on('click',     function () {  uploadMergeCode(true); });
 
+    $('#edit-project-details').on('click',  function () {  editProjectDetails();  });
     $('#selectfile-clear').on('click',      function () {  clearUploadInfo(true);  });
     $('#save-as-btn').on('click',           function () {  saveAsDialog();  });
 
@@ -849,7 +864,10 @@ function resetToolBoxSizing(resizeDelay) {
  *
  */
 function setupWorkspace(data, callback) {
+    ClearBlocklyWorkspace();
+
     projectData = data;
+
 
     // Update the UI with project related details
     showInfo(data);
@@ -1086,10 +1104,10 @@ function saveAsDialog () {
 
 /**
  *
- * @param requestor
+ * @param requester
  */
-function checkBoardType (requestor) {
-    if (requestor !== 'offline') {
+function checkBoardType (requester) {
+    if (requester !== 'offline') {
         var current_type = projectData['board'];
         var save_as_type = $('#save-as-board-type').val();
         // save-as-verify-boardtype
@@ -1161,106 +1179,7 @@ function saveProjectAs (requestor) {
 }
 
 
-/**
- *  Edit Project Details - Continue button onClick event handler
- */
-function setEditOfflineProjectDetailsContinueHandler() {
-    if (isOffline) {
-        $('#edit-project-continue').on('click', function () {
-            // verify that the project contains a valid board type and project name
-            if (validateNewProjectForm()) {
 
-                // Hide the Edit Project modal dialog
-                $('#edit-project-dialog').modal('hide');
-
-                let newName = $('#edit-project-name').val();
-                if ( !(projectData['name'] === newName)) {
-                    projectData['name'] = newName;
-                }
-
-                let newDescription = $('#edit-project-description').val();
-                if (! (projectData['description'] === newDescription)) {
-                    projectData['description'] = newDescription;
-                }
-
-                // Update the UI with the new project name
-                showInfo(projectData);
-
-                // Redirect to the editor page
-                // window.location = 'blocklyc.html';
-            }
-//            resetToolBoxSizing(100); // use a short delay to ensure the DOM is fully ready (TODO: may not be necessary)
-        });
-
-    }
-}
-
-
-/**
- *  Edit Project Details - Cancel button onClick event handler
- */
-function setEditOfflineProjectDetailsCancelHandler() {
-    if (isOffline) {
-        $('#edit-project-cancel').on('click', () => {
-            // if the project is being edited, clear the fields and close the modal
-            $('#edit-project-board-dropdown').removeClass('hidden');
-            $('#edit-project-details-ro').addClass('hidden');
-            $('#edit-project-board-type-select').val('');
-
-            $('#edit-project-board-type-ro').html('');
-            $('#edit-project-created-date-ro').html('');
-            $('#edit-project-last-modified-ro').html('');
-
-            // Hide the Edit Project modal dialog
-            $('#edit-project-dialog').modal('hide');
-        });
-    }
-}
-
-
-/**
- *  Present the Edit Project Details modal dialog box
- *
- *  The onClick event handlers for the Cancel and Continue buttons
- *  will manage the project state as required.
- */
-function EditOfflineProjectDetails() {
-    if (isOffline) {
-        // Set the dialog buttons click event handlers
-        setEditOfflineProjectDetailsContinueHandler();
-        setEditOfflineProjectDetailsCancelHandler();
-
-        // Load the current project details into the html form data
-        $('#edit-project-name').val(projectData.name);
-        $('#edit-project-board-type-ro').val(projectData.board);
-        $('#edit-project-board-type-ro').html(profile.default.description);
-        $('#edit-project-created-date-ro').html(projectData.created);
-        $('#edit-project-last-modified-ro').html(projectData.modified);
-        $('#edit-project-description').val(projectData['description']);
-
-        // Load the current project details into the dialog
-        // PopulateProjectBoardTypesUIElement($('#edit-project-board-type-select'), 'flip');
-
-        // Show the dialog
-        $('#edit-project-dialog').modal({keyboard: false, backdrop: 'static'});
-    }
-}
-
-
-/**
- * Dialog box to allow editing project name and description
- *
- */
-function editProjectDetails() {
-
-    if (isOffline) {
-        EditOfflineProjectDetails();
-    }
-    else {
-        // Redirect to the my projects page
-        window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
-    }
-}
 
 
 /**
@@ -1561,13 +1480,8 @@ function uploadHandler(files) {
                         'timestamp': getTimestamp(),
                     }
 
-//                    projectData = pd;
-
                     // TODO: Save the project into localStorage
                     if (isOffline) {
-
-                        console.log("(uploadHandler) Saving the project to the browser temp storage");
-
                         window.localStorage.setItem(tempProjectStoreName, JSON.stringify(pd));
                     }
                 }
@@ -1749,10 +1663,7 @@ function uploadMergeCode(append) {
             projectData['code'] = EmptyProjectCodeHeader + projCode + newCode + '</xml>';
         }
 
-        //
-        if(Blockly.mainWorkspace) {
-            Blockly.mainWorkspace.clear();
-        }
+        ClearBlocklyWorkspace();
 
         console.log("(uploadMergeCode) Loading the Blocky Toolbox")
         // This call fails because there is no Blockly workspace context
@@ -1786,14 +1697,18 @@ function initToolbox(profileName) {
             Blockly.Css.CONTENT[f] = Blockly.Css.CONTENT[f].replace(/Arial, /g, '').replace(/sans-serif;/g, "Arimo, sans-serif;");
         }   
     }
-    
-    Blockly.inject('content_blocks', {
+
+    // Options are described in detail here:
+    // https://developers.google.com/blockly/guides/get-started/web#configuration
+    const blocklyOptions = {
         toolbox: filterToolbox(profileName),
         trashcan: true,
         media: cdnUrl + 'blockly/media/',
-        readOnly: (profileName === 'propcfile' ? true : false),
+        readOnly: (profileName === 'propcfile'),
         //path: cdnUrl + 'blockly/',
         comments: false,
+
+        // zoom defaults used here
         zoom: {
             controls: true,
             wheel: false,
@@ -1808,7 +1723,9 @@ function initToolbox(profileName) {
             colour: '#fbfbfb',
             snap: false
         }
-    });
+    };
+
+    blocklyWorkSpace = Blockly.inject('content_blocks', blocklyOptions);
 
     init(Blockly);
 
@@ -1836,17 +1753,21 @@ function loadToolbox(xmlText) {
  * @returns {string}
  */
 function getXml() {
-    if (projectData && projectData.board === 'propcfile') {
+    if (projectData && projectData['board'] === 'propcfile') {
         return propcAsBlocksXml();
-    } else if (Blockly.Xml && Blockly.mainWorkspace) {
-        var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-        return Blockly.Xml.domToText(xml);
-    } else if (projectData && projectData.code) {
-        return projectData.code;
-    } else {
-        // Return the XML for a blank project if none is found.
-        return EmptyProjectCodeHeader + '</xml>';
     }
+
+    if (Blockly.Xml && Blockly.mainWorkspace) {
+        const xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+        return Blockly.Xml.domToText(xml);
+    }
+
+    if (projectData && projectData['code']) {
+        return projectData['code'];
+    }
+
+    // Return the XML for a blank project if none is found.
+    return EmptyProjectCodeHeader + '</xml>';
 }
 
 
@@ -1855,11 +1776,12 @@ function getXml() {
  * @param o
  */
 function showOS(o) {
-    $("body").removeClass('Windows')
-            .removeClass('MacOS')
-            .removeClass('Linux')
-            .removeClass('ChromeOS');
-    $("body").addClass(o);
+    const body = $("body");
+    body.removeClass('Windows')
+        .removeClass('MacOS')
+        .removeClass('Linux')
+        .removeClass('ChromeOS');
+    body.addClass(o);
 }
 
 
@@ -1876,4 +1798,19 @@ function showStep(o, i, t) {
     }
     $('#' + o + i.toString() + '-btn').removeClass('btn-default').addClass('btn-primary');
     $('#' + o + i.toString()).removeClass('hidden');
+}
+
+
+function ClearBlocklyWorkspace() {
+    let space = Blockly.getMainWorkspace();
+    if (space) {
+        space.clearUndo();
+        space.clear();
+    }
+/*
+    if(Blockly.mainWorkspace) {
+        Blockly.mainWorkspace.clear();
+        Blockly.mainWorkspace.clearUndo();
+    }
+*/
 }

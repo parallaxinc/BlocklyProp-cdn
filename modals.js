@@ -27,7 +27,7 @@
  *
  *  [done]  New Project
  *  [wip ]  Open (Upload) Existing Project
- *          Update Project Details
+ *          Edit Project Details
  *  [wip ]  Save Current Project
  *          Save Current Project Timer
  * ----------------------------------------------------------------*/
@@ -139,6 +139,13 @@ function NewProjectModalAcceptClick() {
             // page transition
             window.localStorage.setItem(localProjectStoreName, JSON.stringify(projectData));
 
+            // ------------------------------------------------------
+            // Clear the projectData global to prevent the onLeave
+            // event handler from storing the old project code into
+            // the browser storage.
+            // ------------------------------------------------------
+            projectData = null;
+
             // Redirect to the editor page
             window.location = 'blocklyc.html';
         }
@@ -163,6 +170,11 @@ function NewProjectModalCancelClick() {
 
         // Dismiss the modal in the UX
         $('#new-project-dialog').modal('hide');
+
+        if (! projectData) {
+            // If there is no project, go to home page.
+            window.location.href = (isOffline) ? 'index.html' : baseUrl;
+        }
 
         // if the project is being edited, clear the fields and close the modal
         $('#new-project-board-dropdown').removeClass('hidden');
@@ -203,6 +215,106 @@ function OpenProjectFileDialog() {
         setupWorkspace(JSON.parse(window.localStorage.getItem(localProjectStoreName)));
     }
 }
+
+
+
+/**
+ * Dialog box to allow editing project name and description
+ *
+ * @description
+ * The dialog displays a number of project details.
+ */
+function editProjectDetails() {
+    if (isOffline) {
+        EditOfflineProjectDetails();
+    }
+    else {
+        window.location.href = baseUrl + 'my/projects.jsp#' + idProject;
+    }
+}
+
+
+/**
+ *  Present the Edit Project Details modal dialog box
+ *
+ *  The onClick event handlers for the Cancel and Continue buttons
+ *  will manage the project state as required.
+ */
+function EditOfflineProjectDetails() {
+    if (isOffline) {
+        // Set the dialog buttons click event handlers
+        setEditOfflineProjectDetailsContinueHandler();
+        setEditOfflineProjectDetailsCancelHandler();
+
+        // Load the current project details into the html form data
+        $('#edit-project-name').val(projectData['name']);
+        $('#edit-project-description').val(projectData['description']);
+
+        // Display additional project details.
+        let projectBoardType = $('#edit-project-board-type-ro');
+        projectBoardType.val(projectData['board']);
+        projectBoardType.html(profile.default.description);
+        $('#edit-project-created-date-ro').html(projectData.created);
+        $('#edit-project-last-modified-ro').html(projectData.modified);
+
+        // Load the current project details into the dialog
+        // PopulateProjectBoardTypesUIElement($('#edit-project-board-type-select'), 'flip');
+
+        // Show the dialog
+        $('#edit-project-dialog').modal({keyboard: false, backdrop: 'static'});
+    }
+}
+
+
+/**
+ *  Edit Project Details - Continue button onClick event handler
+ */
+function setEditOfflineProjectDetailsContinueHandler() {
+    if (isOffline) {
+        $('#edit-project-continue').on('click', function () {
+            // verify that the project contains a valid board type and project name
+            if (validateNewProjectForm()) {
+
+                // Hide the Edit Project modal dialog
+                $('#edit-project-dialog').modal('hide');
+
+                let newName = $('#edit-project-name').val();
+                if ( !(projectData['name'] === newName)) {
+                    projectData['name'] = newName;
+                }
+
+                let newDescription = $('#edit-project-description').val();
+                if (! (projectData['description'] === newDescription)) {
+                    projectData['description'] = newDescription;
+                }
+                showInfo(projectData);
+            }
+        });
+    }
+}
+
+
+/**
+ *  Edit Project Details - Cancel button onClick event handler
+ */
+function setEditOfflineProjectDetailsCancelHandler() {
+    if (isOffline) {
+        $('#edit-project-cancel').on('click', () => {
+            // if the project is being edited, clear the fields and close the modal
+            $('#edit-project-board-dropdown').removeClass('hidden');
+            $('#edit-project-details-ro').addClass('hidden');
+            $('#edit-project-board-type-select').val('');
+
+            $('#edit-project-board-type-ro').html('');
+            $('#edit-project-created-date-ro').html('');
+            $('#edit-project-last-modified-ro').html('');
+
+            // Hide the Edit Project modal dialog
+            $('#edit-project-dialog').modal('hide');
+        });
+    }
+}
+
 
 
 
