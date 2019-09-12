@@ -166,7 +166,6 @@ var blocklyWorkSpace;
 
 /**
  * Project class implementation
- */
 class Project {
 
     id = 0;
@@ -202,7 +201,7 @@ class Project {
         this.lastUpdated = value;
     }
 }
-
+*/
 
 // TODO: set up a markdown editor (removed because it doesn't work in a Bootstrap modal...)
 
