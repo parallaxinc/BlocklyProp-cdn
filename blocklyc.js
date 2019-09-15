@@ -513,7 +513,7 @@ function init(blockly) {
 
     window.Blockly = blockly;
 
-    if (projectData !== null) {
+    if (projectData) {
         if ( ! projectData['code'] || projectData['code'].length < 50) {
             projectData['code'] = '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>';
         }
