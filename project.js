@@ -333,13 +333,17 @@ var theFileList = [];
 var zip = new JSZip();
 var theFolder = zip.folder('BlocklyPropFiles');
 var projCount = 0;
+var projectsCounted = false;
 
 /**
  * Retrives a chunk of a user's projects and passes them on for processing.
  */
 function getSomeProjects(listOffset) {
     $.get(baseUrl + "rest/project/list?limit=20&offset=" + (listOffset ? listOffset : 0).toString(10), function () {}).done(function (data) {
-        projCount = parseInt(data.total);
+        if (!projectsCounted) {
+            projCount = parseInt(data.total);
+            projectsCounted = true;
+        }
         var pList = data.rows;
         for (var i = 0; i < pList.length - 1; i++) {
             processProjectData(pList[i].id);
@@ -397,6 +401,7 @@ function processProjectData(projectId, listOffset, callbackTrigger) {
                 [project_filename + '.svge']
             ]);
         } else {
+            projCount--;
             $('#removed-projects')
                 .removeClass('hidden')
                 .html($('#removed-projects').html() + '<br><span style="width:50px;display: inline-block;text-align:right">' + ddd.id.toString(10) + ' -</span> ' + ddd.name);
