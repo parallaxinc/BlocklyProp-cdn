@@ -329,56 +329,66 @@ function getAllProjects() {
     var svgBase = '<svg blocklyprop="blocklypropproject" xmlns="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" height="240" width="480" style="font-family:Arial, Helvetica, sans-serif;font-size:20px;"><rect width="480" height="110" style="fill:#eee;stroke:none;" /><text x="100" y="25" fill="#339">NOTE: To convert this file to an SVG</text><text x="100" y="50" fill="#339">image that shows an image of the</text><text x="100" y="75" fill="#339">blocks, open the file in BlocklyProp</text><text x="100" y="100" fill="#339">and resave it as a new file.</text><image height="80" width="80" x="10" y="15" href="data:image/png;base64,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"></image>';
 
     $.get(baseUrl + "rest/project/list", function () {}).done(function (data) {
-        projCount = parseInt(data.total);
-        var projPages = Math.floor(projCount / 100) + 1
+        if (data) {
+            projCount = parseInt(data.total);
+            var projPages = Math.floor(projCount / 100) + 1
 
-        for (var pc = 0; pc < projPages; pc++) {
-            $.get(baseUrl + "rest/project/list?offset=" + (pc * 100).toString(10), function () {}).done(function (data) {
+            for (var pc = 0; pc < projPages; pc++) {
+                $.get(baseUrl + "rest/project/list?offset=" + (pc * 100).toString(10), function () {}).done(function (data) {
+                    if (data) {
+                        var pList = data.rows;
+                        for (var i = 0; i < pList.length; i++) {
+                            $.get(baseUrl + 'rest/shared/project/editor/' + pList[i].id, function () {}).done(function (ddd) {
+                                if (!ddd) {
+                                    ddd = {'name': 'empty project', 'code': '<xml xmlns="http://www.w3.org/1999/xhtml"></xml>'};
+                                }
+                                project_filename = ddd.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
-                var pList = data.rows;
-                for (var i = 0; i < pList.length; i++) {
-                    $.get(baseUrl + 'rest/shared/project/editor/' + pList[i].id, function () {}).done(function (ddd) {
+                                var projXMLcode = ddd.code.substring(42, ddd.code.length);
+                                projXMLcode = projXMLcode.substring(0, (projXMLcode.length - 6));
 
-                        project_filename = ddd.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                                //Weed out empty files
+                                if (projXMLcode.length > 3) {
 
-                        var projXMLcode = ddd.code.substring(42, ddd.code.length);
-                        projXMLcode = projXMLcode.substring(0, (projXMLcode.length - 6));
+                                    // a footer to generate a watermark with the project's information at the bottom-right corner of the SVG 
+                                    // and hold project metadata.
+                                    var SVGfooter = '<text style="font-size:10px;fill:#555;" x="20" y="140">Parallax BlocklyProp Project</text>';
+                                    SVGfooter += '<text style="font-size:10px;fill:#555;" x="20" y="155">User: ' + encodeToValidXml(ddd.user) + '</text>';
+                                    SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="223" transform="translate(-225,-53)">Title: ' + encodeToValidXml(ddd.name) + '</text>';
+                                    SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="208" transform="translate(-225,-23)">Device: ' + ddd.board + '</text>';
+                                    SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="208" transform="translate(-225,-8)">Description: ' + encodeToValidXml(ddd.description) + '</text>';
+                                    SVGfooter += '<text style="font-size:10px;fill:#555;" x="20" y="215" data-createdon="' + ddd.created + '" data-lastmodified="' + ddd.modified + '"></text>';
 
-                        //Weed out empty files
-                        if (projXMLcode.length > 3) {
+                                    // Check to make sure the filename is not too long
+                                    if (project_filename.length >= 23) {
+                                        project_filename = project_filename.substring(0, 22);
+                                    }
+                                    project_filename += '(' + ddd.id.toString(10) + ')';
 
-                            // a footer to generate a watermark with the project's information at the bottom-right corner of the SVG 
-                            // and hold project metadata.
-                            var SVGfooter = '<text style="font-size:10px;fill:#555;" x="20" y="140">Parallax BlocklyProp Project</text>';
-                            SVGfooter += '<text style="font-size:10px;fill:#555;" x="20" y="155">User: ' + encodeToValidXml(ddd.user) + '</text>';
-                            SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="223" transform="translate(-225,-53)">Title: ' + encodeToValidXml(ddd.name) + '</text>';
-                            SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="208" transform="translate(-225,-23)">Device: ' + ddd.board + '</text>';
-                            SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="208" transform="translate(-225,-8)">Description: ' + encodeToValidXml(ddd.description) + '</text>';
-                            SVGfooter += '<text style="font-size:10px;fill:#555;" x="20" y="215" data-createdon="' + ddd.created + '" data-lastmodified="' + ddd.modified + '"></text>';
+                                    var xmlChecksum = hashCode(projXMLcode).toString();
+                                    xmlChecksum = '000000000000'.substring(xmlChecksum.length, 12) + xmlChecksum;
 
-                            // Check to make sure the filename is not too long
-                            if (project_filename.length >= 23) {
-                                project_filename = project_filename.substring(0, 22);
-                            }
-                            project_filename += '(' + ddd.id.toString(10) + ')';
-
-                            var xmlChecksum = hashCode(projXMLcode).toString();
-                            xmlChecksum = '000000000000'.substring(xmlChecksum.length, 12) + xmlChecksum;
-
-                            // Assemble both the SVG (image) of the blocks and the blocks' XML definition
-                            theFileList.push([
-                                [svgBase + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>'],
-                                [project_filename + '.svge']
-                            ]);
-                            theFolder.file(project_filename + '.svge', svgBase + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>');
-                        } else {
-                            projCount--;
+                                    // Assemble both the SVG (image) of the blocks and the blocks' XML definition
+                                    theFileList.push([
+                                        [svgBase + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>'],
+                                        [project_filename + '.svge']
+                                    ]);
+                                    theFolder.file(project_filename + '.svge', svgBase + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>');
+                                } else {
+                                    projCount--;
+                                }
+                            });
                         }
-                    });
-                }
-            });
+                    }
+                });
+            }
+            processFileList();
+        } else {
+            $("#downloadProjBtn")
+                .removeClass('btn-info')
+                .addClass('btn-danger')
+                .html('Unable to retrieve any projects from your account.');
         }
-        processFileList();
     });
 }
 
