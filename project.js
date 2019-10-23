@@ -167,13 +167,13 @@ $(document).ready(function () {
         var linkShareInput = $("#project-link-share");
         linkShareInput[0].setSelectionRange(0, linkShareInput.val().length);
     });
-    
-    // Add a "Download My Projects" button at the top of the my projects page
+
+    /* --------------------------------------------------------------
+     * Add a "Download My Projects" button at the top of the my
+     * projects page to support bulk project downloads.
+     * ------------------------------------------------------------*/
     if (window.location.href.indexOf('my/projects.jsp') > -1) {
-        $('.col-md-12')
-            .first()
-            .prepend('<button id="downloadProjectButton" class="btn btn-primary">Download My Projects</button><div id="removed-projects" class="alert alert-warning hidden" role="alert" style="margin-top:15px;"><b>The following projects were not included in the download because they are empty:</b></div>');
-        $('#downloadProjectButton').on('click', startProjectsDownload);
+        initBulkProjectDownloadButton();
     }
 });
 
@@ -282,19 +282,6 @@ function guid() {
             s4() + '-' + s4() + s4() + s4();
 }
 
-/**
- * Function called by the Download My Projects button
- */
-function startProjectsDownload() {
-    $('#downloadProjectButton')
-        .removeClass('btn-primary')
-        .addClass('btn-info')
-        .html('Fetching your projects...')
-        .off('click')
-        .blur();
-    getSomeProjects(0);
-    $('#removed-projects').html('<b>The following projects were not included in the download because they are empty:</b>');
-}
 
 /**
  * Generates a hash of a string - used to generate a checksum for the blocks (SVG) file
@@ -329,11 +316,31 @@ function encodeToValidXml(str) {
     );
 }
 
+
+/* ------------------------------------------------------------------
+ * Bulk Project Download Feature
+ * ----------------------------------------------------------------*/
 var theFileList = [];
 var zip = new JSZip();
 var theFolder = zip.folder('BlocklyPropFiles');
 var projCount = 0;
 var projectsCounted = false;
+var excludedProjects = [];
+
+/**
+ * Function called by the Download My Projects button
+ */
+function startProjectsDownload() {
+    $('#downloadProjectButton')
+        .removeClass('btn-primary')
+        .addClass('btn-info')
+        .html('Fetching your projects...')
+        .off('click')
+        .blur();
+    getSomeProjects(0);
+    $('#removed-projects').html('<b>The following projects were excluded because they are empty:</b>');
+}
+
 
 /**
  * Retrives a chunk of a user's projects and passes them on for processing.
@@ -386,12 +393,7 @@ function processProjectData(projectId, listOffset, callbackTrigger) {
         if (validProject && projXMLcode.length > 3) {
             // a footer to generate a watermark with the project's information at the bottom-right corner of the SVG
             // and hold project metadata.
-            var SVGfooter = '<text style="font-size:10px;fill:#555;" x="20" y="140">Parallax BlocklyProp Project</text>';
-            SVGfooter += '<text style="font-size:10px;fill:#555;" x="20" y="155">User: ' + encodeToValidXml(ddd.user) + '</text>';
-            SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="223" transform="translate(-225,-53)">Title: ' + encodeToValidXml(ddd.name) + '</text>';
-            SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="208" transform="translate(-225,-23)">Device: ' + ddd.board + '</text>';
-            SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="208" transform="translate(-225,-8)">Description: ' + encodeToValidXml(ddd.description) + '</text>';
-            SVGfooter += '<text style="font-size:10px;fill:#555;" x="20" y="215" data-createdon="' + ddd.created + '" data-lastmodified="' + ddd.modified + '"></text>';
+            var SVGfooter = createSvgFooter(ddd.user, ddd.name, ddd.board, ddd.description, ddd.created, ddd.modified);
 
             // Check to make sure the filename is not too long
             if (project_filename.length >= 23) {
@@ -399,17 +401,25 @@ function processProjectData(projectId, listOffset, callbackTrigger) {
             }
             project_filename += '(' + ddd.id.toString(10) + ')';
 
+            // Compute a faux checksum
             var xmlChecksum = hashCode(projXMLcode).toString();
             xmlChecksum = '000000000000'.substring(xmlChecksum.length, 12) + xmlChecksum;
 
             // Assemble both the SVG (image) of the blocks and the blocks' XML definition
-            theFolder.file(project_filename + '.svge', svgBase + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>');
-            theFileList.push([
-                [svgBase + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>'],
-                [project_filename + '.svge']
-            ]);
+            theFolder.file(
+                project_filename + '.svge',
+                svgBase + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>');
+            theFileList.push(
+                [
+                    [svgBase + SVGfooter + projXMLcode + '<ckm>' + xmlChecksum + '</ckm></svg>'],
+                    [project_filename + '.svge']
+                ]);
         } else {
             projCount--;
+
+            // Add project to excluded list
+            excludedProjects.push([ddd.id.toString(10), ddd.name]);
+
             // Add empty project name to UI list of failed or empty projects
             $('#removed-projects')
                 .removeClass('hidden')
@@ -438,28 +448,29 @@ function processFileList() {
     $('#downloadProjectButton')
         .html('Processing projects...');
     var ci = setInterval(function () {
-        console.log("Setting the timer to zip projects.");
         if (theFileList.length === projCount && projCount > 0) {
             // reset the timer
             clearInterval(ci);
 
-            zip.generateAsync({
-                type: "blob"
-            }).then(function (blob) { // 1) generate the zip file
-                $('#downloadProjectButton')
-                    .removeClass('btn-info')
-                    .addClass('btn-success')
-                    .html('Ready! Downloading...');
-                saveAs(blob, "BlocklyPropProjects.zip"); // 2) trigger the download
-                setTimeout(function () {
-                    hideEmptyProjectList();         // Clean up the UI
-                }, 2000);
-            }, function (err) {
-                $("#downloadProjectButton")
-                    .removeClass('btn-info')
-                    .addClass('btn-danger')
-                    .html(err);
-            });
+            // Add the excluded files to the folder
+            appendExcludedProjectsReport();
+
+            zip.generateAsync( { type: "blob" } )
+                .then(function (blob) { // 1) generate the zip file
+                    $('#downloadProjectButton')
+                        .removeClass('btn-info')
+                        .addClass('btn-success')
+                        .html('Ready! Downloading...');
+                    saveAs(blob, "BlocklyPropProjects.zip"); // 2) trigger the download
+                    setTimeout(function () {
+                        hideEmptyProjectList();         // Clean up the UI
+                    }, 2000);
+                }, function (err) {
+                    $("#downloadProjectButton")
+                        .removeClass('btn-info')
+                        .addClass('btn-danger')
+                        .html(err);
+                }); // end of then clause
         }
     }, 1000);
 }
@@ -485,4 +496,55 @@ function hideEmptyProjectList() {
     theFolder = zip.folder('BlocklyPropFiles');
     projCount = 0;
     projectsCounted = false;
+    excludedProjects = [];
+
+}
+
+function initBulkProjectDownloadButton() {
+    let htmlText =
+        '<button id="downloadProjectButton" class="btn btn-primary">Download My Projects</button>' +
+        '<div id="removed-projects" class="alert alert-warning hidden" role="alert" style="margin-top:15px;">' +
+        '<b>The following projects were excluded because they are empty:</b></div>';
+
+    $('.col-md-12')
+        .first()
+        .prepend(htmlText);
+    $('#downloadProjectButton').on('click', startProjectsDownload);
+}
+
+
+function createSvgFooter(user, name, board, description, dateCreated, dateModified) {
+    var SVGfooter = '<text style="font-size:10px;fill:#555;" x="20" y="140">Parallax BlocklyProp Project</text>';
+    SVGfooter += '<text style="font-size:10px;fill:#555;" x="20" y="155">User: ' + encodeToValidXml(user) + '</text>';
+    SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="223" transform="translate(-225,-53)">Title: ' + encodeToValidXml(name) + '</text>';
+    SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="208" transform="translate(-225,-23)">Device: ' + board + '</text>';
+    SVGfooter += '<text style="font-size:10px;fill:#555;" x="245" y="208" transform="translate(-225,-8)">Description: ' + encodeToValidXml(description) + '</text>';
+    SVGfooter += '<text style="font-size:10px;fill:#555;" x="20" y="215" data-createdon="' + dateCreated + '" data-lastmodified="' + dateModified + '"></text>';
+
+    return SVGfooter;
+}
+
+
+/*
+ * Create a human-readable text file that enumerates the projects
+ * that were excluded from the export because they were empty or
+ * invalid.
+ */
+function appendExcludedProjectsReport() {
+    // Return if there is nothing to do
+    if (excludedProjects.length === 0) {
+        return;
+    }
+
+    let result = "The following project(s) were not exported because they are empty or invalid:\n";
+    let name = "";
+
+    // Enumerate the list
+    excludedProjects.forEach(function(item) {
+        name = item[1] ? item[1] : "Unknown";
+        result = result + "ID: " +  item[0].toString() + "\tName: " + item[1] + "\n";
+    });
+
+    // Add the results to the folder
+    theFolder.file("ExcludedProject.txt", result);
 }
