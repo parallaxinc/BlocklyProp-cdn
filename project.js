@@ -168,11 +168,12 @@ $(document).ready(function () {
         linkShareInput[0].setSelectionRange(0, linkShareInput.val().length);
     });
     
-    
+    // Add a "Download My Projects" button at the top of the my projects page
     if (window.location.href.indexOf('my/projects.jsp') > -1) {
         $('.col-md-12')
             .first()
-            .prepend('<button id="downloadProjBtn" class="btn btn-primary" onclick="startProjectsDownload();">Download My Projects</button>');
+            .prepend('<button id="downloadProjBtn" class="btn btn-primary">Download My Projects</button><div id="removed-projects" class="alert alert-warning hidden" role="alert" style="margin-top:15px;"><b>The following projects were not included in the download because they are empty:</b></div>');
+        $('#downloadProjBtn').on('click', startProjectsDownload);
     }
 });
 
@@ -281,18 +282,25 @@ function guid() {
             s4() + '-' + s4() + s4() + s4();
 }
 
-
-
+/**
+ * Function called by the Download My Projects button
+ */
 function startProjectsDownload() {
     $('#downloadProjBtn')
         .removeClass('btn-primary')
         .addClass('btn-info')
-        .html('Fetching your projects... <span id="projProgress">0</span>%')
-        .prop('onclick', null)
+        .html('Fetching your projects...')
+        .off('click')
         .blur();
-    getAllProjects();
+    getSomeProjects(0);
+    $('#removed-projects').html('<b>The following projects were not included in the download because they are empty:</b>');
 }
 
+/**
+ * Generates a hash of a string - used to generate a checksum for the blocks (SVG) file
+ * @param str string used to generate a hash
+ * @returns {integer}
+ */
 function hashCode(str) {
     let hash = 0,
         i = 0,
@@ -303,6 +311,11 @@ function hashCode(str) {
     return (hash + 2147483647) + 1;
 }
 
+/**
+ * Encodes XML-illegal characters in a string to their legal encoded versions
+ * @param str XML-as-a-string to encode
+ * @returns XML-safe string
+ */
 function encodeToValidXml(str) {
     return (str
         .replace(/&/g, '&amp;')
@@ -317,10 +330,41 @@ function encodeToValidXml(str) {
 }
 
 var theFileList = [];
-var projCount = 0;
 var zip = new JSZip();
 var theFolder = zip.folder('BlocklyPropFiles');
+var projCount = 0;
+var projectsCounted = false;
 
+/**
+ * Retrives a chunk of a user's projects and passes them on for processing.
+ */
+function getSomeProjects(listOffset) {
+    $.get(baseUrl + "rest/project/list?limit=20&offset=" + (listOffset ? listOffset : 0).toString(10), function () {}).done(function (data) {
+        if (!projectsCounted) {
+            projCount = parseInt(data.total);
+            projectsCounted = true;
+        }
+        var pList = data.rows;
+        for (var i = 0; i < pList.length - 1; i++) {
+            processProjectData(pList[i].id);
+        }
+        processProjectData(pList[pList.length - 1].id, listOffset + 20, pList.length < 20 ? 'final' : 'last');
+    }).fail(function (err) {
+        $("#downloadProjBtn")
+            .removeClass('btn-info')
+            .addClass('btn-danger')
+            .off('click')
+            .html(err + ' - Try refreshing the page.');
+    });
+}
+
+/**
+ * Retrieves a project's code and compiles it, along with the other projects into a single .zip file.
+ * @param projectId id of the project to retrieve.
+ * @param listOffset offset used by the callback to begin retriving the next set of projects.
+ * @param callbackTrigger populated when the last project in the group, 
+ * and the last project in the whole set are all retrieved.
+ */
 function getAllProjects() {
 
     theFileList = [];
@@ -392,13 +436,16 @@ function getAllProjects() {
     });
 }
 
+
+/**
+ * Monitors and reports the progress of the file retreivals and when finished, 
+ * triggers the download to the users computer.
+ */
 function processFileList() {
+    $('#downloadProjBtn')
+        .html('Processing files...');
     var ci = setInterval(function () {
-        if (theFileList.length < projCount) {
-            $('#projProgress').html(Math.floor(theFileList.length * 100 / projCount));
-        } else {
-            $('#downloadProjBtn')
-                .html('Processing files...');
+        if (theFileList.length === projCount && projCount > 0) {
             clearInterval(ci);
             zip.generateAsync({
                 type: "blob"
@@ -410,7 +457,10 @@ function processFileList() {
                 saveAs(blob, "BlocklyPropProjects.zip"); // 2) trigger the download
                 setTimeout(function () {
                     $('#downloadProjBtn')
-                        .addClass('hidden');
+                        .removeClass('btn-success')
+                        .addClass('btn-primary')
+                        .html('Download My Projects')
+                        .on('click', startProjectsDownload);
                 }, 1500);
             }, function (err) {
                 $("#downloadProjBtn")
