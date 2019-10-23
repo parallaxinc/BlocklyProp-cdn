@@ -765,7 +765,9 @@ page_text_label['clientdownload_client_chromeos_alreadyinstalled'] = "BlocklyPro
 page_text_label['clientdownload_client_chromeos_installer'] = "Add to Chrome";
 page_text_label['clientdownload_client_macos_installer'] = "MacOS client installer";
 page_text_label['clientdownload_client_windows32_installer'] = "Windows 7/8/8.1/10 (32-bit) client installer";
+page_text_label['clientdownload_client_windows32zip_installer'] = "Windows 7/8/8.1/10 (32-bit) client installer (zip)";
 page_text_label['clientdownload_client_windows64_installer'] = "Windows 7/8/8.1/10 (64-bit) client installer";
+page_text_label['clientdownload_client_windows64zip_installer'] = "Windows 7/8/8.1/10 (64-bit) client installer (zip)";
 page_text_label['clientdownload_download_installer'] = "Download the installer";
 page_text_label['clientdownload_download_launcher'] = "Install the Launcher App";
 page_text_label['clientdownload_instructions'] = "The BlocklyProp Client/Launcher application loads your programs into the Propeller and allows you to have a serial terminal in your browser connected to your Propeller.";
@@ -814,7 +816,7 @@ page_text_label['editor_demo_dialog_title'] = "You are not logged in";
 page_text_label['editor_demonstration_mode_info'] = "<strong>Demo mode:</strong> Log in to use all of BlocklyProp's features.";
 page_text_label['editor_demonstration_mode_instructions'] = "Click here to log in or sign up";
 page_text_label['editor_download'] = "Download blocks file";
-page_text_label['editor_edit-details'] = "Edit Project details";
+page_text_label['editor_edit-details'] = "Edit Project Details";
 page_text_label['editor_graph_time_label'] = "Time (seconds)";
 page_text_label['editor_view-details'] = "View Project details";
 page_text_label['editor_find_next'] = "Find Next";
@@ -1077,6 +1079,10 @@ page_text_label['register_error_sponsor_email_empty'] = "Please enter a sponsor 
 page_text_label['register_error_sponsor_email_format_error'] = "The sponsor email address is not formatted correctly";
 page_text_label['register_error_user_email_empty'] = "Please enter your email address";
 
+// ------------------------------------------------------------------
+// Text for the balloon help that appears when the cursor hovers
+// over a button in the editor toolbar
+// ------------------------------------------------------------------
 var tooltip_text = [
     ['prop-btn-comp','Verify code (compile)'],
     ['prop-btn-ram','Run once (load code to RAM)'],

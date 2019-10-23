@@ -1206,16 +1206,27 @@ Blockly.Blocks.pwm_stop = {
         this.setTooltip(Blockly.MSG_PWM_STOP_TOOLTIP);
         this.setColour(colorPalette.getColor('io'));
         this.appendDummyInput()
-                .appendField("PWM stop");
-
+                .appendField(new Blockly.FieldDropdown(
+                        [['PWM Stop','stop()'], ['PWM Start', 'start(100)']]), "ACTION");
         this.setPreviousStatement(true, "Block");
         this.setNextStatement(true, null);
+    },
+    onchange: function (event) {
+        if (event.type == Blockly.Events.BLOCK_CREATE || 
+                event.type == Blockly.Events.BLOCK_DELETE || 
+                event.type == Blockly.Events.BLOCK_CHANGE) {
+            var warnTxt = null;
+            var allBlocks = Blockly.getMainWorkspace().getAllBlocks().toString();
+            if (allBlocks.indexOf('PWM Stop') === -1 && this.getFieldValue('ACTION') === 'start(100)') {
+                warnTxt = 'WARNING: The "PWM Start" block should only be used to restart PWM\nafter a "PWM Stop" has already been used!';
+            }
+            this.setWarningText(warnTxt);
+        }
     }
 };
 
 Blockly.propc.pwm_stop = function () {
-    var code = 'pwm_stop();\n';
-    return code;
+    return 'pwm_' + (this.getFieldValue('ACTION') || 'stop()') + ';\n';
 };
 
 // ----------------- Sound audio player blocks ---------------------------------

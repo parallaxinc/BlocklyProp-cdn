@@ -55,6 +55,22 @@ html, body {
     max-height: 110% !important;
 }
 
+
+/* Solo-50 Keep mouse pointer from changing to an i-bar */
+.dropdown-menu>li>a {
+    cursor: pointer;
+}
+
+
+/* Style form validation error message */
+.error {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    padding:1px 20px 1px 20px;
+}
+
+
 .field_code {
     background-color: #fff;
     height: 200px;
