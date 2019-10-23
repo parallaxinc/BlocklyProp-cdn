@@ -172,8 +172,8 @@ $(document).ready(function () {
     if (window.location.href.indexOf('my/projects.jsp') > -1) {
         $('.col-md-12')
             .first()
-            .prepend('<button id="downloadProjBtn" class="btn btn-primary">Download My Projects</button><div id="removed-projects" class="alert alert-warning hidden" role="alert" style="margin-top:15px;"><b>The following projects were not included in the download because they are empty:</b></div>');
-        $('#downloadProjBtn').on('click', startProjectsDownload);
+            .prepend('<button id="downloadProjectButton" class="btn btn-primary">Download My Projects</button><div id="removed-projects" class="alert alert-warning hidden" role="alert" style="margin-top:15px;"><b>The following projects were not included in the download because they are empty:</b></div>');
+        $('#downloadProjectButton').on('click', startProjectsDownload);
     }
 });
 
@@ -286,7 +286,7 @@ function guid() {
  * Function called by the Download My Projects button
  */
 function startProjectsDownload() {
-    $('#downloadProjBtn')
+    $('#downloadProjectButton')
         .removeClass('btn-primary')
         .addClass('btn-info')
         .html('Fetching your projects...')
@@ -350,7 +350,7 @@ function getSomeProjects(listOffset) {
         }
         processProjectData(pList[pList.length - 1].id, listOffset + 20, pList.length < 20 ? 'final' : 'last');
     }).fail(function (err) {
-        $("#downloadProjBtn")
+        $("#downloadProjectButton")
             .removeClass('btn-info')
             .addClass('btn-danger')
             .off('click')
@@ -421,7 +421,7 @@ function processProjectData(projectId, listOffset, callbackTrigger) {
             getSomeProjects(listOffset);
         }
     }).fail(function (err) {
-        $("#downloadProjBtn")
+        $("#downloadProjectButton")
             .removeClass('btn-info')
             .addClass('btn-danger')
             .off('click')
@@ -435,15 +435,18 @@ function processProjectData(projectId, listOffset, callbackTrigger) {
  * triggers the download to the users computer.
  */
 function processFileList() {
-    $('#downloadProjBtn')
-        .html('Processing files...');
+    $('#downloadProjectButton')
+        .html('Processing projects...');
     var ci = setInterval(function () {
+        console.log("Setting the timer to zip projects.");
         if (theFileList.length === projCount && projCount > 0) {
+            // reset the timer
             clearInterval(ci);
+
             zip.generateAsync({
                 type: "blob"
             }).then(function (blob) { // 1) generate the zip file
-                $('#downloadProjBtn')
+                $('#downloadProjectButton')
                     .removeClass('btn-info')
                     .addClass('btn-success')
                     .html('Ready! Downloading...');
@@ -452,7 +455,7 @@ function processFileList() {
                     hideEmptyProjectList();         // Clean up the UI
                 }, 2000);
             }, function (err) {
-                $("#downloadProjBtn")
+                $("#downloadProjectButton")
                     .removeClass('btn-info')
                     .addClass('btn-danger')
                     .html(err);
@@ -464,13 +467,22 @@ function processFileList() {
 // Empty and hide the failed project list
 // Reset the download button
 function hideEmptyProjectList() {
+    // Clear the list of excluded projects
     $('#removed-projects')
         .html(' ')
         .addClass('hidden');
 
-    $('#downloadProjBtn')
+    // Update the button to pre-download defaults
+    $('#downloadProjectButton')
         .removeClass('btn-success')
         .addClass('btn-primary')
         .html('Download My Projects')
         .on('click', startProjectsDownload);
+
+    // Reset the exporter variables
+    theFileList = [];
+    zip = new JSZip();
+    theFolder = zip.folder('BlocklyPropFiles');
+    projCount = 0;
+    projectsCounted = false;
 }
