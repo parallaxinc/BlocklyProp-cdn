@@ -419,11 +419,6 @@ function processProjectData(projectId, listOffset, callbackTrigger) {
 
             // Add project to excluded list
             excludedProjects.push([ddd.id.toString(10), ddd.name]);
-
-            // Add empty project name to UI list of failed or empty projects
-            $('#removed-projects')
-                .removeClass('hidden')
-                .html($('#removed-projects').html() + '<br><span style="width:50px;display: inline-block;text-align:right">' + ddd.id.toString(10) + ' -</span> ' + ddd.name);
         }
         if (callbackTrigger == 'final') {
             processFileList();
