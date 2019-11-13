@@ -102,13 +102,18 @@ body {
     line-height: 22px;
 }
 
-.navbar-brand#nav-logo {
+#nav-logo {
     background-image: url('images/logo_small.png');
     background-repeat: no-repeat;
-    background-size: 40px 40px;
-    background-position-y: 5px;
-    padding-left: 50px;
-    margin-left: 0;
+    background-size: 45px 45px;
+    padding-left: 55px;
+    margin-left: 5px;
+    margin-top: 5px;
+    height: 50px;
+    font-size: 20px;
+    line-height: 22px;
+    float: left;
+    color: #777;
 }
 
 .container .jumbotron {
@@ -214,4 +219,18 @@ div#project div.wizard-container {
     background: white;
     border-color: grey;
     text-decoration: none;
+}
+
+#nav-logo {
+    background-image: url('images/logo_small.png');
+    background-repeat: no-repeat;
+    background-size: 50px 50px;
+    padding-left: 55px;
+    margin-left: 5px;
+    margin-top: 5px;
+    height: 50px;
+    font-size: 22px;
+    line-height: 25px;
+    display: inline;
+    float: left;
 }

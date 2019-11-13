@@ -115,7 +115,6 @@ if (!String.prototype.startsWith) {
  */
 var findOne = function (haystack, arr) {
     return arr.some(function (v) {
-        // console.log(v + " " + (haystack.indexOf(v) >= 0));
         return haystack.indexOf(v) >= 0;
     });
 };
@@ -196,7 +195,7 @@ $(document).ready(function () {
     // from the client instruction page to the modal that also shows them
     $("#client-instructions-copy").html($("#client-instructions-original").html());
     
-    console.log(navigator.browserSpecs);
+    if (getURLParameter('debug')) console.log(navigator.browserSpecs);
 });
 
 

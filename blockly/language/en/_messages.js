@@ -736,7 +736,11 @@ toolbox_label['category_s3-hacker-port_sensors'] = "Sensors";
 toolbox_label['category_s3-hacker-port_pins'] = "Pins";
 toolbox_label['category_s3-hacker-port_servo'] = "Servo";
 
+/*
+ *  Embedded UI messages
+ */
 var page_text_label = [];
+
 page_text_label['back'] = "Back";
 page_text_label['browser_detection_ms_warning'] = "WARNING: You appear to be using MS Edge or Internet Explorer as your web browser.  BlocklyProp is not currently compatible with these browsers.  Please use Chrome or Firefox instead.";
 page_text_label['cancel'] = "Cancel";
@@ -761,7 +765,9 @@ page_text_label['clientdownload_client_chromeos_alreadyinstalled'] = "BlocklyPro
 page_text_label['clientdownload_client_chromeos_installer'] = "Add to Chrome";
 page_text_label['clientdownload_client_macos_installer'] = "MacOS client installer";
 page_text_label['clientdownload_client_windows32_installer'] = "Windows 7/8/8.1/10 (32-bit) client installer";
+page_text_label['clientdownload_client_windows32zip_installer'] = "Windows 7/8/8.1/10 (32-bit) client installer (zip)";
 page_text_label['clientdownload_client_windows64_installer'] = "Windows 7/8/8.1/10 (64-bit) client installer";
+page_text_label['clientdownload_client_windows64zip_installer'] = "Windows 7/8/8.1/10 (64-bit) client installer (zip)";
 page_text_label['clientdownload_download_installer'] = "Download the installer";
 page_text_label['clientdownload_download_launcher'] = "Install the Launcher App";
 page_text_label['clientdownload_instructions'] = "The BlocklyProp Client/Launcher application loads your programs into the Propeller and allows you to have a serial terminal in your browser connected to your Propeller.";
@@ -784,9 +790,15 @@ page_text_label['confirm_request_email'] = "Email:";
 page_text_label['confirm_request_submit'] = "Request";
 page_text_label['confirm_request_title'] = "Email confirm request";
 page_text_label['confirm_requested'] = "Please check your email";
+
+/*
+ * Editor canvas messages
+ */
 page_text_label['editor_button_append'] = "Append";
 page_text_label['editor_button_cancel'] = "Cancel";
+page_text_label['editor_button_open'] = "Open";
 page_text_label['editor_button_close'] = "Close";
+page_text_label['editor_button_continue'] = "Continue";
 page_text_label['editor_button_replace'] = "Replace";
 page_text_label['editor_clear-workspace'] = "Clear workspace";
 page_text_label['editor_offline_title'] = "Offline Expermiental Version";
@@ -796,7 +808,6 @@ page_text_label['editor_client_checking'] = "Looking for BlocklyProp-Client...";
 page_text_label['editor_client_not-available'] = "BlocklyProp-Client <b>not found</b>. Click here for instructions.";
 page_text_label['editor_client_title'] = "BlocklyProp Client/Launcher";
 page_text_label['editor_demo_dialog_continue'] = "Continue demo";
-page_text_label['editor_demo_dialog_continue_continuelink'] = "Continue";
 page_text_label['editor_demo_dialog_continue_text'] = "Compiling and saving are disabled";
 page_text_label['editor_demo_dialog_login'] = "Log in";
 page_text_label['editor_demo_dialog_login_loginlink'] = "Log in if you want to start compiling or making changes.";
@@ -805,13 +816,18 @@ page_text_label['editor_demo_dialog_title'] = "You are not logged in";
 page_text_label['editor_demonstration_mode_info'] = "<strong>Demo mode:</strong> Log in to use all of BlocklyProp's features.";
 page_text_label['editor_demonstration_mode_instructions'] = "Click here to log in or sign up";
 page_text_label['editor_download'] = "Download blocks file";
-page_text_label['editor_edit-details'] = "Edit Project details";
+page_text_label['editor_edit-details'] = "Edit Project Details";
+page_text_label['editor_graph_time_label'] = "Time (seconds)";
 page_text_label['editor_view-details'] = "View Project details";
 page_text_label['editor_find_next'] = "Find Next";
 page_text_label['editor_replace'] = "Replace";
+page_text_label['editor_find_label'] = "Find: ";
+page_text_label['editor_replace_label'] = "Replace: ";
 page_text_label['editor_newproject_c'] = "Propeller C";
 page_text_label['editor_newproject_spin'] = "Scribbler Robot";
 page_text_label['editor_newproject_title'] = "New project";
+page_text_label['editor_open'] = "Open blocks file"
+page_text_label['editor_import'] = "Import blocks file"
 page_text_label['editor_project'] = "Project";
 page_text_label['editor_projects_title'] = "Projects";
 page_text_label['editor_run_compile'] = "Compile";
@@ -842,9 +858,14 @@ page_text_label['editor_view_title'] = "View";
 page_text_label['editor_view_xml'] = "XML";
 page_text_label['error_generic'] = "A problem occurred";
 page_text_label['error_unknownemail'] = "Unknown email";
+
 page_text_label['footer_librarieslink'] = "External libraries";
 page_text_label['footer_licenselink'] = "License";
 page_text_label['footer_releases'] = "Releases";
+
+/*
+ * Help system links
+ */
 page_text_label['help_invalid-path'] = "Invalid help file";
 page_text_label['help_link_contest-ideas'] = "http://learn.parallax.com/educators/contest/home";
 page_text_label['help_link_educator-resources_activity-board'] = "http://learn.parallax.com";
@@ -858,10 +879,12 @@ page_text_label['help_link_tutorials_activity-board'] = "http://learn.parallax.c
 page_text_label['help_link_tutorials_activity-bot'] = "http://learn.parallax.com/tutorials/activitybot";
 page_text_label['help_link_tutorials_badge'] = "http://learn.parallax.com";
 page_text_label['help_link_tutorials_s3'] = "http://learn.parallax.com/tutorials/robot/scribbler-robot/scribbler-3";
+
 page_text_label['help_menu_blocklyprop'] = "BlocklyProp";
 page_text_label['help_menu_blocks'] = "Blocks";
 page_text_label['help_menu_languagereference'] = "Language reference";
 page_text_label['help_not-found'] = "Help file not found";
+page_text_label['help_reference'] = "Help and Reference";
 page_text_label['help_search'] = "Search";
 page_text_label['help_search_no-results'] = "No results";
 page_text_label['help_search_results'] = "Search results";
@@ -877,6 +900,7 @@ page_text_label['help_title_activity-bot'] = "Activity Bot";
 page_text_label['help_title_badge'] = "Hackable Badge";
 page_text_label['help_title_flip'] = "Propeller FLiP";
 page_text_label['help_title_s3'] = "Scribbler Robot";
+
 page_text_label['home_c_project_newlink'] = "New";
 page_text_label['home_c_project_title'] = "C Project";
 page_text_label['home_latest_projects_title'] = "Latest projects";
@@ -935,6 +959,10 @@ page_text_label['oauth_new-user_do_submit'] = "Save";
 page_text_label['oauth_new-user_error_screenname'] = "Screen Name already in use";
 page_text_label['oauth_new-user_screenname'] = "Screen Name";
 page_text_label['oauth_success'] = "User logged in";
+page_text_label['os_name_win'] = "Windows";
+page_text_label['os_name_mac'] = "Mac OS";
+page_text_label['os_name_chr'] = "Chrome OS";
+page_text_label['os_name_lnx'] = "Linux";
 page_text_label['password_complexity'] = "The password should be at least 8 characters long";
 page_text_label['password_complexity_error'] = "Password is not complex enough";
 page_text_label['password_reset_do_confirm_password'] = "Confirm password:";
@@ -991,7 +1019,6 @@ page_text_label['project_create_sharing'] = "Sharing";
 page_text_label['project_create_sharing_title'] = "Project sharing";
 page_text_label['project_create_title'] = "New project";
 page_text_label['project_created'] = "Created On";
-page_text_label['project_created'] = "Created";
 page_text_label['project_delete_confirm'] = "Are you sure you want to delete this project?";
 page_text_label['project_delete_confirm_shared'] = "Are you sure you want to delete this project? You have it currently shared using a link.";
 page_text_label['project_delete_confirm_title'] = "Confirm delete";
@@ -1000,7 +1027,6 @@ page_text_label['project_description'] = "Description";
 page_text_label['project_details_title'] = "Project details";
 page_text_label['project_list_title'] = "Community projects";
 page_text_label['project_modified'] = "Last Modified";
-page_text_label['project_modified'] = "Modified";
 page_text_label['project_name'] = "Project Name";
 page_text_label['project_saveaslink'] = "Save As";
 page_text_label['project_savelink'] = "Save";
@@ -1053,6 +1079,10 @@ page_text_label['register_error_sponsor_email_empty'] = "Please enter a sponsor 
 page_text_label['register_error_sponsor_email_format_error'] = "The sponsor email address is not formatted correctly";
 page_text_label['register_error_user_email_empty'] = "Please enter your email address";
 
+// ------------------------------------------------------------------
+// Text for the balloon help that appears when the cursor hovers
+// over a button in the editor toolbar
+// ------------------------------------------------------------------
 var tooltip_text = [
     ['prop-btn-comp','Verify code (compile)'],
     ['prop-btn-ram','Run once (load code to RAM)'],
@@ -1073,33 +1103,6 @@ var tooltip_text = [
     ['project-form-edit-private', 'Hide project from other users']
 ];
 
-// Insert the text strings (internationalization) once the page has loaded
-$(document).ready(function () {
-    
-    // insert into <span> tags
-    $(".keyed-lang-string").each(function () {
-        var span_tag = $(this);
-        
-        // Set the text of the label spans
-        var pageLabel = span_tag.attr('data-key');
-        if (pageLabel) {
-            if (span_tag.is('a')) {
-                span_tag.attr('href', page_text_label[pageLabel]);
-            } else if (span_tag.is('input')) {
-                span_tag.attr('value', page_text_label[pageLabel]);
-            } else {
-                span_tag.html(page_text_label[pageLabel]);
-            }
-        }
-    });
-    
-    // insert into button/link tooltips
-    for (var i = 0; i < tooltip_text.length; i++) {
-        if (tooltip_text[i] && document.getElementById(tooltip_text[i][0])) {
-            $('#' + tooltip_text[i][0]).attr('title', tooltip_text[i][1]);
-        }
-    }
-});
 
 
 // If online, return the full help URL, if offline, open a modal
@@ -1110,13 +1113,27 @@ $(document).ready(function () {
  */
 Blockly.BlockSvg.prototype.showHelp_ = function () {
     var url = goog.isFunction(this.helpUrl) ? this.helpUrl() : this.helpUrl;
+
     if (!isOffline && url) {
+        // Display help in a new browser window
         window.open(url);
     } else if (url) {
+            // Temp fix - Solo-26
+         // Display help in a new browser window
+         window.open(url);
+
         // TODO: open modal/iframe with help content
-	var u = url.replace(/https:\/\/learn.parallax.com\//g, '');
-	u = 'cdn/help/' + u.replace(/\//g, '-') + '.html';
-	$('#help-content').html('<iframe src="' + u + '" style="height:600px; border:none;" />');
-	$('#help-dialog').modal('show');
+        // url = ""http://learn.parallax.com/ab-blocks/functions"
+
+        // Change protocol to HTTPS when accessing the learn site
+        // var u = url.replace(/https:\/\/learn.parallax.com\//g, '');
+
+        // Help is supposed to be in the /cdn/help folder. That does not
+            // yet exist.
+        u = 'cdn/help/' + u.replace(/\//g, '-') + '.html';
+
+        // Disable this until the help issue is addressed. Refeence issue Solo-26
+        //$('#help-content').html('<iframe src="' + u + '" style="height:600px; border:none;" />');
+	    //$('#help-dialog').modal('show');
     }
 };

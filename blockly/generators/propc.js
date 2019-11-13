@@ -326,9 +326,8 @@ Blockly.propc.finish = function (code) {
         }
     }
 
-
-    console.log(Blockly.propc.methods_);
-    console.log(Blockly.propc.cog_setups_);
+    //console.log(Blockly.propc.methods_);
+    //console.log(Blockly.propc.cog_setups_);
     for (var method in Blockly.propc.methods_) {
         for (var cog_setup in Blockly.propc.cog_setups_) {
             if (Blockly.propc.cog_setups_[cog_setup][0] === method) {
@@ -362,7 +361,7 @@ Blockly.propc.finish = function (code) {
             definitions[def] = definitions[def].replace(/\{\{\$var_type_.*?\}\}/ig, "int").replace(/\{\{\$var_length_.*?\}\}/ig, '');
         }
 
-            console.log(def_names[def]);
+        //console.log(def_names[def]);
         if (def_names[def].indexOf('cCode') === -1) {  // exclude custom code blocks from these modifiers
             // Exclude variables with "__" in the name for now because those are buffers for private functions
             if (definitions[def].indexOf("char *") > -1 && definitions[def].indexOf("__") === -1 && definitions[def].indexOf("rfidBfr") === -1  && definitions[def].indexOf("wxBuffer") === -1) {
